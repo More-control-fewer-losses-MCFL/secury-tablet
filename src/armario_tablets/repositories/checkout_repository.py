@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from armario_tablets.models import (
@@ -49,11 +49,13 @@ class CheckoutRepository:
         )
         return self._db.scalar(query)
 
-    def find_in_flight(self, cabinet_id: int) -> list[CheckoutSession]:
+    def find_in_flight(self, cabinet_id: int, for_update: bool = False) -> list[CheckoutSession]:
         query = select(CheckoutSession).where(
             CheckoutSession.cabinet_id == cabinet_id,
             CheckoutSession.status.in_(IN_FLIGHT_STATUSES),
         )
+        if for_update:
+            query = query.with_for_update()
         return list(self._db.scalars(query))
 
     def list_active_items(self, session_id: int) -> list[CheckoutItem]:
@@ -106,7 +108,10 @@ class CheckoutRepository:
             filters.append(CheckoutSession.started_at < until)
 
         taken = func.count(CheckoutItem.id)
-        pending = func.count(CheckoutItem.id).filter(CheckoutItem.status == ItemStatus.ACTIVE)
+        pending = func.coalesce(
+            func.sum(case((CheckoutItem.status == ItemStatus.ACTIVE, 1), else_=0)),
+            0,
+        )
         query = (
             select(
                 CheckoutSession.id,

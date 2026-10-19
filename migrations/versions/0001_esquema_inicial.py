@@ -110,7 +110,9 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name=op.f("pk_checkout_items")),
     )
     op.create_index("ix_checkout_items_session_id", "checkout_items", ["session_id"], unique=False)
-    op.create_index("ix_checkout_items_tablet_status", "checkout_items", ["tablet_id", "status"], unique=False)
+    op.create_index(
+        "ix_checkout_items_tablet_status", "checkout_items", ["tablet_id", "status"], unique=False
+    )
     op.create_table(
         "events",
         sa.Column("id", sa.Integer(), nullable=False),

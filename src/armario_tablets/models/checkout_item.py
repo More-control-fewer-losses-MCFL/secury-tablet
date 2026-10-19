@@ -4,7 +4,18 @@ from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, String, event, select
+from sqlalchemy import (
+    CheckConstraint,
+    Computed,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    UniqueConstraint,
+    event,
+    select,
+)
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -43,12 +54,16 @@ def _guard_active_checkout_duplication(session, flush_context, instances):
             continue
         if instance.status != ItemStatus.ACTIVE:
             continue
-        existing = session.execute(
-            select(CheckoutItem.id).where(
-                CheckoutItem.tablet_id == instance.tablet_id,
-                CheckoutItem.status == ItemStatus.ACTIVE,
+        existing = (
+            session.execute(
+                select(CheckoutItem.id).where(
+                    CheckoutItem.tablet_id == instance.tablet_id,
+                    CheckoutItem.status == ItemStatus.ACTIVE,
+                )
             )
-        ).scalars().first()
+            .scalars()
+            .first()
+        )
         if existing is not None and getattr(instance, "id", None) != existing:
             raise IntegrityError(
                 statement="SELECT 1",
@@ -63,6 +78,7 @@ class CheckoutItem(Base):
         CheckConstraint("status IN ('ACTIVE', 'RETURNED')", name="status_valid"),
         Index("ix_checkout_items_session_id", "session_id"),
         Index("ix_checkout_items_tablet_status", "tablet_id", "status"),
+        UniqueConstraint("active_tablet_id", name="uq_checkout_items_active_tablet"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -71,6 +87,14 @@ class CheckoutItem(Base):
     checked_out_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     returned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(10), default=ItemStatus.ACTIVE)
+    # Coluna gerada virtual compatível com MySQL 8.4 InnoDB e SQLite:
+    # Garante unicidade a nível de banco quando ACTIVE, e permite
+    # múltiplos RETURNED (NULL não colide).
+    active_tablet_id: Mapped[int | None] = mapped_column(
+        Integer,
+        Computed("CASE WHEN status = 'ACTIVE' THEN tablet_id ELSE NULL END", persisted=False),
+        nullable=True,
+    )
 
     session: Mapped[CheckoutSession] = relationship(back_populates="items")
     tablet: Mapped[Tablet] = relationship()

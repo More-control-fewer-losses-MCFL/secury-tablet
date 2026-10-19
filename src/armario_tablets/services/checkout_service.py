@@ -142,7 +142,7 @@ class CheckoutService:
         """Cancela reservas antigas e devolve as que continuam em andamento."""
         cutoff = utcnow() - self._ttl
         remaining = []
-        for session in self._checkouts.find_in_flight(cabinet.id):
+        for session in self._checkouts.find_in_flight(cabinet.id, for_update=True):
             if ensure_utc(session.started_at) < cutoff:
                 session.status = SessionStatus.CANCELLED
                 session.completed_at = utcnow()
