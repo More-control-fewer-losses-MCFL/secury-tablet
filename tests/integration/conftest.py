@@ -1,4 +1,4 @@
-﻿"""Testes de integração: MySQL real, SEPARADO do banco de desenvolvimento.
+"""Testes de integração: MySQL real, SEPARADO do banco de desenvolvimento.
 
 Defina TEST_DATABASE_URL apontando para um banco de teste (nunca o banco real),
 por exemplo: mysql+pymysql://armario:sua_senha@127.0.0.1:3306/armario_tablets_test
@@ -38,10 +38,16 @@ def pytest_collection_modifyitems(config, items):
 def mysql_engine():
     if not TEST_URL:
         pytest.skip("TEST_DATABASE_URL não definida")
-    engine = create_engine(TEST_URL, pool_pre_ping=True)
+    engine = create_engine(TEST_URL, pool_pre_ping=True, isolation_level="READ COMMITTED")
     with engine.begin() as conn:
-        conn.execute(text("DROP DATABASE IF EXISTS armario_tablets_test"))
-        conn.execute(text("CREATE DATABASE armario_tablets_test"))
+        conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
+        conn.execute(
+            text(
+                "DROP TABLE IF EXISTS events, checkout_items, checkout_sessions, "
+                "tablets, professors, cabinets, alembic_version"
+            )
+        )
+        conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
     env = {**os.environ, "DATABASE_URL": TEST_URL, "PYTHONPATH": str(ROOT / "src")}
     subprocess.run(
         [sys.executable, "-m", "alembic", "upgrade", "head"],
@@ -58,12 +64,14 @@ def mysql_engine():
 def session_factory(mysql_engine):
     with mysql_engine.begin() as conn:
         conn.execute(text("SET SESSION innodb_lock_wait_timeout = 5"))
+        conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
         conn.execute(text("TRUNCATE events"))
         conn.execute(text("TRUNCATE checkout_items"))
         conn.execute(text("TRUNCATE checkout_sessions"))
         conn.execute(text("TRUNCATE tablets"))
         conn.execute(text("TRUNCATE professors"))
         conn.execute(text("TRUNCATE cabinets"))
+        conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
     return sessionmaker(bind=mysql_engine, expire_on_commit=False)
 
 

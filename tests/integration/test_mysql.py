@@ -1,4 +1,4 @@
-﻿"""Regras que dependem do MySQL de verdade: travas, concorrência, índices e JSON."""
+"""Regras que dependem do MySQL de verdade: travas, concorrência, índices e JSON."""
 
 from concurrent.futures import ThreadPoolExecutor
 
