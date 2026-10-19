@@ -1,7 +1,7 @@
-"""Testes de integração: PostgreSQL de verdade, SEPARADO do banco de desenvolvimento.
+﻿"""Testes de integração: MySQL real, SEPARADO do banco de desenvolvimento.
 
 Defina TEST_DATABASE_URL apontando para um banco de teste (nunca o banco real),
-por exemplo: postgresql+psycopg://armario:senha@127.0.0.1:5432/armario_tablets_test
+por exemplo: mysql+pymysql://armario:sua_senha@127.0.0.1:3306/armario_tablets_test
 Sem a variável, estes testes são pulados. O schema é criado pelas migrações do Alembic.
 """
 
@@ -35,33 +35,36 @@ def pytest_collection_modifyitems(config, items):
 
 
 @pytest.fixture(scope="session")
-def pg_engine():
+def mysql_engine():
     if not TEST_URL:
         pytest.skip("TEST_DATABASE_URL não definida")
     engine = create_engine(TEST_URL, pool_pre_ping=True)
     with engine.begin() as conn:
-        conn.execute(text("DROP SCHEMA public CASCADE"))
-        conn.execute(text("CREATE SCHEMA public"))
+        conn.execute(text("DROP DATABASE IF EXISTS armario_tablets_test"))
+        conn.execute(text("CREATE DATABASE armario_tablets_test"))
     env = {**os.environ, "DATABASE_URL": TEST_URL, "PYTHONPATH": str(ROOT / "src")}
     subprocess.run(
         [sys.executable, "-m", "alembic", "upgrade", "head"],
-        cwd=ROOT, env=env, check=True, capture_output=True,
-    )  # fmt: skip
+        cwd=ROOT,
+        env=env,
+        check=True,
+        capture_output=True,
+    )
     yield engine
     engine.dispose()
 
 
 @pytest.fixture
-def session_factory(pg_engine):
-    with pg_engine.begin() as conn:
-        conn.execute(text("SET LOCAL lock_timeout = '5s'"))  # falha alto em vez de travar
-        conn.execute(
-            text(
-                "TRUNCATE events, checkout_items, checkout_sessions, tablets, professors, "
-                "cabinets RESTART IDENTITY CASCADE"
-            )
-        )
-    return sessionmaker(bind=pg_engine, expire_on_commit=False)
+def session_factory(mysql_engine):
+    with mysql_engine.begin() as conn:
+        conn.execute(text("SET SESSION innodb_lock_wait_timeout = 5"))
+        conn.execute(text("TRUNCATE events"))
+        conn.execute(text("TRUNCATE checkout_items"))
+        conn.execute(text("TRUNCATE checkout_sessions"))
+        conn.execute(text("TRUNCATE tablets"))
+        conn.execute(text("TRUNCATE professors"))
+        conn.execute(text("TRUNCATE cabinets"))
+    return sessionmaker(bind=mysql_engine, expire_on_commit=False)
 
 
 @pytest.fixture
@@ -72,7 +75,7 @@ def db(session_factory):
 
 
 @pytest.fixture
-def pg_settings() -> Settings:
+def mysql_settings() -> Settings:
     return Settings(
         _env_file=None,
         database_url=TEST_URL or "sqlite://",
@@ -82,7 +85,7 @@ def pg_settings() -> Settings:
 
 
 @pytest.fixture
-def open_services(session_factory, pg_settings):
+def open_services(session_factory, mysql_settings):
     """Abre sessões+serviços independentes (uma por thread) e fecha todas no final.
 
     Sessões esquecidas abertas manteriam locks e travariam o TRUNCATE do próximo teste.
@@ -93,7 +96,10 @@ def open_services(session_factory, pg_settings):
         session = session_factory()
         opened.append(session)
         services = build_services(
-            session, build_simulated_hardware(), pg_settings, poll_interval_seconds=0.01
+            session,
+            build_simulated_hardware(),
+            mysql_settings,
+            poll_interval_seconds=0.01,
         )
         return session, services
 

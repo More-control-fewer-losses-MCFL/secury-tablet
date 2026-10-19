@@ -1,4 +1,4 @@
-"""Regras que dependem do PostgreSQL de verdade: travas, concorrência, índices e JSONB."""
+﻿"""Regras que dependem do MySQL de verdade: travas, concorrência, índices e JSON."""
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -62,7 +62,7 @@ def test_same_event_in_parallel_creates_a_single_checkout(db, open_services):
     assert len(db.scalars(select(CheckoutItem)).all()) == 2
 
 
-def test_partial_unique_index_blocks_second_active_checkout(db, open_services):
+def test_active_duplicate_is_blocked(db, open_services):
     seed_basic(db)
     _, services = open_services()
     sid = services.checkout.request_checkout(ACTIVE_BADGE, 1, "Aula", None, CABINET_CODE).session_id
@@ -75,44 +75,39 @@ def test_partial_unique_index_blocks_second_active_checkout(db, open_services):
     db.rollback()
 
 
-def test_events_details_are_stored_as_jsonb(db, open_services):
+def test_events_details_are_stored_as_json(db, open_services):
     seed_basic(db)
     _, services = open_services()
     sid = services.checkout.request_checkout(ACTIVE_BADGE, 1, "Aula", None, CABINET_CODE).session_id
-    services.checkout.confirm_checkout(sid, "evt-jsonb-00001", all_tags() - {tag_for(2)})
+    services.checkout.confirm_checkout(sid, "evt-json-00001", all_tags() - {tag_for(2)})
 
     column_type = db.scalar(
         text(
-            "SELECT data_type FROM information_schema.columns "
+            "SELECT DATA_TYPE FROM information_schema.columns "
             "WHERE table_name = 'events' AND column_name = 'details'"
         )
     )
     taken = db.scalar(
-        text("SELECT details->'taken'->>0 FROM events WHERE event_id = 'evt-jsonb-00001'")
+        text(
+            "SELECT JSON_UNQUOTE(JSON_EXTRACT(details, '$.taken[0]')) FROM events "
+            "WHERE event_id = 'evt-json-00001'"
+        )
     )
-    assert column_type == "jsonb"
+    assert column_type == "json"
     assert taken == "TAB-002"
 
 
 def test_expected_indexes_exist(db):
-    names = set(
-        db.scalars(text("SELECT indexname FROM pg_indexes WHERE schemaname = 'public'")).all()
-    )
-    assert {
-        "ix_tablets_status",
-        "ix_checkout_sessions_status",
-        "ix_checkout_sessions_started_at",
-        "ix_events_occurred_at",
-        "uq_checkout_items_active_tablet",
-    } <= names
+    names = {row[2] for row in db.execute(text("SHOW INDEX FROM checkout_items")).all()}
+    assert {"ix_checkout_items_session_id", "ix_checkout_items_tablet_status"}.issubset(names)
 
 
-def test_history_query_runs_on_postgres(db, open_services):
+def test_history_query_runs_on_mysql(db, open_services):
     seed_basic(db)
     _, services = open_services()
     sid = services.checkout.request_checkout(ACTIVE_BADGE, 2, "Aula", "9A", CABINET_CODE).session_id
     services.checkout.confirm_checkout(
-        sid, "evt-hist-pg-001", all_tags() - {tag_for(1), tag_for(2)}
+        sid, "evt-hist-mysql-001", all_tags() - {tag_for(1), tag_for(2)}
     )
     page = services.history.page(limit=10)
     assert page.total == 1

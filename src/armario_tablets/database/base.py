@@ -1,7 +1,6 @@
 """Base declarativa do SQLAlchemy, com nomes de constraints previsíveis (bom para Alembic)."""
 
 from sqlalchemy import JSON, MetaData
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase
 
 NAMING_CONVENTION = {
@@ -12,8 +11,8 @@ NAMING_CONVENTION = {
     "pk": "pk_%(table_name)s",
 }
 
-# JSONB no PostgreSQL; JSON genérico em outros bancos (testes unitários com SQLite).
-JSONType = JSON().with_variant(JSONB(), "postgresql")
+# MySQL 8.4 utiliza JSON nativo; o padrão JSON também funciona em SQLite e nos testes.
+JSONType = JSON()
 
 
 class Base(DeclarativeBase):

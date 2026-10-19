@@ -1,7 +1,7 @@
-"""Backup do PostgreSQL com pg_dump, executado dentro do container do Docker Compose.
+"""Backup do MySQL com mysqldump, executado dentro do container do Docker Compose.
 
 Uso:  python scripts/backup_database.py
-Gera: backups/armario_AAAAMMDD_HHMMSS.sql  (a pasta backups/ é ignorada pelo Git)
+Gera: backups/armario_AAAAMMDD_HHMMSS.sql (a pasta backups/ é ignorada pelo Git)
 
 Restauração (PowerShell): veja a seção "Backup e restauração" do README.
 """
@@ -25,13 +25,11 @@ def main() -> int:
         "docker",
         "exec",
         CONTAINER,
-        "pg_dump",
-        "-U",
-        settings.postgres_user,
-        "-d",
-        settings.postgres_db,
-        "--clean",
-        "--if-exists",
+        "mysqldump",
+        "--user",
+        settings.mysql_user,
+        "--password=" + settings.mysql_password.get_secret_value(),
+        settings.mysql_db,
     ]
     with target.open("wb") as output:
         result = subprocess.run(command, stdout=output, stderr=subprocess.PIPE, check=False)
