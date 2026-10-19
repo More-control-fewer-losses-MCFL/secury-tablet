@@ -17,8 +17,14 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
+    db_url = get_settings().sqlalchemy_url
+    url_str = (
+        db_url.render_as_string(hide_password=False)
+        if hasattr(db_url, "render_as_string")
+        else str(db_url)
+    )
     context.configure(
-        url=str(get_settings().sqlalchemy_url),
+        url=url_str,
         target_metadata=target_metadata,
         literal_binds=True,
     )

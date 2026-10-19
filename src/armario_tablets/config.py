@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from pydantic import SecretStr
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
@@ -10,7 +10,10 @@ from sqlalchemy.engine import URL
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    mysql_db: str = "armario_tablets"
+    mysql_database: str = Field(
+        default="armario_tablets",
+        validation_alias=AliasChoices("MYSQL_DATABASE", "MYSQL_DB", "mysql_database", "mysql_db"),
+    )
     mysql_user: str = "armario"
     mysql_password: SecretStr | None = None
     mysql_host: str = "127.0.0.1"
@@ -27,6 +30,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     @property
+    def mysql_db(self) -> str:
+        """Compatibilidade reversa com acessos a settings.mysql_db."""
+        return self.mysql_database
+
+    @property
     def sqlalchemy_url(self) -> str | URL:
         """URL do banco; monta a partir de MYSQL_* se DATABASE_URL não existir."""
         if self.database_url:
@@ -41,7 +49,8 @@ class Settings(BaseSettings):
             password=self.mysql_password.get_secret_value(),
             host=self.mysql_host,
             port=self.mysql_port,
-            database=self.mysql_db,
+            database=self.mysql_database,
+            query={"charset": "utf8mb4"},
         )
 
 

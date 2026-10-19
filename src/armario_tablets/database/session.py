@@ -13,12 +13,16 @@ from armario_tablets.config import get_settings
 @lru_cache
 def get_engine() -> Engine:
     """Um único Engine por processo (ele já gerencia o pool de conexões)."""
-    return create_engine(
-        get_settings().sqlalchemy_url,
-        pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=5,
-    )
+    url = get_settings().sqlalchemy_url
+    driver = url.drivername if hasattr(url, "drivername") else str(url)
+    kwargs = {
+        "pool_pre_ping": True,
+        "pool_size": 5,
+        "max_overflow": 5,
+    }
+    if "mysql" in driver or "postgres" in driver:
+        kwargs["isolation_level"] = "READ COMMITTED"
+    return create_engine(url, **kwargs)
 
 
 @lru_cache
