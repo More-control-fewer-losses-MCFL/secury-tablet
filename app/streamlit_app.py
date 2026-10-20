@@ -1,29 +1,23 @@
 import streamlit as st
 
-from armario_tablets.config import get_settings
+from armario_tablets.views.theme import apply_theme
 
 st.set_page_config(page_title="Armário de Tablets", page_icon="🗄️", layout="wide")
+apply_theme()
 
-st.title("Armário Inteligente de Tablets")
-st.write(
-    "Controle de retirada e devolução de tablets por professores identificados por crachá RFID. "
-    "Use o menu lateral para navegar."
+navigation = st.navigation(
+    [
+        st.Page("pages/0_Inicio.py", title="Início", icon=":material/home:", default=True),
+        st.Page("pages/1_Dashboard.py", title="Dashboard", icon=":material/dashboard:"),
+        st.Page(
+            "pages/2_Solicitar_Tablets.py",
+            title="Solicitar tablets",
+            icon=":material/lock_open:",
+        ),
+        st.Page("pages/3_Devolucao.py", title="Devolução", icon=":material/assignment_return:"),
+        st.Page("pages/4_Tablets.py", title="Tablets", icon=":material/tablet_mac:"),
+        st.Page("pages/5_Professores.py", title="Professores", icon=":material/badge:"),
+        st.Page("pages/6_Historico.py", title="Histórico", icon=":material/history:"),
+    ]
 )
-
-if get_settings().hardware_simulated:
-    st.info(
-        "Hardware **simulado**: leitores e fechadura são de mentira. "
-        "Nenhuma fechadura real será acionada."
-    )
-else:
-    st.warning("HARDWARE_SIMULATED=false, mas não há adaptador de hardware real implementado.")
-
-st.markdown(
-    """
-1. **Dashboard** — disponibilidade e divergências
-2. **Solicitar Tablets** — validar crachá, destravar e simular a retirada
-3. **Devolução** — conciliar tablet a tablet
-4. **Tablets** e 5. **Professores** — cadastros
-6. **Histórico** — retiradas anteriores
-"""
-)
+navigation.run()

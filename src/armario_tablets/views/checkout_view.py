@@ -5,10 +5,12 @@ import streamlit as st
 from armario_tablets.config import get_settings
 from armario_tablets.models import SessionStatus
 from armario_tablets.views.common import friendly_error, services_scope
+from armario_tablets.views.theme import page_header, render_sidebar_profile
 
 
 def render() -> None:
-    st.title("Solicitar tablets")
+    render_sidebar_profile()
+    page_header("Solicitar tablets", "Valide o crachá e destrave o armário.", chip="Modo simulado")
     st.info(
         "Modo simulado: nenhuma fechadura real é acionada. Crachás de teste: "
         "DE000001, DE000002, DE000003 (ativos) e DE000900 (inativo)."
@@ -29,7 +31,7 @@ def _render_request_form() -> None:
         quantity = st.number_input("Quantidade", min_value=1, max_value=50, value=1, step=1)
         purpose = st.text_input("Finalidade de uso")
         class_name = st.text_input("Turma / disciplina (opcional)")
-        submitted = st.form_submit_button("Validar e destravar armário")
+        submitted = st.form_submit_button("Validar e destravar armário", type="primary")
 
     if not submitted:
         return
@@ -70,7 +72,7 @@ def _render_simulation(session_id: int) -> None:
     )
     options = {t.asset_code: t.rfid_tag_uid for t in available}
     removed = st.multiselect("Tablets retirados do armário", list(options))
-    if st.button("Fechar porta e ler inventário (simulado)"):
+    if st.button("Fechar porta e ler inventário (simulado)", type="primary"):
         present = {tag for code, tag in options.items() if code not in removed}
         try:
             with services_scope() as services:

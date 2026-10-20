@@ -2,15 +2,18 @@ import streamlit as st
 
 from armario_tablets.utils.datetime_utils import format_local
 from armario_tablets.views.common import friendly_error, services_scope
+from armario_tablets.views.theme import SESSION_STATUS, page_header, render_sidebar_profile
 
 PAGE_SIZE = 20
 STATUSES = ["Todos", "PENDING", "UNLOCKED", "OPEN", "DIVERGENT", "COMPLETED", "CANCELLED", "FAILED"]
 
 
 def render() -> None:
-    st.title("Histórico")
-    status = st.selectbox("Situação", STATUSES)
-    page_number = st.number_input("Página", min_value=1, value=1, step=1)
+    render_sidebar_profile()
+    page_header("Histórico", "Retiradas anteriores.")
+    filter_col, page_col, _ = st.columns([2, 1, 3])
+    status = filter_col.selectbox("Situação", STATUSES)
+    page_number = page_col.number_input("Página", min_value=1, value=1, step=1)
 
     try:
         with services_scope() as services:
@@ -35,7 +38,7 @@ def render() -> None:
                 "Pendentes": r.pending_quantity,
                 "Finalidade": r.purpose,
                 "Turma": r.class_name or "-",
-                "Situação": r.status,
+                "Situação": SESSION_STATUS.get(r.status, (r.status,))[0],
                 "Início": format_local(r.started_at),
                 "Fim": format_local(r.completed_at),
             }

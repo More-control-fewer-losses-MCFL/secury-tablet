@@ -4,10 +4,12 @@ import streamlit as st
 
 from armario_tablets.models import ItemStatus
 from armario_tablets.views.common import friendly_error, services_scope
+from armario_tablets.views.theme import page_header, render_sidebar_profile
 
 
 def render() -> None:
-    st.title("Devolução")
+    render_sidebar_profile()
+    page_header("Devolução", "Concilie o que voltou ao armário, tablet a tablet.")
     with services_scope() as services:
         pending = services.returns.pending_returns()
         in_cabinet = services.tablets.list_available()
@@ -29,7 +31,7 @@ def render() -> None:
     st.caption("Simulação: marque os tablets que foram colocados de volta no armário.")
     returned = st.multiselect("Tablets devolvidos", expected)
 
-    if st.button("Ler inventário e conciliar (simulado)"):
+    if st.button("Ler inventário e conciliar (simulado)", type="primary"):
         with services_scope() as services:
             codes = {t.asset_code: t.rfid_tag_uid for t in services.tablets.list_all()}
         present = {t.rfid_tag_uid for t in in_cabinet} | {codes[c] for c in returned}

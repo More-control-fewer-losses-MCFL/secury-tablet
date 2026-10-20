@@ -3,11 +3,12 @@ import streamlit as st
 from armario_tablets.utils.datetime_utils import format_local
 from armario_tablets.utils.validators import mask_uid
 from armario_tablets.views.common import friendly_error, services_scope
+from armario_tablets.views.theme import page_header, render_sidebar_profile
 
 
 def render() -> None:
-    st.title("Professores")
-    st.caption("O UID do crachá aparece mascarado de propósito.")
+    render_sidebar_profile()
+    page_header("Professores", "O UID do crachá aparece mascarado de propósito.")
     try:
         with services_scope() as services:
             professors = services.professors.list_all()
