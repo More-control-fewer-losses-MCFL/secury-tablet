@@ -25,6 +25,16 @@ def test_complete_return_closes_the_session(services, db, open_session):
     assert all(i.returned_at is not None for i in result.items)
 
 
+def test_dashboard_counts_tablets_moved_today(services, open_session):
+    assert services.history.dashboard()["withdrawn_today"] == 3
+
+    services.returns.reconcile(open_session, "evt-ret-dash-0001", all_tags())
+
+    dashboard = services.history.dashboard()
+    assert dashboard["withdrawn_today"] == 3
+    assert dashboard["returned_today"] == 3
+
+
 def test_incomplete_return_leaves_pending_items_and_divergence(services, db, open_session):
     present = all_tags() - {tag_for(3)}  # TAB-003 não voltou
     result = services.returns.reconcile(open_session, "evt-ret-0000002", present)

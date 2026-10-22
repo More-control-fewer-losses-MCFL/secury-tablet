@@ -1,3 +1,4 @@
-from armario_tablets.views import professors_view
+"""Página Professores — cadastro e consulta."""
+from armario_tablets.views.professors_view import render
 
-professors_view.render()
+render()

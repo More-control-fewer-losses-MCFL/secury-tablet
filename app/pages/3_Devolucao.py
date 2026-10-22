@@ -1,3 +1,4 @@
-from armario_tablets.views import return_view
+"""Página Devolução — conciliação de tablets devolvidos."""
+from armario_tablets.views.return_view import render
 
-return_view.render()
+render()

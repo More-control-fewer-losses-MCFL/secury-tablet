@@ -82,6 +82,21 @@ class CheckoutRepository:
         )
         return {status: total for status, total in rows}
 
+    def count_item_movements(self, since: datetime, until: datetime) -> dict[str, int]:
+        withdrawn = self._db.scalar(
+            select(func.count(CheckoutItem.id)).where(
+                CheckoutItem.checked_out_at >= since,
+                CheckoutItem.checked_out_at < until,
+            )
+        )
+        returned = self._db.scalar(
+            select(func.count(CheckoutItem.id)).where(
+                CheckoutItem.returned_at >= since,
+                CheckoutItem.returned_at < until,
+            )
+        )
+        return {"withdrawn": withdrawn or 0, "returned": returned or 0}
+
     def history(
         self,
         *,

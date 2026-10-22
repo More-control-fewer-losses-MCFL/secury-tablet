@@ -27,6 +27,14 @@ class Settings(BaseSettings):
     reservation_ttl_minutes: int = 10
 
     api_base_url: str = "http://127.0.0.1:8000"
+    admin_username: str = "admin"
+    admin_password: SecretStr | None = None
+    admin_token_secret: SecretStr | None = None
+    admin_session_ttl_minutes: int = Field(default=480, ge=1, le=1440)
+    cors_allowed_origins: str = (
+        "http://localhost:8080,http://127.0.0.1:8080,"
+        "http://localhost:8502,http://127.0.0.1:8502"
+    )
     log_level: str = "INFO"
 
     @property

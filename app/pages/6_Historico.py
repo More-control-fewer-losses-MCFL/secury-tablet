@@ -1,3 +1,4 @@
-from armario_tablets.views import history_view
+"""Página Histórico — operações anteriores."""
+from armario_tablets.views.history_view import render
 
-history_view.render()
+render()

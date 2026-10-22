@@ -2,6 +2,7 @@
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 
 from armario_tablets.api.deps import get_db, get_services
 from armario_tablets.api.main import create_app
@@ -44,6 +45,95 @@ def hardware_event(client, session_id, event_id, present, kind="INVENTORY_AFTER_
 
 def test_health(client):
     assert client.get("/health").json() == {"status": "ok", "database": "ok"}
+
+
+def test_cors_allows_configured_flutter_web_origin(client):
+    response = client.options(
+        "/health",
+        headers={
+            "Origin": "http://localhost:8502",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:8502"
+
+
+def test_cors_allows_authorization_header_for_flutter_admin_login(client):
+    response = client.options(
+        "/admin/login",
+        headers={
+            "Origin": "http://localhost:8502",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "authorization" in response.headers["access-control-allow-headers"].lower()
+
+
+def test_admin_login_is_disabled_without_server_credentials(client):
+    response = client.post("/admin/login", json={"username": "admin", "password": "anything"})
+
+    assert response.status_code == 503
+    assert "ADMIN_PASSWORD" in response.json()["detail"]
+
+
+def test_admin_login_issues_expiring_signed_session(client, settings):
+    settings.admin_password = SecretStr("a-long-test-password")
+    settings.admin_token_secret = SecretStr("test-signing-secret-that-is-at-least-32-bytes")
+
+    login = client.post(
+        "/admin/login",
+        json={"username": "admin", "password": "a-long-test-password"},
+    )
+
+    assert login.status_code == 200
+    body = login.json()
+    assert body["token_type"] == "bearer"
+    assert body["expires_in"] == 8 * 60 * 60
+    assert "password" not in body
+
+    session = client.get(
+        "/admin/session", headers={"Authorization": f"Bearer {body['access_token']}"}
+    )
+    assert session.json() == {"username": "admin", "role": "admin"}
+
+
+def test_admin_login_rejects_bad_credentials_and_tampered_token(client, settings):
+    settings.admin_password = SecretStr("a-long-test-password")
+    settings.admin_token_secret = SecretStr("test-signing-secret-that-is-at-least-32-bytes")
+
+    rejected = client.post(
+        "/admin/login", json={"username": "admin", "password": "wrong-password"}
+    )
+    assert rejected.status_code == 401
+
+    accepted = client.post(
+        "/admin/login",
+        json={"username": "admin", "password": "a-long-test-password"},
+    )
+    token = accepted.json()["access_token"]
+    invalid = client.get(
+        "/admin/session", headers={"Authorization": f"Bearer {token}tampered"}
+    )
+    assert invalid.status_code == 401
+
+
+def test_cors_rejects_unconfigured_origin(client):
+    response = client.options(
+        "/health",
+        headers={
+            "Origin": "https://untrusted.example",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "access-control-allow-origin" not in response.headers
 
 
 def test_available_tablets(client):

@@ -1,3 +1,4 @@
-from armario_tablets.views import checkout_view
+"""Página Solicitar Tablets — fluxo de retirada."""
+from armario_tablets.views.checkout_view import render
 
-checkout_view.render()
+render()

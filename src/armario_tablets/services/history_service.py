@@ -1,9 +1,12 @@
-from datetime import datetime
+from datetime import UTC, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 from armario_tablets.models import SessionStatus
 from armario_tablets.repositories.checkout_repository import CheckoutRepository
 from armario_tablets.repositories.tablet_repository import TabletRepository
 from armario_tablets.schemas.checkout_schema import HistoryPage, HistoryRow
+
+LOCAL_TZ = ZoneInfo("America/Sao_Paulo")
 
 
 class HistoryService:
@@ -61,10 +64,18 @@ class HistoryService:
         tablets_by_status = self._tablets.count_by_status()
         sessions_by_status = self._checkouts.count_by_status()
         divergent = self.page(status=SessionStatus.DIVERGENT, limit=self.MAX_PAGE_SIZE)
+        local_today = datetime.now(LOCAL_TZ).date()
+        today_start = datetime.combine(local_today, time.min, tzinfo=LOCAL_TZ).astimezone(UTC)
+        tomorrow_start = datetime.combine(
+            local_today + timedelta(days=1), time.min, tzinfo=LOCAL_TZ
+        ).astimezone(UTC)
+        movements_today = self._checkouts.count_item_movements(today_start, tomorrow_start)
         return {
             "available": self._tablets.count_available(),
             "tablets_by_status": tablets_by_status,
             "sessions_by_status": sessions_by_status,
             "open_sessions": sessions_by_status.get(SessionStatus.OPEN, 0),
             "divergences": divergent.rows,
+            "withdrawn_today": movements_today["withdrawn"],
+            "returned_today": movements_today["returned"],
         }

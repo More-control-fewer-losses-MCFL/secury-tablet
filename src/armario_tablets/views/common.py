@@ -3,6 +3,8 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+import streamlit as st
+
 from armario_tablets.config import get_settings
 from armario_tablets.database.session import session_scope
 from armario_tablets.exceptions import AppError
@@ -30,3 +32,11 @@ def friendly_error(error: Exception) -> str:
     if isinstance(error, AppError):
         return str(error)
     return "Erro inesperado. Veja o log do servidor."
+
+
+def record_database_status(connected: bool) -> None:
+    """Atualiza o status visível e redesenha a barra superior se ele mudou."""
+    previous = st.session_state.get("database_connected")
+    st.session_state["database_connected"] = connected
+    if previous is not connected:
+        st.rerun()

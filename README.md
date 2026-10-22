@@ -7,6 +7,9 @@ Sistema para controlar a **retirada e a devolução de tablets** de um armário 
 - Banco: **MySQL 8.4** (Docker) · ORM: **SQLAlchemy 2** · Migrações: **Alembic**
 - Tudo em **Python**. Começa em **modo simulado**: não precisa de leitor nem de fechadura.
 
+> Para executar e acessar o cliente web Flutter, configurar o login
+> administrativo ou entrar por RFID, consulte o [guia detalhado do Flutter Web](frontend_flutter/README.md).
+
 > **Importante:** neste momento **todo o hardware é simulado**. Nenhuma fechadura real é acionada. Veja [docs/escopo_projeto.md](docs/escopo_projeto.md) para saber o que ainda precisa ser validado.
 
 ## O que você precisa ter instalado (Windows)

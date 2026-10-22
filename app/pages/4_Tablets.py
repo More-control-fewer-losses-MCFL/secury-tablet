@@ -1,3 +1,4 @@
-from armario_tablets.views import tablets_view
+"""Página Tablets — inventário e situação."""
+from armario_tablets.views.tablets_view import render
 
-tablets_view.render()
+render()

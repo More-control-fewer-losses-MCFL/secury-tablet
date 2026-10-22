@@ -1,3 +1,4 @@
-from armario_tablets.views import dashboard_view
+"""Página Dashboard — métricas, ocupação, divergências."""
+from armario_tablets.views.dashboard_view import render
 
-dashboard_view.render()
+render()
