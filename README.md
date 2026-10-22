@@ -1,6 +1,6 @@
 # Armário Inteligente de Tablets
 
-Sistema para controlar a **retirada e a devolução de tablets** de um armário por professores identificados com **crachá RFID**.
+O Armário Inteligente de Tablets é um **sistema de controle de empréstimos** que utiliza identificação por **RFID** para registrar a retirada e a devolução de dispositivos por professores. A aplicação integra uma **interface web, uma API e um banco de dados relacional, com suporte atual à simulação do fluxo de operação**.
 
 - Interface web local: **Streamlit**
 - API local: **FastAPI** (recebe eventos do controlador/leitor)
