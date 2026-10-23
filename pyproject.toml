@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "armario-inteligente-tablets"
+version = "0.1.0"
+description = "Controle de retirada e devolução de tablets por professores com crachá RFID."
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit>=1.50",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "sqlalchemy>=2.0",
+    "PyMySQL>=1.1",
+    "alembic>=1.13",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+markers = [
+    "integration: testes que exigem MySQL 8.4 (defina TEST_DATABASE_URL)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "app", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Depends/Query nos parâmetros é o padrão do FastAPI.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
