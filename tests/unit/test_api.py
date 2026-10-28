@@ -164,7 +164,13 @@ def test_checkout_request_errors(client):
     assert checkout(client, badge=INACTIVE_BADGE).status_code == 403
 
 
-def test_full_flow_with_duplicate_event(client):
+def test_full_flow_with_duplicate_event(client, settings):
+    settings.admin_password = SecretStr("strong-test-password")
+    settings.admin_token_secret = SecretStr("s" * 32)
+    token = client.post(
+        "/admin/login",
+        json={"username": settings.admin_username, "password": "strong-test-password"},
+    ).json()["access_token"]
     session_id = checkout(client).json()["session_id"]
     present = all_tags() - {tag_for(1), tag_for(2)}
 
@@ -181,6 +187,7 @@ def test_full_flow_with_duplicate_event(client):
             "event_id": "evt-http-000002",
             "present_tags": sorted(all_tags() - {tag_for(2)}),
         },
+        headers={"Authorization": f"Bearer {token}"},
     )
     assert reconcile.status_code == 200
     assert reconcile.json()["status"] == "DIVERGENT"
