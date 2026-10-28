@@ -12,6 +12,14 @@ Sistema para controlar a **retirada e a devolução de tablets** de um armário 
 
 > **Importante:** neste momento **todo o hardware é simulado**. Nenhuma fechadura real é acionada. Veja [docs/escopo_projeto.md](docs/escopo_projeto.md) para saber o que ainda precisa ser validado.
 
+## Inicialização completa em Docker
+
+Com Docker Desktop ativo, execute `.\scripts\start_local.ps1` na raiz.
+Abra http://localhost:8080. O script preserva .env existente e sobe Flutter Web,
+API, migrações e MySQL. Use `-Demo` apenas para criar dados falsos.
+Veja [guia Docker](docs/docker.md) e [homologação em sala](docs/hardware-sala.md).
+O acesso de professores continua somente RFID, em terminal autorizado pelo admin.
+
 ## O que você precisa ter instalado (Windows)
 
 - Python 3.12 ou mais novo

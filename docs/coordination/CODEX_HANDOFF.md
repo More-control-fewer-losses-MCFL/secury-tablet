@@ -2,97 +2,85 @@
 
 ## A. Identificação
 
-- Data: 2026-10-28 (America/Sao_Paulo).
-- Branch documental: docs/operational-authorization-review, base 23578bc.
-- Entrega documental: commit inicial `dcfaa49`, [PR #5](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/5) para main.
-- Commits implementados: 4119b65 (hardware/CI), 4e9946e (inventário manual).
-- Issues: não criadas; IDs locais SEC-001, CI-001, SEC-002 e SEC-003.
-- PRs: [#3](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/3),
-  [#4](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/4).
-- Objetivo: revisar trabalho local, publicar correções pequenas e registrar baseline confiável.
+Data: 2026-10-28 (America/Sao_Paulo). Estado: em revisão.
+Branch atual: feat/docker-full-stack, empilhada sobre feat/terminal-rfid-authorization.
+Commits: 0138744 (CI-001), f3ffee8 (SEC-002/003), 581b8dc (navegação de enrollment).
+Issues não criadas; IDs locais preservados. PRs:
+[#6](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/6) para main,
+[#7](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/7) sobre #6.
+Docker será publicado em PR separado sobre #7. Codex não executou merges.
+Objetivo: corrigir concorrência, proteger operações preservando RFID-only e entregar
+execução local em Docker; hardware será montado em sala. Senha de teste mantida.
 
 ## B. Desenvolvimento realizado
 
-PR #3 cria security.py, database_safety.py, testes de credenciais/banco e quality.yml;
-altera eventos/configuração, fixtures, testes API, .env.example e documentação.
-Corrigidos imports/formatação Ruff e instruções de testes ainda em PostgreSQL.
-PR #4 altera returns.py e teste de fluxo API, cria test_return_authorization.py e
-documenta autorização de present_tags. Reutiliza sessão administrativa existente;
-listas vazias também exigem autorização. Omitido/null mantém leitura do servidor.
-Entrega documental cria AGENTS.md, PROJECT_STATUS.md, este handoff e revisão de rotas.
-Não há decisão arquitetural nova aprovada; docs/arquitetura.md permanece referência.
-Diretório docs/adr é reservado a decisões futuras, sem ADR artificial neste ciclo.
+- CI-001: CheckoutRepository adquire armário antes da sessão em caminhos mutantes;
+  professor carregado separadamente. Removida inversão causadora do deadlock 1213.
+- SEC-002/003: novo operational_auth.py, rotas terminal/RFID e modelo/migração 0003
+  terminal_authorizations. Cookie Strict/HttpOnly de 8h revogável no MySQL, Bearer
+  professor de 10min vinculado ao terminal; cadastro ativo revalidado em cada acesso.
+- Rotas de histórico, retirada, devolução, cadastro e tablets protegidas; professor
+  opera em seu nome e concilia próprias sessões; present_tags manual exige admin.
+- Flutter usa cookies no navegador, Bearer em memória, expiração e opção de admin
+  para autorizar terminal e retornar ao RFID sem abrir painel administrativo.
+- Dockerfiles API/Flutter/Nginx, .dockerignore e Compose com migrações/healthchecks;
+  script start_local.ps1 preserva .env, gera configuração se ausente e seed é opt-in.
+- Nginx encaminha /api na mesma origem, limita login e omite logs com UIDs.
+  API não publica porta no host e usa UID 10001. Segredos fora das imagens.
+- README, docs/docker.md, docs/hardware-sala.md, PROJECT_STATUS e ADR 0001 atualizados.
+  Contratos físicos documentados, sem implementar protocolo de equipamento desconhecido.
 
 ## C. Validação
 
-Usado Python do .venv do clone pai (o clone aninhado estava limpo em main).
-Comando: `.venv/Scripts/python.exe -m pytest -q`: 56 aprovados no #3, 64 no #4;
-6 integrações puladas em ambas. Ruff check e format --check nos arquivos Python
-alterados aprovados; git diff --check aprovado. Nenhum teste unitário reprovado
-na validação final das implementações. Sem banco local seguro configurado,
-Docker sem daemon e Flutter ausente: integração/analyze/test/build locais não executados.
-
-CI de #3 (40695940352) e #4 (40696297689): unit/mysql/flutter aprovados.
-Main pós-merge (40696330653): unit/flutter aprovados; mysql 1 falha, 5 aprovados.
-Deadlock 1213 ao atualizar cabinets.lock_state no teste de concorrência. Não houve
-retry para esconder a falha. Hardware físico não testado. Aviso Starlette/httpx permanece.
+Python do .venv: pytest tests/unit -q (78 aprovados), pytest tests/integration -q
+com URL segura explícita (25 aprovados, incluindo 20 cenários concorrentes).
+Ruff check e format --check aprovados nos Python alterados.
+Flutter analyze sem problemas, flutter test: 6 aprovados; build Web Linux no Docker.
+Compose config --quiet e up -d --build --wait aprovados; migração 0003 exit 0.
+MySQL, API e Web saudáveis; nginx -t aprovado; UID da API verificado como 10001.
+Smoke real via Nginx: interface, health, Swagger/OpenAPI, admin, terminal, RFID,
+recusa de operações cruzadas/manual e revogação aprovados. Sem criar retirada demo.
+API reiniciada e recuperada com banco disponível. Backup local restaurado em
+secury_restore_1793198766_test: 4 professores/10 tablets; banco demo intacto.
+CI #6 run 40706716082 e primeira revisão #7 run 40708316632 passaram; conferir
+revisões posteriores e job Docker. Testes físicos e HTTPS não executados.
+Aviso Starlette/httpx permanece. Não alegar homologação de produção.
 
 ## D. Segurança e qualidade
 
-Chave de hardware separada do administrador; rejeições não chegam aos serviços.
-Inventário informado por cliente exige admin no #4; fluxo professor sem lista preservado.
-Não criado login por UID; falta autenticação segura e autorização por propriedade.
-Nenhuma migração ou banco de produção alterado; proteção _test antes de DDL de testes.
-Não há validação contra replay completo ou homologação física.
-Regressões a observar: consumidores HTTP que enviavam present_tags agora precisam
-Bearer administrativo; testar migração de professores antes de restringir outras rotas.
+PO respondeu **apenas o RFID** à escolha de autenticação. Decisão explícita no
+ADR 0001: terminal supervisionado, não autenticação forte do portador. UID copiado
+ainda funciona no terminal autorizado. Cadastro/ownership são verificados no servidor.
+Terminal e professor não substituem token admin; hardware usa chave separada.
+Sem migração destrutiva nem reset de dados. Nova tabela só controla revogação.
+.env e senha de teste preservados; nenhuma credencial real publicada.
+Nenhum leitor/fechadura física acionado. Proteção ampliada contra replay depende
+protocolo futuro. Stack limitada ao loopback; HTTPS e cookie Secure fora dele.
+Serviços legados sem as novas proteções foram encerrados em 8000/8501/8502 após
+validar Docker em 8080. Clone aninhado preservado, nunca adicionado ao Git.
+Regressão de contrato intencional: clientes operacionais precisam Bearer; leitor
+HTTP precisa X-Hardware-Key; professores usam RFID após autorização do terminal.
 
 ## E. Estado da tarefa
 
-Em revisão. #3 foi integrado por ação externa em main; #4 foi integrado por ação
-externa na branch de hardware, não confirmado em main. Codex não executou merges.
-CI pós-merge falhou, impedindo declaração de baseline totalmente validada.
-Documentação Notion não foi modificada nem declarada sincronizada.
+Em revisão. Implementação local validada no escopo simulado. Sem merge pelo Codex,
+sem publicação em produção e sem sincronização do Notion. Funcionalidades de
+cadastro/edição/agenda além da API existente não foram incluídas implicitamente.
 
 ## F. Próximo trabalho recomendado
 
-1. CI-001: reproduzir e corrigir deadlock; protege consistência e confiabilidade do CI.
-2. SEC-002: decidir autenticação segura de professores e migração Flutter com PO;
-   evita confiar em UID clonado e quebrar o fluxo atual.
-3. SEC-003: vincular histórico/retornos à identidade validada; evita acesso cruzado.
-
-Confirmar propagação do #4 para main antes de considerar SEC-001 entregue.
+1. Revisar a cadeia #6 → #7 → Docker, conferir CI e ajustar bases após merges humanos.
+2. Levantar equipamentos/protocolo em sala e implementar adaptadores com os critérios
+   de hardware-sala.md; testar sensor, falhas, energia, inventário e duplicação.
+3. Fechar requisitos da primeira versão (cadastros/agenda/relatórios) e, se houver
+   acesso pela rede, planejar HTTPS e revisar ameaças do modo RFID-only.
 
 ## G. Mensagem pronta para o ChatGPT
 
-Revisar PRs #3 e #4 e os documentos PROJECT_STATUS.md e
-operational-authorization.md. Foram publicados hardware autenticado/CI e proteção
-administrativa do inventário manual, mantendo contrato do Flutter. Os 64 testes
-locais da melhoria passaram; CI dos PRs passou em Python/MySQL/Flutter, mas main
-pós-merge revelou deadlock 1213 (run 40696330653). Priorizar CI-001, depois mecanismo
-seguro de identidade de professores e escopo por usuário. UID não é credencial.
-#4 foi integrado na branch de hardware, então confirmar propagação a main.
-Atualizar Notion somente mediante solicitação do usuário e operação confirmada.
-
-## Ciclo CI-001 — 2026-10-28
-
-Branch fix/mysql-lock-order. A inversão cabinet→session versus session→cabinet
-foi removida no CheckoutRepository: alterações por sessão adquirem primeiro o
-armário e usam carregamento separado do professor. Sem retry de comandos físicos.
-Validação local: 56 unitários e 25 integrações MySQL aprovados, incluindo 20
-cenários simultâneos. Banco exclusivo armario_tablets_test, sem tocar o banco demo.
-Ruff aprovado. Estado: em revisão; hardware permanece simulado.
-
-## Ciclo SEC-002/SEC-003
-
-O PO pediu acesso apenas RFID. Implementado controle de terminal (não prova forte
-do portador), conforme ADR 0001: cookie Strict/HttpOnly, registro MySQL revogável,
-sessão curta de professor vinculada ao terminal e autorização por proprietário.
-Flutter obtém Bearer em /auth/rfid e encerra identidade ao expirar. Admin prepara
-o terminal no formulário de login; senha de teste local preservada por solicitação.
-Novo schema 0003 validado no banco isolado _test; nenhuma alteração destrutiva no
-banco demo. Hardware continua simulado e será montado em sala.
-
-Validação SEC-002/003: 78 testes unitários, 25 integrações MySQL, análise Flutter
-sem problemas e 5 testes Flutter aprovados. Ruff dos Python alterados aprovado.
-Estado: em revisão, sem homologação física.
+Secury Tablet agora tem correção de locks MySQL, autorização por terminal e dono,
+e stack Docker local com Flutter/Nginx, API, migrações e MySQL persistente. Mantido
+RFID sem senha por escolha do PO; não afirmar autenticação forte de crachá. Senha
+local de teste preservada. Validação: 78 unitários, 25 integrações MySQL, 6 Flutter,
+análise e build Web; smoke Docker com login/escopo/revogação e backup restaurado.
+Revisar PRs #6/#7 e entrega Docker, PROJECT_STATUS, ADR 0001 e guia físico. Hardware
+continua simulado e será construído em sala. Notion ainda não foi atualizado.
