@@ -1,6 +1,68 @@
 services:
+  migrate:
+    build: &api_build
+      context: .
+      dockerfile: docker/api.Dockerfile
+    image: secury-tablet-api:local
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    environment: &api_environment
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-armario_tablets}
+      MYSQL_USER: ${MYSQL_USER:-armario}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Configure MYSQL_PASSWORD no .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD no .env}
+      ADMIN_TOKEN_SECRET: ${ADMIN_TOKEN_SECRET:?Configure ADMIN_TOKEN_SECRET no .env}
+      HARDWARE_API_KEY: ${HARDWARE_API_KEY:?Configure HARDWARE_API_KEY no .env}
+      HARDWARE_SIMULATED: "true"
+      CABINET_CODE: ${CABINET_CODE:-ARM-01}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      TERMINAL_SESSION_TTL_MINUTES: ${TERMINAL_SESSION_TTL_MINUTES:-480}
+      PROFESSOR_SESSION_TTL_MINUTES: ${PROFESSOR_SESSION_TTL_MINUTES:-10}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    depends_on:
+      db:
+        condition: service_healthy
+  api:
+    build: *api_build
+    image: secury-tablet-api:local
+    environment: *api_environment
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+  seed:
+    image: secury-tablet-api:local
+    profiles: [demo]
+    command: ["python", "scripts/seed_demo.py"]
+    environment: *api_environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
   db:
     image: mysql:8.4
+    restart: unless-stopped
     container_name: armario_tablets_db
     command:
       - --character-set-server=utf8mb4

@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   unit:
     runs-on: ubuntu-latest
@@ -61,3 +65,29 @@ jobs:
       - run: flutter analyze
       - run: flutter test
       - run: flutter build web
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [unit, mysql, flutter]
+    timeout-minutes: 25
+    env:
+      MYSQL_DATABASE: armario_tablets
+      MYSQL_USER: armario
+      MYSQL_PASSWORD: ci-only-app-password
+      MYSQL_ROOT_PASSWORD: ci-only-root-password
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ci-only-administrator-password
+      ADMIN_TOKEN_SECRET: ci-only-signing-secret-with-at-least-32-bytes
+      HARDWARE_API_KEY: ci-only-hardware-key-with-at-least-32-bytes
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose up -d --build --wait --wait-timeout 180
+      - run: |
+          curl --fail http://127.0.0.1:8080/healthz
+          curl --fail http://127.0.0.1:8080/api/health
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/history)" = 401
+      - if: failure()
+        run: docker compose logs --tail 100
+      - if: always()
+        run: docker compose down
