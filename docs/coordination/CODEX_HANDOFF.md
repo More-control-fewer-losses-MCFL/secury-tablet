@@ -82,3 +82,17 @@ armário e usam carregamento separado do professor. Sem retry de comandos físic
 Validação local: 56 unitários e 25 integrações MySQL aprovados, incluindo 20
 cenários simultâneos. Banco exclusivo armario_tablets_test, sem tocar o banco demo.
 Ruff aprovado. Estado: em revisão; hardware permanece simulado.
+
+## Ciclo SEC-002/SEC-003
+
+O PO pediu acesso apenas RFID. Implementado controle de terminal (não prova forte
+do portador), conforme ADR 0001: cookie Strict/HttpOnly, registro MySQL revogável,
+sessão curta de professor vinculada ao terminal e autorização por proprietário.
+Flutter obtém Bearer em /auth/rfid e encerra identidade ao expirar. Admin prepara
+o terminal no formulário de login; senha de teste local preservada por solicitação.
+Novo schema 0003 validado no banco isolado _test; nenhuma alteração destrutiva no
+banco demo. Hardware continua simulado e será montado em sala.
+
+Validação SEC-002/003: 78 testes unitários, 25 integrações MySQL, análise Flutter
+sem problemas e 5 testes Flutter aprovados. Ruff dos Python alterados aprovado.
+Estado: em revisão, sem homologação física.

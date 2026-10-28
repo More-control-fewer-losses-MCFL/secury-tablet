@@ -25,15 +25,14 @@ class AppController extends ChangeNotifier {
     if (normalizedUid.isEmpty) {
       throw const FormatException('Aproxime o crachá ou informe o UID.');
     }
-    final identified = await api.identifyBadge(normalizedUid);
+    final session = await api.loginTeacher(normalizedUid);
     _adminSessionExpiry?.cancel();
-    _adminSessionExpiry = null;
-    api.clearAdminSession();
+    _adminSessionExpiry = Timer(Duration(seconds: session.expiresIn), signOut);
     adminSession = null;
-    professor = identified;
+    professor = session.professor;
     _badgeUid = normalizedUid;
     notifyListeners();
-    return identified;
+    return session.professor;
   }
 
   Future<void> loginAdmin(String username, String password) async {
@@ -44,6 +43,15 @@ class AppController extends ChangeNotifier {
     adminSession = session;
     _adminSessionExpiry = Timer(Duration(seconds: session.expiresIn), signOut);
     notifyListeners();
+  }
+
+  Future<void> authorizeTerminal(String username, String password) async {
+    await api.loginAdmin(username.trim(), password);
+    try {
+      await api.authorizeTerminal();
+    } finally {
+      api.clearAdminSession();
+    }
   }
 
   void signOut() {

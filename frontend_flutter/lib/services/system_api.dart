@@ -39,6 +39,23 @@ class SystemApi {
 
   void clearAdminSession() => _client.accessToken = null;
 
+  Future<void> authorizeTerminal() async {
+    await _client.post('/terminal/authorize', {});
+  }
+
+  Future<({Professor professor, int expiresIn})> loginTeacher(
+    String uid,
+  ) async {
+    final result = _asMap(
+      await _client.post('/auth/rfid', {'badge_uid': uid.trim()}),
+    );
+    final token = result['access_token'] as String;
+    final professor = Professor.fromJson(_asMap(result['professor']));
+    final expiresIn = result['expires_in'] as int;
+    _client.accessToken = token;
+    return (professor: professor, expiresIn: expiresIn);
+  }
+
   Future<ApiHealth> health() async =>
       ApiHealth.fromJson(_asMap(await _client.get('/health')));
 

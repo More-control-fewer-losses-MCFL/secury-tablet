@@ -20,19 +20,26 @@ void main() {
           200,
         );
       }
-      if (request.url.path == '/professors/by-badge/AABB1234') {
+      if (request.url.path == '/auth/rfid') {
+        expect(request.method, 'POST');
+        expect(jsonDecode(request.body), {'badge_uid': 'AABB1234'});
         return http.Response(
           jsonEncode({
-            'id': 7,
-            'name': 'Maria Silva',
-            'registration': 'P-007',
-            'active': true,
-            'created_at': '2026-01-01T12:00:00Z',
+            'access_token': 'teacher-token',
+            'expires_in': 600,
+            'professor': {
+              'id': 7,
+              'name': 'Maria Silva',
+              'registration': 'P-007',
+              'active': true,
+              'created_at': '2026-01-01T12:00:00Z',
+            },
           }),
           200,
         );
       }
       if (request.url.path == '/tablets') {
+        expect(request.headers['authorization'], 'Bearer teacher-token');
         return http.Response('[]', 200);
       }
       if (request.url.path == '/history') {
@@ -59,6 +66,7 @@ void main() {
     expect(find.text('Olá, Maria Silva'), findsOneWidget);
     expect(find.text('Tablets cadastrados'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
@@ -125,6 +133,62 @@ void main() {
 
     expect(find.text('Olá, admin'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox());
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+  testWidgets('administrator enrolls terminal and stays on RFID login', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    var enrolled = false;
+    final client = MockClient((request) async {
+      if (request.url.path == '/health') {
+        return http.Response(
+          jsonEncode({'status': 'ok', 'database': 'ok'}),
+          200,
+        );
+      }
+      if (request.url.path == '/admin/login') {
+        return http.Response(
+          jsonEncode({
+            'access_token': 'admin-token',
+            'username': 'admin',
+            'expires_in': 480,
+          }),
+          200,
+        );
+      }
+      if (request.url.path == '/admin/session') {
+        return http.Response(
+          jsonEncode({'username': 'admin', 'role': 'admin'}),
+          200,
+        );
+      }
+      if (request.url.path == '/terminal/authorize') {
+        expect(request.headers['authorization'], 'Bearer admin-token');
+        enrolled = true;
+        return http.Response(jsonEncode({'authorized': true}), 200);
+      }
+      return http.Response('{}', 404);
+    });
+    await tester.pumpWidget(
+      SystemApp(
+        api: SystemApi(baseUrl: 'http://test.local', httpClient: client),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Entrar como administrador').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.enterText(find.byType(TextField).at(1), 'test-password');
+    await tester.tap(find.text('Entrar como administrador').first);
+    await tester.pumpAndSettle();
+    expect(enrolled, true);
+    expect(find.text('Identificação por RFID'), findsOneWidget);
+    expect(find.text('Olá, admin'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });

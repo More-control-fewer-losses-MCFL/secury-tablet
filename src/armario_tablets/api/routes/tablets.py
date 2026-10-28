@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends
 
 from armario_tablets.api.deps import get_services
+from armario_tablets.api.operational_auth import require_principal
 from armario_tablets.schemas.tablet_schema import AvailabilityOut, TabletOut
 from armario_tablets.services.factory import Services
 
-router = APIRouter(prefix="/tablets", tags=["tablets"])
+router = APIRouter(prefix="/tablets", tags=["tablets"], dependencies=[Depends(require_principal)])
 
 
 @router.get("/available", response_model=AvailabilityOut)
