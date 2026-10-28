@@ -13,13 +13,14 @@ from tests.factories import ACTIVE_BADGE, INACTIVE_BADGE, all_tags, tag_for
 
 @pytest.fixture
 def client(services, db, hardware, settings):
+    settings.hardware_api_key = SecretStr("test-controller-key-with-at-least-32-bytes")
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_services] = lambda: build_services(
         db, hardware, settings, poll_interval_seconds=0.01
     )
-    return TestClient(app)
+    return TestClient(app, headers={"X-Hardware-Key": settings.hardware_api_key.get_secret_value()})
 
 
 def checkout(client, quantity=2, badge=ACTIVE_BADGE):
@@ -107,9 +108,7 @@ def test_admin_login_rejects_bad_credentials_and_tampered_token(client, settings
     settings.admin_password = SecretStr("a-long-test-password")
     settings.admin_token_secret = SecretStr("test-signing-secret-that-is-at-least-32-bytes")
 
-    rejected = client.post(
-        "/admin/login", json={"username": "admin", "password": "wrong-password"}
-    )
+    rejected = client.post("/admin/login", json={"username": "admin", "password": "wrong-password"})
     assert rejected.status_code == 401
 
     accepted = client.post(
@@ -117,9 +116,7 @@ def test_admin_login_rejects_bad_credentials_and_tampered_token(client, settings
         json={"username": "admin", "password": "a-long-test-password"},
     )
     token = accepted.json()["access_token"]
-    invalid = client.get(
-        "/admin/session", headers={"Authorization": f"Bearer {token}tampered"}
-    )
+    invalid = client.get("/admin/session", headers={"Authorization": f"Bearer {token}tampered"})
     assert invalid.status_code == 401
 
 

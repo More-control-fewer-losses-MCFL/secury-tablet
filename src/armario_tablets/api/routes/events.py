@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from armario_tablets.api.deps import get_services
+from armario_tablets.api.security import require_hardware_key
 from armario_tablets.schemas.event_schema import EventOut, HardwareEventIn
 from armario_tablets.services.factory import Services
 
-router = APIRouter(prefix="/hardware", tags=["hardware"])
+router = APIRouter(
+    prefix="/hardware", tags=["hardware"], dependencies=[Depends(require_hardware_key)]
+)
 
 
 @router.post("/events", response_model=EventOut)

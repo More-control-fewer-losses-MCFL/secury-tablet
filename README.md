@@ -42,6 +42,10 @@ notepad .env
 
 Troque `MYSQL_PASSWORD` por uma senha sua. **Nunca envie o `.env` para o Git** (já está no `.gitignore`).
 
+Para enviar eventos HTTP de hardware, defina também `HARDWARE_API_KEY` com uma
+chave aleatória de pelo menos 32 bytes e envie-a no cabeçalho `X-Hardware-Key`.
+Isso também se aplica ao controlador simulado. Consulte [API](docs/api.md).
+
 ### 3. Subir o MySQL
 
 ```powershell

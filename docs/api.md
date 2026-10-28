@@ -1,6 +1,27 @@
 # API HTTP
 
-Documentação interativa (Swagger): `http://127.0.0.1:8000/docs`. Rode apenas em rede local protegida: **não há autenticação**.
+Documentação interativa (Swagger): `http://127.0.0.1:8000/docs`. Rode apenas em rede local protegida. O login administrativo possui token próprio, mas as rotas operacionais de professores ainda não exigem sessão autenticada.
+
+## Credencial do controlador
+
+`POST /hardware/events` exige o cabeçalho `X-Hardware-Key`, inclusive com hardware
+simulado. Configure `HARDWARE_API_KEY` no `.env` do servidor e no controlador com
+uma chave aleatória de pelo menos 32 bytes, diferente de `ADMIN_TOKEN_SECRET`.
+Gere-a com `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+Não inclua essa chave no Flutter Web, em URLs ou em arquivos versionados. O fluxo
+do Flutter não envia eventos de hardware; eles são responsabilidade do controlador.
+
+Chave ausente ou incorreta retorna 401; configuração ausente ou curta retorna 503.
+As requisições rejeitadas não acessam os serviços nem alteram inventário/sessões.
+O Swagger apresenta a credencial em **Authorize**. Em redes que ultrapassem o
+loopback, use transporte HTTPS para não expor a chave. Para revogar a chave, gere
+outra, atualize servidor e controlador e reinicie a API.
+
+```powershell
+$headers = @{ 'X-Hardware-Key' = $env:HARDWARE_API_KEY }
+# $body deve conter o JSON de evento descrito abaixo.
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/hardware/events -Headers $headers -ContentType 'application/json' -Body $body
+```
 
 | Método | Rota | Descrição | Sucesso |
 |---|---|---|---|

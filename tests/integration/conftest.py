@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from armario_tablets.config import Settings
 from armario_tablets.integrations.simulated_hardware import build_simulated_hardware
 from armario_tablets.services.factory import build_services
+from tests.database_safety import validate_test_database_url
 from tests.factories import CABINET_CODE
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,7 +39,11 @@ def pytest_collection_modifyitems(config, items):
 def mysql_engine():
     if not TEST_URL:
         pytest.skip("TEST_DATABASE_URL não definida")
-    engine = create_engine(TEST_URL, pool_pre_ping=True, isolation_level="READ COMMITTED")
+    engine = create_engine(
+        validate_test_database_url(TEST_URL),
+        pool_pre_ping=True,
+        isolation_level="READ COMMITTED",
+    )
     with engine.begin() as conn:
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
         conn.execute(
