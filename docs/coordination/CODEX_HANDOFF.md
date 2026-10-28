@@ -73,3 +73,12 @@ pós-merge revelou deadlock 1213 (run 40696330653). Priorizar CI-001, depois mec
 seguro de identidade de professores e escopo por usuário. UID não é credencial.
 #4 foi integrado na branch de hardware, então confirmar propagação a main.
 Atualizar Notion somente mediante solicitação do usuário e operação confirmada.
+
+## Ciclo CI-001 — 2026-10-28
+
+Branch fix/mysql-lock-order. A inversão cabinet→session versus session→cabinet
+foi removida no CheckoutRepository: alterações por sessão adquirem primeiro o
+armário e usam carregamento separado do professor. Sem retry de comandos físicos.
+Validação local: 56 unitários e 25 integrações MySQL aprovados, incluindo 20
+cenários simultâneos. Banco exclusivo armario_tablets_test, sem tocar o banco demo.
+Ruff aprovado. Estado: em revisão; hardware permanece simulado.

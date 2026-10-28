@@ -20,7 +20,8 @@ from tests.factories import (
 pytestmark = pytest.mark.integration
 
 
-def test_two_simultaneous_requests_never_both_succeed(db, open_services):
+@pytest.mark.parametrize("iteration", range(20))
+def test_two_simultaneous_requests_never_both_succeed(db, open_services, iteration):
     seed_basic(db, tablets=3)
     outcomes = []
 

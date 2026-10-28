@@ -52,3 +52,11 @@ A pasta não rastreada `secury-tablet/` permanece preservada e fora dos commits.
 Próximos itens: CI-001 (deadlock), SEC-002 (prova de identidade e migração Flutter),
 SEC-003 (autorização por identidade), conforme [revisão](operational-authorization.md).
 Confirmar também entrega de SEC-001 em main antes de fechar o item.
+
+## Atualização CI-001 — 2026-10-28
+
+Correção proposta em fix/mysql-lock-order: ordem consistente armário antes da sessão,
+sem repetir efeitos físicos. 56 unitários e 25 integrações locais MySQL passaram
+(incluindo 20 cenários de concorrência). Em revisão; CI remoto ainda precisa validar.
+Flutter 3.47.8/Dart 3.13.7 agora instalado localmente; análise, dois testes e build
+Web passaram no ciclo de instalação. Demo disponível nas portas 8000/8501/8502.
