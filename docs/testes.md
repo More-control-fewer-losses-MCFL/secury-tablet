@@ -2,7 +2,7 @@
 
 ```powershell
 pytest tests/unit -q                 # rápido, SQLite em memória, sem Docker
-pytest tests/integration -q          # PostgreSQL real (veja abaixo)
+pytest tests/integration -q          # MySQL 8.4 real (veja abaixo)
 pytest -q                            # tudo (integração é pulada sem TEST_DATABASE_URL)
 ruff check .; ruff format --check .
 ```
@@ -22,14 +22,28 @@ SQLite em memória + hardware simulado. Cobrem:
 
 ## Integração (`tests/integration`)
 
-Usam **PostgreSQL de verdade, em um banco SEPARADO**. Defina `TEST_DATABASE_URL`:
+Usam **MySQL 8.4 de verdade, em um banco SEPARADO**. Defina `TEST_DATABASE_URL`:
 
 ```powershell
-docker exec armario_tablets_db psql -U armario -d postgres -c "CREATE DATABASE armario_tablets_test"
-$env:TEST_DATABASE_URL = "postgresql+psycopg://armario:SUA_SENHA@127.0.0.1:5432/armario_tablets_test"
+docker exec -it armario_tablets_db mysql -u root -p -e "CREATE DATABASE armario_tablets_test"
+$env:TEST_DATABASE_URL = "mysql+pymysql://USUARIO_TESTE:SENHA_TESTE@127.0.0.1:3306/armario_tablets_test"
 pytest tests/integration -q
 ```
 
-> **Atenção:** a fixture **apaga todo o schema `public`** do banco de teste e o recria pelas migrações do Alembic (isso também testa a migração). Nunca aponte para o banco de desenvolvimento ou de produção. Os dados são sempre falsos.
+Crie um usuário exclusivo para testes e conceda acesso somente a esse banco.
+Codifique caracteres especiais da senha na URL (percent-encoding).
 
-Cobrem: dois pedidos simultâneos nunca vencem juntos; o mesmo evento chegando em paralelo gera uma única retirada; índice único parcial; `details` realmente em JSONB; índices esperados existem; histórico no PostgreSQL.
+> **Atenção:** a fixture **apaga as tabelas da aplicação** do banco de teste e as recria pelas migrações do Alembic (isso também testa a migração). Nunca aponte para o banco de desenvolvimento ou de produção. Os dados são sempre falsos.
+
+Cobrem: dois pedidos simultâneos nunca vencem juntos; o mesmo evento chegando em paralelo gera uma única retirada; unicidade de itens ativos; `details` realmente em JSON; índices esperados existem; histórico no MySQL.
+
+## Verificações automáticas
+
+O workflow `.github/workflows/quality.yml` executa testes unitários Python,
+integração MySQL 8.4 em banco isolado e análise/testes/build Web do Flutter em
+pull requests e pushes para `main`/`develop`. Consulte o resultado de cada job
+antes de integrar uma alteração.
+
+Os testes de integração recusam `TEST_DATABASE_URL` com backend diferente de
+MySQL ou banco sem sufixo `_test`, antes de executar comandos destrutivos.
+Use sempre uma instância descartável com credenciais exclusivas de teste.
