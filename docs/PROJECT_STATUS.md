@@ -43,6 +43,8 @@ UID RFID é identificador clonável. Histórico expõe terceiros na rede confiá
 Autenticação de hardware não resolve replay completo. Hardware real e Streamlit
 não foram homologados nesta revisão. Nenhum segredo nem migração foi alterado.
 
+Entrega documental: commit inicial `dcfaa49`, [PR #5](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/5) aberto para main.
+
 Atual entrega documental cria instruções de agentes, análise de rotas e handoff.
 Estado: em revisão; não afirmar conclusão de segurança ou validação física.
 A pasta não rastreada `secury-tablet/` permanece preservada e fora dos commits.

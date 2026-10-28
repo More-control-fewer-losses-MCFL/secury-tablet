@@ -4,6 +4,7 @@
 
 - Data: 2026-10-28 (America/Sao_Paulo).
 - Branch documental: docs/operational-authorization-review, base 23578bc.
+- Entrega documental: commit inicial `dcfaa49`, [PR #5](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/5) para main.
 - Commits implementados: 4119b65 (hardware/CI), 4e9946e (inventário manual).
 - Issues: não criadas; IDs locais SEC-001, CI-001, SEC-002 e SEC-003.
 - PRs: [#3](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/3),
