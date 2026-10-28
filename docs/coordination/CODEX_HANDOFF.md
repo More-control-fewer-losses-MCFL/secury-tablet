@@ -8,7 +8,8 @@ Commits: 0138744 (CI-001), f3ffee8 (SEC-002/003), 581b8dc (navegação de enroll
 Issues não criadas; IDs locais preservados. PRs:
 [#6](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/6) para main,
 [#7](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/7) sobre #6.
-Docker será publicado em PR separado sobre #7. Codex não executou merges.
+Docker: [PR #8](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/8)
+sobre #7, commit inicial 2746808. Codex não executou merges.
 Objetivo: corrigir concorrência, proteger operações preservando RFID-only e entregar
 execução local em Docker; hardware será montado em sala. Senha de teste mantida.
 

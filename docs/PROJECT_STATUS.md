@@ -19,10 +19,11 @@ Não houve homologação física nem exposição pública.
 |---|---|---|
 | CI-001 | Ordem de locks armário antes de sessão; sem repetir comandos físicos | PR #6, commit 0138744 |
 | SEC-002/003 | Terminal autorizado pelo admin, RFID sem senha, sessão curta e ownership | PR #7, commits f3ffee8/581b8dc |
-| DOCKER-001 | Flutter/Nginx + API + migrações + MySQL persistente; início por script | Branch atual; PR separado |
+| DOCKER-001 | Flutter/Nginx + API + migrações + MySQL persistente; início por script | PR #8, commit inicial 2746808 |
 
 PRs: [#6](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/6),
-[#7](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/7).
+[#7](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/7),
+[#8](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/8).
 São mudanças empilhadas: main → #6 → #7 → Docker. Nenhum merge executado pelo Codex.
 O PR #4 antigo foi integrado apenas na branch de hardware; #7 implementa a proteção
 do inventário manual na cadeia atual de entrega, junto do controle por proprietário.
