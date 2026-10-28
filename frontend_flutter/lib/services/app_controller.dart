@@ -45,6 +45,15 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> authorizeTerminal(String username, String password) async {
+    await api.loginAdmin(username.trim(), password);
+    try {
+      await api.authorizeTerminal();
+    } finally {
+      api.clearAdminSession();
+    }
+  }
+
   void signOut() {
     _adminSessionExpiry?.cancel();
     _adminSessionExpiry = null;

@@ -81,13 +81,11 @@ class _AuthPageState extends State<AuthPage> {
       error = null;
     });
     try {
-      await widget.controller.loginAdmin(
-        adminUsernameController.text,
-        adminPasswordController.text,
-      );
       if (authorizeTerminal) {
-        await widget.controller.api.authorizeTerminal();
-        widget.controller.signOut();
+        await widget.controller.authorizeTerminal(
+          adminUsernameController.text,
+          adminPasswordController.text,
+        );
         if (mounted) {
           setState(() {
             adminMode = false;
@@ -97,6 +95,10 @@ class _AuthPageState extends State<AuthPage> {
         }
         return;
       }
+      await widget.controller.loginAdmin(
+        adminUsernameController.text,
+        adminPasswordController.text,
+      );
       if (mounted) context.go('/home');
     } on ApiException catch (exception) {
       if (mounted) setState(() => error = exception.message);
