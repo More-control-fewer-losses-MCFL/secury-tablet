@@ -60,3 +60,15 @@ sem repetir efeitos físicos. 56 unitários e 25 integrações locais MySQL pass
 (incluindo 20 cenários de concorrência). Em revisão; CI remoto ainda precisa validar.
 Flutter 3.47.8/Dart 3.13.7 agora instalado localmente; análise, dois testes e build
 Web passaram no ciclo de instalação. Demo disponível nas portas 8000/8501/8502.
+
+## SEC-002/SEC-003 — terminal supervisionado
+
+PO escolheu somente RFID. Nova branch feat/terminal-rfid-authorization protege o
+terminal com cookie HttpOnly revogável, sessões de professor curtas e escopo de
+histórico/retirada/devolução. UID continua copiável; não alegar autenticação forte
+do portador. Migração 0003 cria apenas terminal_authorizations. A decisão está em
+ADR 0001; fluxo Flutter preserva RFID, com autorização prévia pelo administrador.
+
+Validação SEC-002/003: 78 testes unitários, 25 integrações MySQL, análise Flutter
+sem problemas e 5 testes Flutter aprovados. Ruff dos Python alterados aprovado.
+Estado: em revisão, sem homologação física.

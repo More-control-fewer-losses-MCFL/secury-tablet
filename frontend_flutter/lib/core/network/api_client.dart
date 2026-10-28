@@ -5,13 +5,14 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'api_exception.dart';
+import 'http_client_factory.dart';
 
 class ApiClient {
   ApiClient({
     required this._baseUrl,
     http.Client? client,
     this.timeout = const Duration(seconds: 12),
-  }) : _client = client ?? http.Client();
+  }) : _client = client ?? createHttpClient();
 
   final String _baseUrl;
   final http.Client _client;
@@ -39,7 +40,7 @@ class ApiClient {
   };
 
   Uri _uri(String path, [Map<String, String>? query]) {
-    final uri = Uri.parse('$_baseUrl$path');
+    final uri = Uri.base.resolve('$_baseUrl$path');
     return query == null ? uri : uri.replace(queryParameters: query);
   }
 

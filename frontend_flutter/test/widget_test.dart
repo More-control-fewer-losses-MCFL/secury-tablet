@@ -20,19 +20,26 @@ void main() {
           200,
         );
       }
-      if (request.url.path == '/professors/by-badge/AABB1234') {
+      if (request.url.path == '/auth/rfid') {
+        expect(request.method, 'POST');
+        expect(jsonDecode(request.body), {'badge_uid': 'AABB1234'});
         return http.Response(
           jsonEncode({
-            'id': 7,
-            'name': 'Maria Silva',
-            'registration': 'P-007',
-            'active': true,
-            'created_at': '2026-01-01T12:00:00Z',
+            'access_token': 'teacher-token',
+            'expires_in': 600,
+            'professor': {
+              'id': 7,
+              'name': 'Maria Silva',
+              'registration': 'P-007',
+              'active': true,
+              'created_at': '2026-01-01T12:00:00Z',
+            },
           }),
           200,
         );
       }
       if (request.url.path == '/tablets') {
+        expect(request.headers['authorization'], 'Bearer teacher-token');
         return http.Response('[]', 200);
       }
       if (request.url.path == '/history') {
@@ -59,6 +66,7 @@ void main() {
     expect(find.text('Olá, Maria Silva'), findsOneWidget);
     expect(find.text('Tablets cadastrados'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });
@@ -125,6 +133,7 @@ void main() {
 
     expect(find.text('Olá, admin'), findsOneWidget);
 
+    await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();
     tester.view.resetDevicePixelRatio();
   });

@@ -11,6 +11,7 @@ from armario_tablets.models.checkout_session import (
 from armario_tablets.models.event import Event
 from armario_tablets.models.professor import Professor
 from armario_tablets.models.tablet import Tablet, TabletStatus
+from armario_tablets.models.terminal_authorization import TerminalAuthorization
 
 __all__ = [
     "HOLDING_STATUSES",
@@ -26,4 +27,5 @@ __all__ = [
     "SessionStatus",
     "Tablet",
     "TabletStatus",
+    "TerminalAuthorization",
 ]

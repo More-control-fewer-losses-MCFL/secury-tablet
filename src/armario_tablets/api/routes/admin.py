@@ -82,9 +82,7 @@ def _valid_token(token: str, settings: Settings, secret: bytes) -> str | None:
 
 
 @router.post("/login")
-def login(
-    body: AdminLoginIn, settings: Settings = Depends(get_settings)
-) -> dict[str, str | int]:
+def login(body: AdminLoginIn, settings: Settings = Depends(get_settings)) -> dict[str, str | int]:
     secret = _token_secret(settings)
     expected_username = settings.admin_username.encode("utf-8")
     submitted_username = body.username.encode("utf-8")

@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     admin_password: SecretStr | None = None
     admin_token_secret: SecretStr | None = None
     admin_session_ttl_minutes: int = Field(default=480, ge=1, le=1440)
+    terminal_session_ttl_minutes: int = Field(default=480, ge=1, le=1440)
+    professor_session_ttl_minutes: int = Field(default=10, ge=1, le=60)
+    session_cookie_secure: bool = False  # Set true behind HTTPS outside local development.
     cors_allowed_origins: str = (
         "http://localhost:8080,http://127.0.0.1:8080,http://localhost:8502,http://127.0.0.1:8502"
     )

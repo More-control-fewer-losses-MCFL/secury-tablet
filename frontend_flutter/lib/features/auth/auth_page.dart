@@ -25,6 +25,7 @@ class _AuthPageState extends State<AuthPage> {
   bool loading = false;
   bool checkingApi = true;
   bool adminMode = false;
+  bool authorizeTerminal = false;
   String? error;
   ApiHealth? health;
   Professor? identified;
@@ -84,6 +85,18 @@ class _AuthPageState extends State<AuthPage> {
         adminUsernameController.text,
         adminPasswordController.text,
       );
+      if (authorizeTerminal) {
+        await widget.controller.api.authorizeTerminal();
+        widget.controller.signOut();
+        if (mounted) {
+          setState(() {
+            adminMode = false;
+            authorizeTerminal = false;
+            adminPasswordController.clear();
+          });
+        }
+        return;
+      }
       if (mounted) context.go('/home');
     } on ApiException catch (exception) {
       if (mounted) setState(() => error = exception.message);
@@ -206,6 +219,14 @@ class _AuthPageState extends State<AuthPage> {
         ),
         const SizedBox(height: 8),
         if (adminMode) ...[
+          CheckboxListTile(
+            value: authorizeTerminal,
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Autorizar este terminal e voltar ao RFID'),
+            onChanged: loading
+                ? null
+                : (value) => setState(() => authorizeTerminal = value ?? false),
+          ),
           TextField(
             controller: adminUsernameController,
             enabled: !loading,
@@ -311,8 +332,9 @@ class _AuthPageState extends State<AuthPage> {
         ),
         const SizedBox(height: 16),
         const Text(
-          'Limitação de segurança: a API atual valida o cadastro ativo pelo UID, mas não emite token ou sessão autorizada. '
-          'Este fluxo identifica o professor e não substitui autenticação de produção.',
+          'O acesso por RFID exige um terminal autorizado pela administração. '
+          'O crachá identifica o cadastro; um UID copiado ainda pode ser usado neste terminal. '
+          'No primeiro uso, entre como administrador e marque a autorização do terminal.',
           style: TextStyle(color: AppTheme.warning, fontSize: 12),
         ),
       ],
