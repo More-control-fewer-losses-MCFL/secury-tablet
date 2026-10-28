@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 from armario_tablets.models import (
     HOLDING_STATUSES,
     IN_FLIGHT_STATUSES,
+    Cabinet,
     CheckoutItem,
     CheckoutSession,
     ItemStatus,
@@ -28,10 +29,19 @@ class CheckoutRepository:
         return item
 
     def get_session(self, session_id: int, for_update: bool = False) -> CheckoutSession | None:
+        if for_update:
+            # Every mutating path takes cabinet -> session locks. Otherwise a new
+            # request holding the cabinet can deadlock with unlock confirmation.
+            cabinet_id = self._db.scalar(
+                select(CheckoutSession.cabinet_id).where(CheckoutSession.id == session_id)
+            )
+            if cabinet_id is None:
+                return None
+            self._db.scalar(select(Cabinet).where(Cabinet.id == cabinet_id).with_for_update())
         query = (
             select(CheckoutSession)
             .where(CheckoutSession.id == session_id)
-            .options(joinedload(CheckoutSession.professor))
+            .options(selectinload(CheckoutSession.professor))
         )
         if for_update:
             query = query.with_for_update(of=CheckoutSession)
