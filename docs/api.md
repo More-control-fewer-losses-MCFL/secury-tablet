@@ -71,3 +71,15 @@ Reenviar o mesmo `event_id` retorna `"duplicate": true` e **não** cria nova ret
 Tipos de evento aceitos do hardware: `DOOR_OPENED`, `DOOR_CLOSED`, `INVENTORY_AFTER_CHECKOUT`, `INVENTORY_AFTER_RETURN`, `LOCK_ERROR`, `READER_ERROR`. Um `LOCK_ERROR`/`READER_ERROR` com `session_id` encerra a solicitação em andamento como `FAILED`.
 
 > O UID do crachá na URL de `/professors/by-badge/` pode aparecer em logs de proxies/servidores. Em uso real, prefira consultar por POST ou manter essa rota apenas em `127.0.0.1`. O sistema em si não grava o UID completo nos logs.
+
+## Manual return inventory
+
+`POST /returns/reconcile` requires a valid administrative Bearer session when
+`present_tags` is a list, including an empty list. Missing, forged or expired
+sessions are rejected before services are constructed. If administration is
+not configured, manual inventory fails closed with HTTP 503.
+
+Omitting `present_tags` or sending null preserves the teacher Flutter flow:
+the server reads its configured inventory reader. This flow still lacks secure
+teacher authentication and ownership checks; a badge UID is an identifier,
+not proof of identity. The hardware key cannot replace an administrative token.
