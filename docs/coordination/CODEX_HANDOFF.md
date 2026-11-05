@@ -110,8 +110,7 @@ Integrações MySQL não executadas: sem TEST_DATABASE_URL; fixtures DROP/TRUNCA
 não autorizadas nesta solicitação. Sem acesso ao banco real, deploy ou merge.
 
 Base remota conferida: main=14002e6, feat/terminal-rfid-authorization=8fb19a9;
-árvore de 8fb19a9 coincide com feat/docker-full-stack=76e32a4. PR em preparação
-contra feat/terminal-rfid-authorization para isolar SEC-004/007 da cadeia anterior.
+árvore de 8fb19a9 coincide com feat/docker-full-stack=76e32a4. PR planejado contra feat/terminal-rfid-authorization para isolar SEC-004/007 da cadeia anterior.
 CI remoto e jornada manual pendentes; estado em revisão. Notion não alterado.
 
 Próximos três itens:
@@ -120,3 +119,11 @@ Próximos três itens:
 3. Homologar RFID/sensores físicos e HTTPS antes de eventual acesso pela rede.
 
 Implementação: commit a4373f4 (feat(sec007)).
+
+Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
+conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
+a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
+(implementação) e c029d8c (documentação inicial). Descrição pronta em
+[SEC-007_PR_DRAFT.md](../SEC-007_PR_DRAFT.md); no handoff, resolver como
+`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
+10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.

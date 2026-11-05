@@ -59,3 +59,11 @@ Validação desta revisão: 88 testes Python; Ruff aprovado. Flutter analyze,
 segura e proibição de comandos destrutivos. CI e jornada manual ainda pendentes.
 
 Implementação: commit a4373f4 (feat(sec007)).
+
+Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
+conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
+a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
+(implementação) e c029d8c (documentação inicial). Descrição pronta em
+[SEC-007_PR_DRAFT.md](SEC-007_PR_DRAFT.md); no handoff, resolver como
+`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
+10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.

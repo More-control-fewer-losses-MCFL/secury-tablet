@@ -32,7 +32,7 @@ vedados nesta solicitação. Jornada manual e CI remoto pendentes.
 
 PR deve usar `feat/terminal-rfid-authorization` (8fb19a9) como base: main remota
 observada em 14002e6 ainda não inclui essa dependência. Sem merge automático.
-Estado: em revisão; publicação do PR em preparação. Notion não alterado.
+Estado: em revisão; publicação do PR bloqueada por autenticação. Notion não alterado.
 
 ## Arquitetura e escopo
 
@@ -102,3 +102,11 @@ primeira versão e proteção HTTPS para eventual acesso em rede.
 Notion não alterado. Evidência e instruções em coordination/CODEX_HANDOFF.md.
 
 Implementação: commit a4373f4 (feat(sec007)).
+
+Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
+conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
+a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
+(implementação) e c029d8c (documentação inicial). Descrição pronta em
+[SEC-007_PR_DRAFT.md](SEC-007_PR_DRAFT.md); no handoff, resolver como
+`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
+10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.
