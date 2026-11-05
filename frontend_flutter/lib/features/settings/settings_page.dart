@@ -91,7 +91,9 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             SectionTitle('Integrações não disponíveis na API atual'),
             SizedBox(height: 12),
-            Text('• Não existe emissão de token ou sessão autenticada.'),
+            Text(
+              '• Existem sessões de administrador e professor; uso de crachá exige terminal autorizado.',
+            ),
             Text('• Não existe listagem geral nem edição de professores.'),
             Text(
               '• Não existe endpoint de agenda futura ou lista de devoluções pendentes.',

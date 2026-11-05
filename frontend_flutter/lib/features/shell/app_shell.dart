@@ -21,15 +21,24 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   final searchController = TextEditingController();
 
-  static const _items = [
+  static const _adminItems = [
     _NavItem('Início', Icons.home_outlined, '/home'),
     _NavItem('Agenda', Icons.calendar_month_outlined, '/agenda'),
-    _NavItem('Retirada', Icons.output_outlined, '/movements'),
-    _NavItem('Devolução', Icons.assignment_return_outlined, '/returns'),
+    _NavItem('Devoluções', Icons.assignment_return_outlined, '/returns'),
     _NavItem('Professores', Icons.badge_outlined, '/teachers'),
+    _NavItem('Alertas', Icons.notifications_active_outlined, '/alerts'),
     _NavItem('Tablets', Icons.tablet_mac_outlined, '/tablets'),
-    _NavItem('Histórico e relatórios', Icons.receipt_long_outlined, '/history'),
+    _NavItem('Relatórios', Icons.receipt_long_outlined, '/history'),
     _NavItem('Configurações', Icons.settings_outlined, '/settings'),
+  ];
+
+  static const _teacherItems = [
+    _NavItem('Início', Icons.home_outlined, '/home'),
+    _NavItem('Totem', Icons.touch_app_outlined, '/totem'),
+    _NavItem('Minhas aulas', Icons.calendar_month_outlined, '/agenda'),
+    _NavItem('Retirar tablets', Icons.output_outlined, '/movements'),
+    _NavItem('Devolver tablets', Icons.assignment_return_outlined, '/returns'),
+    _NavItem('Meu histórico', Icons.receipt_long_outlined, '/history'),
   ];
 
   @override
@@ -40,17 +49,21 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final items = widget.controller.isAdmin ? _adminItems : _teacherItems;
     final path = GoRouterState.of(context).uri.path;
-    final selectedIndex = _items
+    final selectedIndex = items
         .indexWhere((item) => item.path == path)
-        .clamp(0, _items.length - 1);
+        .clamp(0, items.length - 1);
     return LayoutBuilder(
       builder: (context, constraints) {
         final desktop = constraints.maxWidth >= 980;
         final sidebar = _Sidebar(
-          items: _items,
+          items: items,
           selectedIndex: selectedIndex,
-          onSelect: (index) => context.go(_items[index].path),
+          onSelect: (index) => context.go(items[index].path),
+          sectionTitle: widget.controller.isAdmin
+              ? 'ADMINISTRAÇÃO'
+              : 'PROFESSORES',
           onLogout: () {
             widget.controller.signOut();
             context.go('/login');
@@ -140,21 +153,28 @@ class _TopBar extends StatelessWidget {
             ),
           ),
         if (compact) const SizedBox(width: 4),
-        Expanded(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 540),
-            child: TextField(
-              controller: searchController,
-              textInputAction: TextInputAction.search,
-              onSubmitted: onSearch,
-              decoration: const InputDecoration(
-                hintText: 'Pesquisar movimentações',
-                prefixIcon: Icon(Icons.search),
-                isDense: true,
+        if (compact)
+          IconButton(
+            tooltip: 'Pesquisar meu histórico',
+            onPressed: () => context.go('/history'),
+            icon: const Icon(Icons.search),
+          )
+        else
+          Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 540),
+              child: TextField(
+                controller: searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: onSearch,
+                decoration: const InputDecoration(
+                  hintText: 'Pesquisar movimentações',
+                  prefixIcon: Icon(Icons.search),
+                  isDense: true,
+                ),
               ),
             ),
           ),
-        ),
         const SizedBox(width: 8),
         _ApiStatusIndicator(compact: compact, api: api),
         if (!compact) ...[
@@ -257,6 +277,7 @@ class _Sidebar extends StatelessWidget {
     required this.onSelect,
     required this.onLogout,
     required this.name,
+    required this.sectionTitle,
   });
 
   final List<_NavItem> items;
@@ -264,6 +285,7 @@ class _Sidebar extends StatelessWidget {
   final ValueChanged<int> onSelect;
   final VoidCallback onLogout;
   final String name;
+  final String sectionTitle;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -275,11 +297,11 @@ class _Sidebar extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20, 22, 16, 24),
           child: BrandMark(inverted: true),
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'GESTÃO DE EQUIPAMENTOS',
-            style: TextStyle(
+            sectionTitle,
+            style: const TextStyle(
               color: Color(0xFFB8D4F5),
               fontSize: 10,
               letterSpacing: 1,

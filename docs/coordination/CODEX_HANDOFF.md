@@ -2,8 +2,9 @@
 
 ## A. Identificação
 
-Data: 2026-10-28 (America/Sao_Paulo). Estado: em revisão.
-Branch atual: feat/docker-full-stack, empilhada sobre feat/terminal-rfid-authorization.
+Data: 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Branch atual: feat/SEC-007-integration-review, criada sobre
+feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits: 0138744 (CI-001), f3ffee8 (SEC-002/003), 581b8dc (navegação de enrollment).
 Issues não criadas; IDs locais preservados. PRs:
 [#6](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/6) para main,
@@ -85,3 +86,38 @@ local de teste preservada. Validação: 78 unitários, 25 integrações MySQL, 6
 análise e build Web; smoke Docker com login/escopo/revogação e backup restaurado.
 Revisar PRs #6/#7 e entrega Docker, PROJECT_STATUS, ADR 0001 e guia físico. Hardware
 continua simulado e será construído em sala. Notion ainda não foi atualizado.
+
+## H. Ciclo SEC-007 — 2026-11-05
+
+Branch `feat/SEC-007-integration-review`, PR em rascunho
+[#9](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9),
+base `feat/terminal-rfid-authorization` (8fb19a9); main observada em 14002e6.
+Totem, central de alertas e dashboard implementados, conciliando SEC-004 e
+preservando alterações locais. Rotas, serviços, repositórios e schemas separados.
+Professor bloqueado no monitoramento e no inventário completo. Sem schema novo.
+
+Pacote encontrado em Downloads, extraído fora do projeto. --check retornou 2
+por contexto main.py já integrado/formatado; reconciliação manual, sem --apply.
+
+Validação concluída: 88 unitários Python, Ruff src/tests, formatação dos 9 Python
+alterados, diff --check; Flutter 3.47.8 em Docker com analyze, 10 testes e build Web.
+Oito cenários adicionais de monitoramento executados em MySQL 8.4 novo e isolado:
+migrações até 0003 aprovadas, autenticação/contagem/ordenação/redação/limites
+aprovados. Usados dados fictícios e rollback por cenário, sem DROP/TRUNCATE.
+Contêiner sec007-review-5f708f3d parado e preservado, sem tocar bancos existentes.
+A suíte completa de integração local não foi executada; CI cobre sua configuração.
+Aviso preexistente Starlette/httpx permanece.
+
+Push concluído pela autenticação Git local. Conector GitHub continua com 403
+para escrita; PR aberto via API com a credencial Git em memória, sem exposição.
+CI Quality iniciado no PR; resultado final a conferir. Jornada visual manual e
+homologação física pendentes. Hardware continua simulado; sem deploy ou merge.
+Estado: em revisão. Notion não alterado.
+Commits: a4373f4 (implementação), c029d8c (evidências iniciais), 9310114
+(rascunho e bloqueio inicial, agora resolvido para push/API Git local).
+Descrição: [SEC-007_PR_DRAFT.md](../SEC-007_PR_DRAFT.md).
+
+Próximos três itens:
+1. Conferir CI do PR #9 e revisar a base após integrar as dependências.
+2. Executar aceite visual manual professor/admin sem alterar dados reais.
+3. Homologar hardware e configurar HTTPS antes de acesso pela rede.

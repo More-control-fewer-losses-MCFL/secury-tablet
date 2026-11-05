@@ -1,10 +1,39 @@
 # Estado da engenharia — Secury Tablet
 
-Atualizado em 2026-10-28 (America/Sao_Paulo). Estado: em revisão.
-Branch atual: feat/docker-full-stack, baseada em feat/terminal-rfid-authorization.
+Atualizado em 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Branch atual: feat/SEC-007-integration-review, baseada em
+feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
-581b8dc (navegação da autorização do terminal). Base main analisada: c7d8175.
+581b8dc (navegação da autorização do terminal). Main observada: 14002e6;
+base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
+
+## Atualização SEC-007 — 2026-11-05
+
+Branch `feat/SEC-007-integration-review`, PR em rascunho
+[#9](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9),
+base `feat/terminal-rfid-authorization` (8fb19a9); main observada em 14002e6.
+Totem, central de alertas e dashboard implementados, conciliando SEC-004 e
+preservando alterações locais. Rotas, serviços, repositórios e schemas separados.
+Professor bloqueado no monitoramento e no inventário completo. Sem schema novo.
+
+Pacote encontrado em Downloads, extraído fora do projeto. --check retornou 2
+por contexto main.py já integrado/formatado; reconciliação manual, sem --apply.
+
+Validação concluída: 88 unitários Python, Ruff src/tests, formatação dos 9 Python
+alterados, diff --check; Flutter 3.47.8 em Docker com analyze, 10 testes e build Web.
+Oito cenários adicionais de monitoramento executados em MySQL 8.4 novo e isolado:
+migrações até 0003 aprovadas, autenticação/contagem/ordenação/redação/limites
+aprovados. Usados dados fictícios e rollback por cenário, sem DROP/TRUNCATE.
+Contêiner sec007-review-5f708f3d parado e preservado, sem tocar bancos existentes.
+A suíte completa de integração local não foi executada; CI cobre sua configuração.
+Aviso preexistente Starlette/httpx permanece.
+
+Push concluído pela autenticação Git local. Conector GitHub continua com 403
+para escrita; PR aberto via API com a credencial Git em memória, sem exposição.
+CI Quality iniciado no PR; resultado final a conferir. Jornada visual manual e
+homologação física pendentes. Hardware continua simulado; sem deploy ou merge.
+Estado: em revisão. Notion não alterado.
 
 ## Arquitetura e escopo
 

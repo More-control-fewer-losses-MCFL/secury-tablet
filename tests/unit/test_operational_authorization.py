@@ -221,3 +221,24 @@ def test_invalid_terminal_cannot_login(auth_client, settings, kind):
     auth_client.cookies.clear()
     auth_client.cookies.set(TERMINAL_COOKIE, cookie)
     assert auth_client.post("/auth/rfid", json={"badge_uid": ACTIVE_BADGE}).status_code == 401
+
+
+def test_teacher_sees_availability_but_not_full_inventory(auth_client):
+    """A teacher can request tablets but cannot inspect the complete asset ledger."""
+    headers = teacher_headers(auth_client)
+    available = auth_client.get("/tablets/available", headers=headers)
+    assert available.status_code == 200
+    full_inventory = auth_client.get("/tablets", headers=headers)
+    assert full_inventory.status_code == 403
+    assert auth_client.get("/tablets", headers=admin_headers(auth_client)).status_code == 200
+
+
+def test_inventory_access_is_rejected_before_services(auth_client):
+    """Unauthorized callers must not instantiate business services."""
+    headers = teacher_headers(auth_client)
+
+    def forbidden():
+        pytest.fail("Unauthorized inventory access constructed services")
+
+    auth_client.app.dependency_overrides[get_services] = forbidden
+    assert auth_client.get("/tablets", headers=headers).status_code == 403

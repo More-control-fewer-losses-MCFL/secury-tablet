@@ -10,6 +10,7 @@ from armario_tablets.api.routes import (
     checkout,
     events,
     health,
+    monitoring,
     professors,
     returns,
     tablets,
@@ -58,7 +59,17 @@ def create_app() -> FastAPI:
             status_code=status, content={"code": type(error).__name__, "detail": str(error)}
         )
 
-    for module in (health, admin, terminal, tablets, professors, checkout, returns, events):
+    for module in (
+        health,
+        admin,
+        terminal,
+        tablets,
+        professors,
+        checkout,
+        returns,
+        events,
+        monitoring,
+    ):
         app.include_router(module.router)
     return app
 
