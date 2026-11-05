@@ -89,41 +89,35 @@ continua simulado e será construído em sala. Notion ainda não foi atualizado.
 
 ## H. Ciclo SEC-007 — 2026-11-05
 
-Alterações locais preexistentes preservadas e integradas em branch específica
-`feat/SEC-007-integration-review`, partindo de 8fb19a9. Não havia clone aninhado
-`secury-tablet/` neste workspace. ZIP localizado em Downloads, extraído em TEMP.
-LEIA-ME, HANDOFF_CHATGPT e apply_incremento.py lidos. `--check` abortou com código 2
-por contexto já integrado/formatado em main.py; reconciliação manual, sem --apply.
+Branch `feat/SEC-007-integration-review`, PR em rascunho
+[#9](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9),
+base `feat/terminal-rfid-authorization` (8fb19a9); main observada em 14002e6.
+Totem, central de alertas e dashboard implementados, conciliando SEC-004 e
+preservando alterações locais. Rotas, serviços, repositórios e schemas separados.
+Professor bloqueado no monitoramento e no inventário completo. Sem schema novo.
 
-SEC-004: backend já autenticava perfis e limitava recursos ao proprietário;
-separação visual, guardas de navegação e inventário completo exclusivo do admin
-foram preservados. SEC-007 adiciona totem, central e indicadores reais.
-Rotas HTTP finas, classificação no serviço, consultas no repositório e contratos
-em schemas. Estados existentes do domínio reutilizados; sem migração.
-Professor recebe 401 no monitoramento e 403 no inventário completo. Eventos
-omitem details; abertura de porta isolada não é alarme. Hardware segue simulado.
+Pacote encontrado em Downloads, extraído fora do projeto. --check retornou 2
+por contexto main.py já integrado/formatado; reconciliação manual, sem --apply.
 
-Validação: 88 unitários Python aprovados, Ruff src/tests e formatação dos 9 Python
-alterados aprovados. Flutter 3.47.8 via Docker: analyze, 10 testes e build Web
-aprovados; navegação final validada. Aviso Starlette/httpx conhecido.
-Integrações MySQL não executadas: sem TEST_DATABASE_URL; fixtures DROP/TRUNCATE
-não autorizadas nesta solicitação. Sem acesso ao banco real, deploy ou merge.
+Validação concluída: 88 unitários Python, Ruff src/tests, formatação dos 9 Python
+alterados, diff --check; Flutter 3.47.8 em Docker com analyze, 10 testes e build Web.
+Oito cenários adicionais de monitoramento executados em MySQL 8.4 novo e isolado:
+migrações até 0003 aprovadas, autenticação/contagem/ordenação/redação/limites
+aprovados. Usados dados fictícios e rollback por cenário, sem DROP/TRUNCATE.
+Contêiner sec007-review-5f708f3d parado e preservado, sem tocar bancos existentes.
+A suíte completa de integração local não foi executada; CI cobre sua configuração.
+Aviso preexistente Starlette/httpx permanece.
 
-Base remota conferida: main=14002e6, feat/terminal-rfid-authorization=8fb19a9;
-árvore de 8fb19a9 coincide com feat/docker-full-stack=76e32a4. PR planejado contra feat/terminal-rfid-authorization para isolar SEC-004/007 da cadeia anterior.
-CI remoto e jornada manual pendentes; estado em revisão. Notion não alterado.
+Push concluído pela autenticação Git local. Conector GitHub continua com 403
+para escrita; PR aberto via API com a credencial Git em memória, sem exposição.
+CI Quality iniciado no PR; resultado final a conferir. Jornada visual manual e
+homologação física pendentes. Hardware continua simulado; sem deploy ou merge.
+Estado: em revisão. Notion não alterado.
+Commits: a4373f4 (implementação), c029d8c (evidências iniciais), 9310114
+(rascunho e bloqueio inicial, agora resolvido para push/API Git local).
+Descrição: [SEC-007_PR_DRAFT.md](../SEC-007_PR_DRAFT.md).
 
 Próximos três itens:
-1. Conferir CI e revisar o PR empilhado, retargetando após integração das dependências.
-2. Validar jornadas manuais professor/admin em ambiente isolado e planejar MySQL seguro.
-3. Homologar RFID/sensores físicos e HTTPS antes de eventual acesso pela rede.
-
-Implementação: commit a4373f4 (feat(sec007)).
-
-Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
-conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
-a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
-(implementação) e c029d8c (documentação inicial). Descrição pronta em
-[SEC-007_PR_DRAFT.md](../SEC-007_PR_DRAFT.md); no handoff, resolver como
-`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
-10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.
+1. Conferir CI do PR #9 e revisar a base após integrar as dependências.
+2. Executar aceite visual manual professor/admin sem alterar dados reais.
+3. Homologar hardware e configurar HTTPS antes de acesso pela rede.

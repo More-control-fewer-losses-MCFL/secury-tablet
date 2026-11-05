@@ -54,16 +54,9 @@ Dashboard retorna até 5 alertas; central retorna 30 por padrão, no máximo 50.
 Contadores globais: inventário por estado, sessões OPEN/DIVERGENT separadas e
 PENDING+UNLOCKED em curso, reutilizando os estados existentes do domínio.
 
-Validação desta revisão: 88 testes Python; Ruff aprovado. Flutter analyze,
-10 testes e build Web aprovados no Docker com SDK 3.47.8; navegação final validada. Integração MySQL não executada por ausência de URL
-segura e proibição de comandos destrutivos. CI e jornada manual ainda pendentes.
-
-Implementação: commit a4373f4 (feat(sec007)).
-
-Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
-conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
-a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
-(implementação) e c029d8c (documentação inicial). Descrição pronta em
-[SEC-007_PR_DRAFT.md](SEC-007_PR_DRAFT.md); no handoff, resolver como
-`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
-10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.
+Validação desta revisão: 88 unitários Python e Ruff aprovados; Flutter analyze,
+10 testes e build Web aprovados em Docker. Oito cenários de monitoramento também
+aprovados em MySQL 8.4 isolado, com migrações até 0003 e rollback entre cenários,
+sem DROP/TRUNCATE. A suíte completa local MySQL não foi executada.
+PR [#9](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9)
+em rascunho; CI iniciado. Jornada visual manual e homologação física pendentes.

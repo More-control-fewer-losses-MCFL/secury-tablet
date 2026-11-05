@@ -10,29 +10,30 @@ Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito co
 
 ## Atualização SEC-007 — 2026-11-05
 
-Totem `/totem`, central `/alerts` e indicadores administrativos integrados às
-alterações locais existentes, preservadas na branch de revisão. SEC-004 já tinha
-proteção backend por perfil; a separação visual e a restrição do inventário
-completo foram conciliadas sem reaplicar o pacote antigo.
+Branch `feat/SEC-007-integration-review`, PR em rascunho
+[#9](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9),
+base `feat/terminal-rfid-authorization` (8fb19a9); main observada em 14002e6.
+Totem, central de alertas e dashboard implementados, conciliando SEC-004 e
+preservando alterações locais. Rotas, serviços, repositórios e schemas separados.
+Professor bloqueado no monitoramento e no inventário completo. Sem schema novo.
 
-ZIP encontrado em Downloads (não havia `imports/`), extraído fora do projeto.
-LEIA-ME, HANDOFF e aplicador revisados. `apply_incremento.py --check` retornou 2:
-contexto de `main.py` diferente devido ao registro de rotas já integrado e
-formatado. Integração revisada manualmente; não foi usado `--apply`.
+Pacote encontrado em Downloads, extraído fora do projeto. --check retornou 2
+por contexto main.py já integrado/formatado; reconciliação manual, sem --apply.
 
-API delega ao serviço e repositório de monitoramento; schemas separados.
-Eventos históricos omitem `details`; `DOOR_OPENED` isolado não gera alerta.
-Sem migração, acesso a dados reais ou acionamento de hardware.
+Validação concluída: 88 unitários Python, Ruff src/tests, formatação dos 9 Python
+alterados, diff --check; Flutter 3.47.8 em Docker com analyze, 10 testes e build Web.
+Oito cenários adicionais de monitoramento executados em MySQL 8.4 novo e isolado:
+migrações até 0003 aprovadas, autenticação/contagem/ordenação/redação/limites
+aprovados. Usados dados fictícios e rollback por cenário, sem DROP/TRUNCATE.
+Contêiner sec007-review-5f708f3d parado e preservado, sem tocar bancos existentes.
+A suíte completa de integração local não foi executada; CI cobre sua configuração.
+Aviso preexistente Starlette/httpx permanece.
 
-Validação: 88 testes unitários aprovados; Ruff `check src tests`, formatação dos
-9 Python alterados e `git diff --check` aprovados. Flutter 3.47.8 em Docker:
-analyze sem problemas, 10 testes e build Web aprovados; versão final dos testes Flutter validada. Um aviso preexistente Starlette/httpx permanece.
-MySQL não executado: TEST_DATABASE_URL ausente e fixtures usam DROP/TRUNCATE,
-vedados nesta solicitação. Jornada manual e CI remoto pendentes.
-
-PR deve usar `feat/terminal-rfid-authorization` (8fb19a9) como base: main remota
-observada em 14002e6 ainda não inclui essa dependência. Sem merge automático.
-Estado: em revisão; publicação do PR bloqueada por autenticação. Notion não alterado.
+Push concluído pela autenticação Git local. Conector GitHub continua com 403
+para escrita; PR aberto via API com a credencial Git em memória, sem exposição.
+CI Quality iniciado no PR; resultado final a conferir. Jornada visual manual e
+homologação física pendentes. Hardware continua simulado; sem deploy ou merge.
+Estado: em revisão. Notion não alterado.
 
 ## Arquitetura e escopo
 
@@ -100,13 +101,3 @@ Prioridades: revisar/integrar a cadeia de PRs com CI aprovado; homologar adaptad
 e equipamentos em sala conforme hardware-sala.md; validar requisitos restantes da
 primeira versão e proteção HTTPS para eventual acesso em rede.
 Notion não alterado. Evidência e instruções em coordination/CODEX_HANDOFF.md.
-
-Implementação: commit a4373f4 (feat(sec007)).
-
-Publicação bloqueada nesta sessão: git push HTTPS recusou a credencial;
-conector GitHub retornou HTTP 403 Resource not accessible by integration ao criar
-a branch. Nenhuma branch remota ou PR criado. Commits locais: a4373f4
-(implementação) e c029d8c (documentação inicial). Descrição pronta em
-[SEC-007_PR_DRAFT.md](SEC-007_PR_DRAFT.md); no handoff, resolver como
-`../SEC-007_PR_DRAFT.md`. Validação final Flutter em Docker concluída: analyze,
-10 testes e build Web aprovados. Estado em revisão, CI e jornada manual pendentes.

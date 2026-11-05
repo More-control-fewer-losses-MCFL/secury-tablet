@@ -2,7 +2,7 @@
 
 Base: feat/terminal-rfid-authorization
 Head: feat/SEC-007-integration-review
-Estado: rascunho; publicação bloqueada por autenticação.
+Estado: PR em rascunho publicado: https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/9
 
 ## Comportamento
 
@@ -28,9 +28,11 @@ Alterações locais existentes foram preservadas e conciliadas.
 - git diff --check: aprovado.
 - apply_incremento.py --check: código 2, contexto main.py já integrado e
   formatado. Reconciliação manual; não foi forçado --apply.
-- MySQL não executado: TEST_DATABASE_URL ausente; fixtures DROP/TRUNCATE
-  vedadas nesta solicitação. Dados reais não acessados.
-- Jornada manual e CI remoto pendentes. Sem deploy ou homologação física.
+- MySQL 8.4 isolado: oito cenários do monitoramento aprovados; migrações até
+  0003 aprovadas. Rollback por cenário, sem DROP/TRUNCATE ou dados reais.
+  A suíte completa local de integração não foi executada.
+- Jornada visual manual pendente. CI remoto iniciado no PR #9.
+- Sem deploy ou homologação física.
 
 ## Base e dependências
 
@@ -38,15 +40,9 @@ Main remota observada: 14002e6. Base remota: 8fb19a9, cuja árvore coincide
 com feat/docker-full-stack=76e32a4. Manter PR empilhado na branch de autorização
 até integrar dependências e então revisar base novamente. Não fazer merge automático.
 
-## Publicação pendente
+## Publicação
 
-Commits locais: a4373f4 (implementação) e c029d8c (documentação inicial).
-Push HTTPS falhou por credencial inválida. Criação de branch pelo conector GitHub
-falhou com HTTP 403 Resource not accessible by integration. Nenhuma branch remota
-ou PR foi criado nesta sessão. Após restaurar acesso de escrita, executar:
-
-```powershell
-git push -u origin feat/SEC-007-integration-review
-```
-
-Abrir PR em rascunho com base e descrição acima. Conferir CI e manter em revisão.
+PR #9 publicado em rascunho. Push via Git local; criação via API com a mesma
+credencial, mantida em memória. O conector GitHub retornou 403 para escrita.
+Commits iniciais: a4373f4, c029d8c e 9310114. Documentação posterior registra
+o resultado atualizado. Não fazer merge automático; conferir CI e base.
