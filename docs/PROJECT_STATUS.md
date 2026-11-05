@@ -1,10 +1,38 @@
 # Estado da engenharia — Secury Tablet
 
-Atualizado em 2026-10-28 (America/Sao_Paulo). Estado: em revisão.
-Branch atual: feat/docker-full-stack, baseada em feat/terminal-rfid-authorization.
+Atualizado em 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Branch atual: feat/SEC-007-integration-review, baseada em
+feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
-581b8dc (navegação da autorização do terminal). Base main analisada: c7d8175.
+581b8dc (navegação da autorização do terminal). Main observada: 14002e6;
+base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
+
+## Atualização SEC-007 — 2026-11-05
+
+Totem `/totem`, central `/alerts` e indicadores administrativos integrados às
+alterações locais existentes, preservadas na branch de revisão. SEC-004 já tinha
+proteção backend por perfil; a separação visual e a restrição do inventário
+completo foram conciliadas sem reaplicar o pacote antigo.
+
+ZIP encontrado em Downloads (não havia `imports/`), extraído fora do projeto.
+LEIA-ME, HANDOFF e aplicador revisados. `apply_incremento.py --check` retornou 2:
+contexto de `main.py` diferente devido ao registro de rotas já integrado e
+formatado. Integração revisada manualmente; não foi usado `--apply`.
+
+API delega ao serviço e repositório de monitoramento; schemas separados.
+Eventos históricos omitem `details`; `DOOR_OPENED` isolado não gera alerta.
+Sem migração, acesso a dados reais ou acionamento de hardware.
+
+Validação: 88 testes unitários aprovados; Ruff `check src tests`, formatação dos
+9 Python alterados e `git diff --check` aprovados. Flutter 3.47.8 em Docker:
+analyze sem problemas, 10 testes e build Web aprovados; versão final dos testes Flutter validada. Um aviso preexistente Starlette/httpx permanece.
+MySQL não executado: TEST_DATABASE_URL ausente e fixtures usam DROP/TRUNCATE,
+vedados nesta solicitação. Jornada manual e CI remoto pendentes.
+
+PR deve usar `feat/terminal-rfid-authorization` (8fb19a9) como base: main remota
+observada em 14002e6 ainda não inclui essa dependência. Sem merge automático.
+Estado: em revisão; publicação do PR em preparação. Notion não alterado.
 
 ## Arquitetura e escopo
 
@@ -72,3 +100,5 @@ Prioridades: revisar/integrar a cadeia de PRs com CI aprovado; homologar adaptad
 e equipamentos em sala conforme hardware-sala.md; validar requisitos restantes da
 primeira versão e proteção HTTPS para eventual acesso em rede.
 Notion não alterado. Evidência e instruções em coordination/CODEX_HANDOFF.md.
+
+Implementação: commit a4373f4 (feat(sec007)).

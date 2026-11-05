@@ -2,8 +2,9 @@
 
 ## A. Identificação
 
-Data: 2026-10-28 (America/Sao_Paulo). Estado: em revisão.
-Branch atual: feat/docker-full-stack, empilhada sobre feat/terminal-rfid-authorization.
+Data: 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Branch atual: feat/SEC-007-integration-review, criada sobre
+feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits: 0138744 (CI-001), f3ffee8 (SEC-002/003), 581b8dc (navegação de enrollment).
 Issues não criadas; IDs locais preservados. PRs:
 [#6](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/6) para main,
@@ -85,3 +86,37 @@ local de teste preservada. Validação: 78 unitários, 25 integrações MySQL, 6
 análise e build Web; smoke Docker com login/escopo/revogação e backup restaurado.
 Revisar PRs #6/#7 e entrega Docker, PROJECT_STATUS, ADR 0001 e guia físico. Hardware
 continua simulado e será construído em sala. Notion ainda não foi atualizado.
+
+## H. Ciclo SEC-007 — 2026-11-05
+
+Alterações locais preexistentes preservadas e integradas em branch específica
+`feat/SEC-007-integration-review`, partindo de 8fb19a9. Não havia clone aninhado
+`secury-tablet/` neste workspace. ZIP localizado em Downloads, extraído em TEMP.
+LEIA-ME, HANDOFF_CHATGPT e apply_incremento.py lidos. `--check` abortou com código 2
+por contexto já integrado/formatado em main.py; reconciliação manual, sem --apply.
+
+SEC-004: backend já autenticava perfis e limitava recursos ao proprietário;
+separação visual, guardas de navegação e inventário completo exclusivo do admin
+foram preservados. SEC-007 adiciona totem, central e indicadores reais.
+Rotas HTTP finas, classificação no serviço, consultas no repositório e contratos
+em schemas. Estados existentes do domínio reutilizados; sem migração.
+Professor recebe 401 no monitoramento e 403 no inventário completo. Eventos
+omitem details; abertura de porta isolada não é alarme. Hardware segue simulado.
+
+Validação: 88 unitários Python aprovados, Ruff src/tests e formatação dos 9 Python
+alterados aprovados. Flutter 3.47.8 via Docker: analyze, 10 testes e build Web
+aprovados; navegação final validada. Aviso Starlette/httpx conhecido.
+Integrações MySQL não executadas: sem TEST_DATABASE_URL; fixtures DROP/TRUNCATE
+não autorizadas nesta solicitação. Sem acesso ao banco real, deploy ou merge.
+
+Base remota conferida: main=14002e6, feat/terminal-rfid-authorization=8fb19a9;
+árvore de 8fb19a9 coincide com feat/docker-full-stack=76e32a4. PR em preparação
+contra feat/terminal-rfid-authorization para isolar SEC-004/007 da cadeia anterior.
+CI remoto e jornada manual pendentes; estado em revisão. Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI e revisar o PR empilhado, retargetando após integração das dependências.
+2. Validar jornadas manuais professor/admin em ambiente isolado e planejar MySQL seguro.
+3. Homologar RFID/sensores físicos e HTTPS antes de eventual acesso pela rede.
+
+Implementação: commit a4373f4 (feat(sec007)).
