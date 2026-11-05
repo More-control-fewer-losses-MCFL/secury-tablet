@@ -16,6 +16,36 @@ class AppController extends ChangeNotifier {
   String searchQuery = '';
 
   bool get hasIdentity => professor != null || adminSession != null;
+  bool get isAdmin => adminSession != null;
+  bool get isTeacher => professor != null && adminSession == null;
+
+  /// UI navigation policy. API authorization remains independently enforced.
+  bool canAccessRoute(String route) {
+    if (isAdmin) {
+      return const {
+        '/home',
+        '/agenda',
+        '/returns',
+        '/teachers',
+        '/tablets',
+        '/history',
+        '/settings',
+        '/alerts',
+      }.contains(route);
+    }
+    if (isTeacher) {
+      return const {
+        '/home',
+        '/agenda',
+        '/movements',
+        '/returns',
+        '/history',
+        '/totem',
+      }.contains(route);
+    }
+    return false;
+  }
+
   String get displayName =>
       adminSession?.username ?? professor?.name ?? 'Usuário';
   String? get badgeUid => _badgeUid;

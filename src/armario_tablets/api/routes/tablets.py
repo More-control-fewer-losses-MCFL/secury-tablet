@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from armario_tablets.api.deps import get_services
-from armario_tablets.api.operational_auth import require_principal
+from armario_tablets.api.operational_auth import require_admin, require_principal
 from armario_tablets.schemas.tablet_schema import AvailabilityOut, TabletOut
 from armario_tablets.services.factory import Services
 
@@ -13,6 +13,6 @@ def list_available(services: Services = Depends(get_services)) -> AvailabilityOu
     return services.availability.snapshot()
 
 
-@router.get("", response_model=list[TabletOut])
+@router.get("", response_model=list[TabletOut], dependencies=[Depends(require_admin)])
 def list_tablets(status: str | None = None, services: Services = Depends(get_services)):
     return [TabletOut.from_model(t) for t in services.tablets.list_all(status)]

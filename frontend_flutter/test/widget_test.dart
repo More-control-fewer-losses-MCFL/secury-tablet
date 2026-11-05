@@ -38,9 +38,12 @@ void main() {
           200,
         );
       }
-      if (request.url.path == '/tablets') {
+      if (request.url.path == '/tablets/available') {
         expect(request.headers['authorization'], 'Bearer teacher-token');
-        return http.Response('[]', 200);
+        return http.Response(
+          jsonEncode({'available': 4, 'total': 10, 'tablets': []}),
+          200,
+        );
       }
       if (request.url.path == '/history') {
         return http.Response(
@@ -64,7 +67,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Olá, Maria Silva'), findsOneWidget);
-    expect(find.text('Tablets cadastrados'), findsOneWidget);
+    expect(find.text('Disponíveis agora'), findsOneWidget);
+    expect(find.text('Professores'), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();
