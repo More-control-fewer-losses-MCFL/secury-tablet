@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 
 import '../core/network/api_client.dart';
+import '../models/admin_monitoring.dart';
 import '../models/system_models.dart';
 
 class SystemApi {
@@ -39,8 +40,43 @@ class SystemApi {
 
   void clearAdminSession() => _client.accessToken = null;
 
+  Future<void> authorizeTerminal() async {
+    await _client.post('/terminal/authorize', {});
+  }
+
+  Future<({Professor professor, int expiresIn})> loginTeacher(
+    String uid,
+  ) async {
+    final result = _asMap(
+      await _client.post('/auth/rfid', {'badge_uid': uid.trim()}),
+    );
+    final token = result['access_token'] as String;
+    final professor = Professor.fromJson(_asMap(result['professor']));
+    final expiresIn = result['expires_in'] as int;
+    _client.accessToken = token;
+    return (professor: professor, expiresIn: expiresIn);
+  }
+
   Future<ApiHealth> health() async =>
       ApiHealth.fromJson(_asMap(await _client.get('/health')));
+
+  Future<AdminOverview> adminOverview() async =>
+      AdminOverview.fromJson(_asMap(await _client.get('/admin/overview')));
+
+  Future<List<AlertRecord>> adminAlerts({int limit = 30}) async {
+    final value = await _client.get(
+      '/admin/alerts',
+      query: {'limit': '$limit'},
+    );
+    if (value is! List) {
+      throw const FormatException(
+        'Formato de alertas inválido recebido da API.',
+      );
+    }
+    return value
+        .map((item) => AlertRecord.fromJson(_asMap(item)))
+        .toList(growable: false);
+  }
 
   Future<Professor> identifyBadge(String uid) async {
     final encodedUid = Uri.encodeComponent(uid.trim());

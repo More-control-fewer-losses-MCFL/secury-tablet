@@ -8,6 +8,7 @@ import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
 import '../shell/locker_illustration.dart';
+import 'admin_monitoring_panel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.controller, super.key});
@@ -91,7 +92,7 @@ class _HomePageState extends State<HomePage> {
           ),
           _HeroBanner(
             onAgenda: () => context.go('/agenda'),
-            onMovement: () => context.go('/movements'),
+            onMovement: () => context.go('/returns'),
           ),
           const SizedBox(height: 18),
           LayoutBuilder(
@@ -138,6 +139,8 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+          const SizedBox(height: 18),
+          AdminMonitoringPanel(api: widget.controller.api),
           const SizedBox(height: 18),
           LayoutBuilder(
             builder: (context, constraints) {
@@ -253,7 +256,7 @@ class _HeroBanner extends StatelessWidget {
                           foregroundColor: Colors.white,
                           side: const BorderSide(color: Colors.white70),
                         ),
-                        child: const Text('Registrar movimentação'),
+                        child: const Text('Acompanhar devoluções'),
                       ),
                     ],
                   ),

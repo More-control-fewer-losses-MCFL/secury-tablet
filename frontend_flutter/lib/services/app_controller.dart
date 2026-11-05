@@ -16,6 +16,36 @@ class AppController extends ChangeNotifier {
   String searchQuery = '';
 
   bool get hasIdentity => professor != null || adminSession != null;
+  bool get isAdmin => adminSession != null;
+  bool get isTeacher => professor != null && adminSession == null;
+
+  /// UI navigation policy. API authorization remains independently enforced.
+  bool canAccessRoute(String route) {
+    if (isAdmin) {
+      return const {
+        '/home',
+        '/agenda',
+        '/returns',
+        '/teachers',
+        '/tablets',
+        '/history',
+        '/settings',
+        '/alerts',
+      }.contains(route);
+    }
+    if (isTeacher) {
+      return const {
+        '/home',
+        '/agenda',
+        '/movements',
+        '/returns',
+        '/history',
+        '/totem',
+      }.contains(route);
+    }
+    return false;
+  }
+
   String get displayName =>
       adminSession?.username ?? professor?.name ?? 'Usuário';
   String? get badgeUid => _badgeUid;
@@ -25,15 +55,14 @@ class AppController extends ChangeNotifier {
     if (normalizedUid.isEmpty) {
       throw const FormatException('Aproxime o crachá ou informe o UID.');
     }
-    final identified = await api.identifyBadge(normalizedUid);
+    final session = await api.loginTeacher(normalizedUid);
     _adminSessionExpiry?.cancel();
-    _adminSessionExpiry = null;
-    api.clearAdminSession();
+    _adminSessionExpiry = Timer(Duration(seconds: session.expiresIn), signOut);
     adminSession = null;
-    professor = identified;
+    professor = session.professor;
     _badgeUid = normalizedUid;
     notifyListeners();
-    return identified;
+    return session.professor;
   }
 
   Future<void> loginAdmin(String username, String password) async {
@@ -44,6 +73,15 @@ class AppController extends ChangeNotifier {
     adminSession = session;
     _adminSessionExpiry = Timer(Duration(seconds: session.expiresIn), signOut);
     notifyListeners();
+  }
+
+  Future<void> authorizeTerminal(String username, String password) async {
+    await api.loginAdmin(username.trim(), password);
+    try {
+      await api.authorizeTerminal();
+    } finally {
+      api.clearAdminSession();
+    }
   }
 
   void signOut() {

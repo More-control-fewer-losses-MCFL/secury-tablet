@@ -14,13 +14,22 @@ from tests.factories import ACTIVE_BADGE, INACTIVE_BADGE, all_tags, tag_for
 @pytest.fixture
 def client(services, db, hardware, settings):
     settings.hardware_api_key = SecretStr("test-controller-key-with-at-least-32-bytes")
+    settings.admin_password = SecretStr("default-test-admin-password")
+    settings.admin_token_secret = SecretStr("s" * 32)
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[get_settings] = lambda: settings
     app.dependency_overrides[get_services] = lambda: build_services(
         db, hardware, settings, poll_interval_seconds=0.01
     )
-    return TestClient(app, headers={"X-Hardware-Key": settings.hardware_api_key.get_secret_value()})
+    client = TestClient(
+        app, headers={"X-Hardware-Key": settings.hardware_api_key.get_secret_value()}
+    )
+    token = client.post(
+        "/admin/login", json={"username": "admin", "password": "default-test-admin-password"}
+    ).json()["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
 
 
 def checkout(client, quantity=2, badge=ACTIVE_BADGE):
@@ -76,7 +85,8 @@ def test_cors_allows_authorization_header_for_flutter_admin_login(client):
     assert "authorization" in response.headers["access-control-allow-headers"].lower()
 
 
-def test_admin_login_is_disabled_without_server_credentials(client):
+def test_admin_login_is_disabled_without_server_credentials(client, settings):
+    settings.admin_password = None
     response = client.post("/admin/login", json={"username": "admin", "password": "anything"})
 
     assert response.status_code == 503

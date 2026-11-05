@@ -9,6 +9,7 @@ from armario_tablets.integrations.simulated_hardware import Hardware
 from armario_tablets.repositories.cabinet_repository import CabinetRepository
 from armario_tablets.repositories.checkout_repository import CheckoutRepository
 from armario_tablets.repositories.event_repository import EventRepository
+from armario_tablets.repositories.monitoring_repository import MonitoringRepository
 from armario_tablets.repositories.professor_repository import ProfessorRepository
 from armario_tablets.repositories.tablet_repository import TabletRepository
 from armario_tablets.services.availability_service import AvailabilityService
@@ -18,6 +19,7 @@ from armario_tablets.services.checkout_service import CheckoutService
 from armario_tablets.services.event_service import HardwareEventService
 from armario_tablets.services.history_service import HistoryService
 from armario_tablets.services.inventory_service import InventoryService
+from armario_tablets.services.monitoring_service import MonitoringService
 from armario_tablets.services.return_service import ReturnService
 
 
@@ -33,6 +35,7 @@ class Services:
     cabinets: CabinetService
     professors: ProfessorRepository
     tablets: TabletRepository
+    monitoring: MonitoringService
 
 
 def build_services(
@@ -78,4 +81,5 @@ def build_services(
         cabinets=cabinets,
         professors=professors,
         tablets=tablets,
+        monitoring=MonitoringService(MonitoringRepository(db)),
     )

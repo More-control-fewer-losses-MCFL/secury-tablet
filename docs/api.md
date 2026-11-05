@@ -71,3 +71,36 @@ Reenviar o mesmo `event_id` retorna `"duplicate": true` e **não** cria nova ret
 Tipos de evento aceitos do hardware: `DOOR_OPENED`, `DOOR_CLOSED`, `INVENTORY_AFTER_CHECKOUT`, `INVENTORY_AFTER_RETURN`, `LOCK_ERROR`, `READER_ERROR`. Um `LOCK_ERROR`/`READER_ERROR` com `session_id` encerra a solicitação em andamento como `FAILED`.
 
 > O UID do crachá na URL de `/professors/by-badge/` pode aparecer em logs de proxies/servidores. Em uso real, prefira consultar por POST ou manter essa rota apenas em `127.0.0.1`. O sistema em si não grava o UID completo nos logs.
+
+## Terminal autorizado e escopo operacional (nova entrega)
+
+O professor continua usando apenas RFID, por escolha do Product Owner. O UID não
+é prova criptográfica de identidade: o controle confia no terminal autorizado e
+permanece vulnerável ao uso de um crachá copiado nesse terminal. Uso supervisionado.
+
+1. Administrador entra em `/admin/login` e usa seu Bearer em `POST /terminal/authorize`.
+2. O servidor registra a autorização e grava cookie HttpOnly, SameSite=Strict,
+   válido por 8h. HTTPS requer `SESSION_COOKIE_SECURE=true`.
+3. O professor envia apenas `badge_uid` em `POST /auth/rfid`; sem terminal válido,
+   a requisição é recusada. Cadastro ativo gera Bearer de professor de 10 minutos,
+   limitado também pela validade do terminal e vinculado ao cookie daquele terminal.
+4. `POST /terminal/revoke` com Bearer administrativo revoga esse terminal no banco;
+   inclusive cópias anteriores do cookie deixam de funcionar. Apagar a chave de
+   assinatura do servidor invalida todas as sessões (requer reinício).
+
+No Flutter: entre como administrador, marque **Autorizar este terminal e voltar ao
+RFID** e efetue login. Depois os professores usam apenas o crachá. No desenvolvimento
+local abra `http://127.0.0.1:8502`, com API em `http://127.0.0.1:8000`: cookies Strict
+precisam do mesmo hostname. Docker servirá interface e API na mesma origem.
+
+Todas as rotas operacionais exigem sessão. Professor consulta somente seu histórico,
+retira em seu nome e concilia suas próprias sessões usando o leitor do servidor.
+Não pode substituir `present_tags`, mesmo por lista vazia. Administrador pode
+consultar globalmente e informar inventário manual. Hardware continua usando
+exclusivamente X-Hardware-Key; essa chave não autoriza operações de professor/admin.
+Cadastro desativado invalida a sessão de professor nas próximas requisições.
+
+Sair do Flutter apaga o Bearer da memória; o terminal continua autorizado até sua
+revogação/expiração. Recarregar a página exige nova identificação RFID. Cópias de
+Bearer + cookie podem ser usadas até expiração/revogação: proteger o terminal.
+Não existe autenticação forte do portador do crachá neste modo.
