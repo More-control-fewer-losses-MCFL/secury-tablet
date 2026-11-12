@@ -169,3 +169,5 @@ pendentes. Notion não alterado. Sem merge automático ou hardware físico.
 
 Próximos três itens: proprietário criar/preencher Professores; sincronizar como
 admin e validar jornada controlada; conferir PR/CI e dependência SEC-004.
+
+Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.

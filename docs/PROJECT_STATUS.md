@@ -131,3 +131,5 @@ Prioridades: revisar/integrar a cadeia de PRs com CI aprovado; homologar adaptad
 e equipamentos em sala conforme hardware-sala.md; validar requisitos restantes da
 primeira versão e proteção HTTPS para eventual acesso em rede.
 Notion não alterado. Evidência e instruções em coordination/CODEX_HANDOFF.md.
+
+Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.
