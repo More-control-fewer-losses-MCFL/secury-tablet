@@ -1,0 +1,10 @@
+# Optional: use only on the backend, with a private OAuth token file.
+services:
+  api:
+    environment:
+      GOOGLE_SHEETS_TOKEN_FILE: /run/secrets/google_sheets_token.json
+    volumes:
+      - type: bind
+        source: ${GOOGLE_SHEETS_TOKEN_HOST_FILE:?Configure o arquivo OAuth privado}
+        target: /run/secrets/google_sheets_token.json
+        read_only: true

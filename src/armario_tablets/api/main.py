@@ -11,6 +11,7 @@ from armario_tablets.api.routes import (
     events,
     health,
     monitoring,
+    professor_sync,
     professors,
     returns,
     tablets,
@@ -33,6 +34,9 @@ STATUS_BY_ERROR: dict[type[exc.AppError], int] = {
     exc.InvalidUidError: 422,
     exc.LockError: 502,
     exc.ReaderError: 502,
+    exc.ProfessorSourceUnavailableError: 503,
+    exc.ProfessorImportInvalidError: 422,
+    exc.ProfessorImportConflictError: 409,
 }
 
 
@@ -69,6 +73,7 @@ def create_app() -> FastAPI:
         returns,
         events,
         monitoring,
+        professor_sync,
     ):
         app.include_router(module.router)
     return app

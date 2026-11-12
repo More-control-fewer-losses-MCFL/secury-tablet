@@ -15,3 +15,8 @@ frontend_flutter/build
 frontend_flutter/.flutter-plugins-dependencies
 frontend_flutter/android/.gradle
 frontend_flutter/ios/Pods
+
+secrets/
+**/credentials.json
+**/token.json
+**/google_sheets*token*.json

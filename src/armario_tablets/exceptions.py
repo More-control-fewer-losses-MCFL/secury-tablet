@@ -43,3 +43,15 @@ class ReaderError(AppError):
 
 class InvalidUidError(AppError):
     """UID com formato inválido."""
+
+
+class ProfessorSourceUnavailableError(AppError):
+    """The configured read-only professor source is unavailable."""
+
+
+class ProfessorImportInvalidError(AppError):
+    """Invalid or ambiguous professor data; nothing is imported."""
+
+
+class ProfessorImportConflictError(AppError):
+    """An imported badge belongs to another local professor."""

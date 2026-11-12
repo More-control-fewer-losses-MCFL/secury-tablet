@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from armario_tablets.models import Professor
@@ -18,3 +18,8 @@ class ProfessorRepository:
         self._db.add(professor)
         self._db.flush()
         return professor
+
+    def get_by_registration(self, registration: str) -> Professor | None:
+        return self._db.scalar(
+            select(Professor).where(func.lower(Professor.registration) == registration.lower())
+        )

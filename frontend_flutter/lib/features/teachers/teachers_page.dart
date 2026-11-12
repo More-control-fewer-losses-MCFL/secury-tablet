@@ -18,6 +18,8 @@ class _TeachersPageState extends State<TeachersPage> {
   final badgeController = TextEditingController();
   Professor? professor;
   bool loading = false;
+  bool syncing = false;
+  String? syncMessage;
   String? error;
 
   @override
@@ -27,7 +29,7 @@ class _TeachersPageState extends State<TeachersPage> {
   }
 
   Future<void> _lookup() async {
-    if (loading) return;
+    if (loading || syncing) return;
     setState(() {
       loading = true;
       error = null;
@@ -46,6 +48,53 @@ class _TeachersPageState extends State<TeachersPage> {
     }
   }
 
+  Future<void> _syncProfessors() async {
+    if (syncing) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sincronizar professores?'),
+        content: const Text(
+          'Os cadastros e a situação ativo/inativo serão atualizados conforme a planilha. O histórico será preservado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sincronizar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() {
+      syncing = true;
+      syncMessage = null;
+      error = null;
+      professor = null;
+    });
+    try {
+      final result = await widget.controller.api.syncProfessors();
+      if (mounted) {
+        setState(
+          () => syncMessage =
+              '${result.created} criados, ${result.updated} atualizados e ${result.unchanged} sem alteração.',
+        );
+      }
+    } on ApiException catch (exception) {
+      if (mounted) setState(() => error = exception.message);
+    } on FormatException {
+      if (mounted) {
+        setState(() => error = 'Resposta de sincronização inválida.');
+      }
+    } finally {
+      if (mounted) setState(() => syncing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,6 +103,28 @@ class _TeachersPageState extends State<TeachersPage> {
         'Professores',
         'Consulta individual por crachá RFID cadastrado.',
       ),
+      SectionCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionTitle('Cadastro pela planilha'),
+            const SizedBox(height: 8),
+            const Text(
+              'Importe os professores autorizados e mantenha seus cadastros atualizados.',
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: syncing || loading ? null : _syncProfessors,
+              icon: const Icon(Icons.sync),
+              label: Text(
+                syncing ? 'Sincronizando…' : 'Sincronizar professores',
+              ),
+            ),
+            if (syncMessage != null) Text(syncMessage!),
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
       SectionCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +145,7 @@ class _TeachersPageState extends State<TeachersPage> {
                 ),
                 const SizedBox(width: 10),
                 FilledButton(
-                  onPressed: loading ? null : _lookup,
+                  onPressed: loading || syncing ? null : _lookup,
                   child: Text(loading ? 'Consultando…' : 'Consultar'),
                 ),
               ],
@@ -109,8 +180,8 @@ class _TeachersPageState extends State<TeachersPage> {
       const SectionCard(
         child: StateMessage(
           message:
-              'A API atual oferece apenas consulta por crachá. Ela não disponibiliza '
-              'listagem geral, pesquisa por nome ou matrícula, cadastro ou edição de professores.',
+              'Os cadastros podem ser sincronizados pela planilha e consultados por crachá. '
+              'Listagem geral e edição direta ainda não estão disponíveis nesta tela.',
           icon: Icons.info_outline,
         ),
       ),

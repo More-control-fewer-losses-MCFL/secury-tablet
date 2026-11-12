@@ -97,4 +97,34 @@ void main() {
     await api.loginTeacher('AABB1234');
     await expectLater(api.adminOverview(), throwsA(isA<ApiException>()));
   });
+  test('professor sync uses authenticated administrative API', () async {
+    final client = MockClient((request) async {
+      if (request.url.path == '/admin/login') {
+        return http.Response(
+          jsonEncode({
+            'access_token': 'admin-token',
+            'username': 'admin',
+            'expires_in': 60,
+          }),
+          200,
+        );
+      }
+      if (request.url.path == '/admin/session') {
+        return http.Response(
+          jsonEncode({'username': 'admin', 'role': 'admin'}),
+          200,
+        );
+      }
+      expect(request.method, 'POST');
+      expect(request.url.path, '/admin/professors/sync-google-sheets');
+      expect(request.headers['authorization'], 'Bearer admin-token');
+      return http.Response(
+        jsonEncode({'created': 1, 'updated': 2, 'unchanged': 3}),
+        200,
+      );
+    });
+    final api = SystemApi(baseUrl: 'http://test.local', httpClient: client);
+    await api.loginAdmin('admin', 'password');
+    expect(await api.syncProfessors(), (created: 1, updated: 2, unchanged: 3));
+  });
 }

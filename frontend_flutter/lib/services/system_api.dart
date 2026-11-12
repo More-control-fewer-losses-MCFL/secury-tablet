@@ -57,6 +57,17 @@ class SystemApi {
     return (professor: professor, expiresIn: expiresIn);
   }
 
+  Future<({int created, int updated, int unchanged})> syncProfessors() async {
+    final value = _asMap(
+      await _client.post('/admin/professors/sync-google-sheets', {}),
+    );
+    return (
+      created: value['created'] as int,
+      updated: value['updated'] as int,
+      unchanged: value['unchanged'] as int,
+    );
+  }
+
   Future<ApiHealth> health() async =>
       ApiHealth.fromJson(_asMap(await _client.get('/health')));
 
