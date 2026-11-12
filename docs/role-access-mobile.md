@@ -16,7 +16,7 @@ validadas pela API; esconder menus não constitui segurança.
 | Retirada por crachá | Própria sessão RFID | Somente API; fluxo administrativo futuro |
 | Devolução | Somente própria solicitação | Qualquer solicitação |
 | Histórico | Somente o próprio | Global |
-| Agenda baseada no histórico | Somente própria | Global |
+| Agenda baseada no histórico | Não disponível no perfil | Global |
 | Lista completa de patrimônio | Não | Sim |
 | Consulta de outros professores | Não | Sim |
 | Configurações | Não | Sim |
@@ -61,3 +61,33 @@ leitor/fechadura permanece simulado até homologação física.
 Não adiciona login por senha para professor, funções para vários administradores,
 integração NFC nativa, push notifications ou conectividade pública. Isso precisa
 ser planejado como requisitos independentes com segurança apropriada.
+
+## Revisão SEC-004 — 2026-11-12
+
+Entradas Flutter separadas: `/#/login` para professor e `/#/admin/login` para
+administrador. A tela de professor contém apenas leitura RFID; a administrativa
+contém usuário/senha e autorização do terminal. O link de troca abre outra rota,
+sem mudar o papel da sessão; professor autenticado não abre o login administrativo.
+Após autorizar terminal, administrador volta ao login do professor sem manter
+uma sessão administrativa ativa. Identificação RFID continua exigindo terminal
+previamente autorizado; não se trata de prova forte da identidade do portador.
+
+Professor: início pessoal, totem, solicitar retirada, devolver e histórico próprio.
+Agenda saiu desse perfil porque não há agendamento real implementado. Administrador
+mantém painel, alertas, patrimônio, professores, relatórios e configurações.
+
+`GET /tablets/available`: professor recebe contadores `available` e `total` com
+`tablets: []`; a consulta não carrega os registros individuais. Administrador
+mantém os detalhes. `GET /tablets` permanece exclusivo do admin (403 para professor).
+Histórico e devoluções continuam limitados ao proprietário no backend.
+A forma da resposta de disponibilidade foi preservada para compatibilidade.
+
+BDD: dado professor autenticado, disponibilidade não expõe patrimônio; dado admin,
+os detalhes permanecem; dado visitante, cada URL mostra somente seu formulário;
+dado professor navegando para telas administrativas ou agenda, volta ao início.
+
+Validação local: 90 unitários Python, Ruff e formatação dos 3 Python alterados;
+Flutter analyze sem problemas, 11 testes e build Web aprovados em Docker.
+Sem migração nova, mudança de senha, escrita em dados reais ou hardware físico.
+Integração MySQL local não executada nesta revisão; CI remoto e aceite visual
+manual ainda pendentes. Estado em revisão; PR a publicar, sem merge automático.

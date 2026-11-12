@@ -8,6 +8,21 @@ Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
 base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
 
+## Revisão SEC-004 — 2026-11-12
+
+Branch `feat/SEC-004-separate-role-access`, base `origin/main` em 1d87ba0
+(SEC-007 já integrado por outra ação no PR #10). Logins Flutter separados por
+rota: professor `/#/login`, administrador `/#/admin/login`. Professor acessa
+apenas início pessoal, totem, retirada, devolução e próprio histórico; agenda
+sem agendamento real não é mais exposta nesse perfil. API de disponibilidade
+omite detalhes individuais do patrimônio para professor e mantém-os para admin.
+
+90 unitários Python aprovados; Ruff/formatação dos 3 Python alterados e diff
+aprovados. Flutter analyze, 11 testes e build Web aprovados em Docker. Sem novas
+migrações ou alteração de dados reais; hardware simulado. Integração MySQL local,
+CI remoto e aceite visual manual pendentes nesta revisão. Estado em revisão.
+Documentação em role-access-mobile.md; PR em preparação, sem merge automático.
+
 ## Atualização SEC-007 — 2026-11-05
 
 Branch `feat/SEC-007-integration-review`, PR em rascunho

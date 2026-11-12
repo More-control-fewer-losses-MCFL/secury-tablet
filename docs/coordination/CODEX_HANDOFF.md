@@ -121,3 +121,24 @@ Próximos três itens:
 1. Conferir CI do PR #9 e revisar a base após integrar as dependências.
 2. Executar aceite visual manual professor/admin sem alterar dados reais.
 3. Homologar hardware e configurar HTTPS antes de acesso pela rede.
+
+## I. Revisão SEC-004 — 2026-11-12
+
+Branch `feat/SEC-004-separate-role-access`, base main 1d87ba0. Mudanças anteriores
+SEC-007 já integradas por outra ação pelo PR #10; não executar merge automático.
+Acesso professor `/#/login`; admin `/#/admin/login`. Formulários separados por
+rota, redirecionamento de professor autenticado ao tentar login administrativo,
+menu professor sem agenda não implementada. Retirada/devolução/histórico próprio
+mantidos. Disponibilidade da API omite detalhes de patrimônio para professor,
+sem sequer carregar esses registros; admin mantém detalhes. Mesma resposta JSON
+com tablets vazio para professor. Autorização no backend permanece obrigatória.
+
+90 testes Python, Ruff e format dos 3 Python alterados aprovados. Flutter analyze,
+11 testes e build Web aprovados em Docker. Aviso Starlette/httpx preexistente.
+Sem migração ou escrita em dados reais, segredos preservados. Hardware simulado.
+MySQL local e aceite visual manual não executados nesta revisão; CI remoto e PR
+pendentes. Atualização da stack local em 8081 em preparação, usando o MySQL já
+configurado em 3307; preservar ScadaBR em 8080. Notion não alterado.
+
+Próximos três itens: conferir CI/PR; validar visualmente os dois perfis; homologar
+terminal e HTTPS antes de uso fora da máquina. Estado em revisão.
