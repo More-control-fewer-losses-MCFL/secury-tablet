@@ -1,6 +1,6 @@
 # Estado da engenharia — Secury Tablet
 
-Atualizado em 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Atualizado em 2026-11-12 (America/Sao_Paulo). Estado: em revisão.
 Branch atual: feat/SEC-007-integration-review, baseada em
 feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
@@ -21,7 +21,8 @@ omite detalhes individuais do patrimônio para professor e mantém-os para admin
 aprovados. Flutter analyze, 11 testes e build Web aprovados em Docker. Sem novas
 migrações ou alteração de dados reais; hardware simulado. Integração MySQL local,
 CI remoto e aceite visual manual pendentes nesta revisão. Estado em revisão.
-Documentação em role-access-mobile.md; PR em preparação, sem merge automático.
+Documentação em role-access-mobile.md; PR [#11](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/11) em rascunho, sem merge automático.
+Runtime local atualizado em localhost:8081, API/web saudáveis; smoke HTTP e acesso administrativo aprovados. Commit funcional 505490a.
 
 ## Atualização SEC-007 — 2026-11-05
 

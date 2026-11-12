@@ -90,4 +90,6 @@ Validação local: 90 unitários Python, Ruff e formatação dos 3 Python altera
 Flutter analyze sem problemas, 11 testes e build Web aprovados em Docker.
 Sem migração nova, mudança de senha, escrita em dados reais ou hardware físico.
 Integração MySQL local não executada nesta revisão; CI remoto e aceite visual
-manual ainda pendentes. Estado em revisão; PR a publicar, sem merge automático.
+manual ainda pendentes. Estado em revisão; PR [#11](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/11) em rascunho, sem merge automático.
+
+Disponível localmente: professor http://localhost:8081/#/login e administrador http://localhost:8081/#/admin/login. API e web saudáveis após atualização; verificação HTTP aprovada.
