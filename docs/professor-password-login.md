@@ -79,3 +79,5 @@ Aviso Starlette/httpx preexistente nos testes Python permanece.
 CI remoto e aceite assistivo/manual completos pendentes; sem merge ou produção.
 Referência de decisão: ADR 0002. Esta decisão complementa o RFID do ADR 0001,
 conforme o novo pedido explícito do usuário.
+
+Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) em rascunho para feat/professional-access-screen. Sem merge; CI a conferir.

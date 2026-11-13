@@ -20,7 +20,7 @@ Conta `professor.demo`, Professora Ana (demo)/DEMO-001 criada só no runtime iso
 Senha gerada em arquivo privado no perfil do usuário, fora do workspace/Git/logs.
 Prévia 8082 usa API isolada; banco/API anteriores preservados, `.env` não alterado.
 Sem retirada real ou hardware físico; sem produção, merge ou atualização do Notion.
-Aviso Starlette/httpx preexistente. CI e aceite assistivo pendentes; PR a publicar.
+Aviso Starlette/httpx preexistente. CI e aceite assistivo pendentes; PR referenciado abaixo.
 Guia/BDD: docs/professor-password-login.md. Decisão: docs/adr/0002-professor-password-login.md.
 
 Próximos três itens:
@@ -289,3 +289,5 @@ Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-
 Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
 
 Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.
+
+Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) em rascunho para feat/professional-access-screen. Sem merge; CI a conferir.

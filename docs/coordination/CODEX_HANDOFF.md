@@ -326,10 +326,12 @@ Conta `professor.demo`, Professora Ana (demo)/DEMO-001 criada só no runtime iso
 Senha gerada em arquivo privado no perfil do usuário, fora do workspace/Git/logs.
 Prévia 8082 usa API isolada; banco/API anteriores preservados, `.env` não alterado.
 Sem retirada real ou hardware físico; sem produção, merge ou atualização do Notion.
-Aviso Starlette/httpx preexistente. CI e aceite assistivo pendentes; PR a publicar.
+Aviso Starlette/httpx preexistente. CI e aceite assistivo pendentes; PR referenciado abaixo.
 Guia/BDD: docs/professor-password-login.md. Decisão: docs/adr/0002-professor-password-login.md.
 
 Próximos três itens:
 1. Revisar PR dependente de #14 e conferir CI do head publicado.
 2. Confirmar aceite do login/cadastro de credencial em ambos os perfis e teclado.
 3. Planejar integração das migrações/HTTPS conforme ambiente, sem homologação física implícita.
+
+Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) em rascunho para feat/professional-access-screen. Sem merge; CI a conferir.
