@@ -171,3 +171,27 @@ Próximos três itens: proprietário criar/preencher Professores; sincronizar co
 admin e validar jornada controlada; conferir PR/CI e dependência SEC-004.
 
 Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.
+
+## K. Interface Flutter — 2026-11-12
+
+Branch feat/frontend-clarity-accessibility sobre 827b326, dependente do PR #12.
+Tema com tipografia/espaçamento/contraste consistentes; componentes se adaptam a
+texto ampliado. Login móvel começa pelo formulário e mantém orientação de RFID;
+menu por finalidade/perfil, atalhos móveis e drawer funcional. Conta professor
+não oferece Configurações; notificação admin abre alertas. Dashboard tem métricas
+reais e histórico recente; formulários/cartões de retirada, devolução, totem e
+consulta fluem em tela estreita. A lista de patrimônio omitida do professor não
+é confundida com estoque vazio. Handlers/API/permissões/diálogos preservados.
+
+17 testes Flutter aprovados; Analyze sem problemas, build Web concluído com SDK
+3.47.8 em Docker. Novos cenários em 360/1440px e texto1,5x; contraste >=4.5 para
+rótulos/status; cancelamentos não enviam POST de negócio. Três prévias renderizadas
+inspecionadas (dados fictícios; imagens temporárias fora do Git). Ilustração
+LockerIllustration e ícones Material reutilizados; nenhuma dependência adicionada.
+Sem alteração de Python/schema, escrita em dados reais ou hardware físico.
+CI e avaliação com leitor de tela/teclado reais pendentes; estado em revisão.
+Runtime local atualizado em 8081, sem reiniciar API/MySQL. Página, health e bootstrap HTTP 200. Guia frontend-ux.md.
+Notion não alterado. PR a publicar, sem merge automático.
+
+Próximos três itens: conferir PR/CI e dependências; aceite assistivo manual;
+proprietário preencher a aba de cadastro e validar jornada real controlada.

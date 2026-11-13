@@ -8,6 +8,22 @@ Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
 base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
 
+## Revisão da interface Flutter — 2026-11-12
+
+Branch `feat/frontend-clarity-accessibility`, base 827b326 (integração Sheets/PR #12).
+Tema e componentes consistentes; login prioriza formulário no celular; menu por
+perfil agrupado, drawer corrigido e atalhos inferiores do professor; painel com
+métricas reais; totem, retirada/devolução e consulta de professor responsivos.
+Corrige estado vazio indevido da retirada quando available > 0 e tablets vazio.
+Preserva rotas, confirmação de operações, sincronização e autorização backend.
+Ilustração nativa reutilizada, ícones explicativos, contraste e áreas de toque
+reforçados. Sem nova dependência, alteração de banco ou hardware físico.
+
+Flutter Analyze sem problemas; 17 testes aprovados, incluindo navegação em
+360/1440px com texto1,5x e contraste; Build Web concluído. Três prévias com dados
+fictícios inspecionadas. Validação assistiva manual/CI pendentes: em revisão.
+Guia em frontend-ux.md. Interface local atualizada em 8081; página, health e bootstrap HTTP 200. PR a publicar.
+
 ## Integração de cadastro Google Sheets — 2026-11-12
 
 Branch feat/google-sheets-professor-sync, dependente da revisão SEC-004 do PR #11.

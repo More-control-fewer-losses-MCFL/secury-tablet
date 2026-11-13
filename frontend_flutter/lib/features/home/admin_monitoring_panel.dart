@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/display.dart';
 import '../../models/admin_monitoring.dart';
 import '../../services/system_api.dart';
 import '../../widgets/common_widgets.dart';
@@ -32,33 +33,40 @@ class _AdminMonitoringPanelState extends State<AdminMonitoringPanel> {
     builder: (context, snapshot) {
       if (snapshot.hasError) {
         return ErrorPanel(
-          message: 'Não foi possível carregar indicadores de incidentes.',
+          message: 'Não foi possível carregar os indicadores de ocorrências.',
           onRetry: _reload,
         );
       }
       if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
+        return const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(
+            child: CircularProgressIndicator(
+              semanticsLabel: 'Carregando ocorrências',
+            ),
+          ),
+        );
       }
       final data = snapshot.requireData;
       return SectionCard(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SectionTitle(
-              'Monitoramento e ocorrências',
+              'Ocorrências e pendências',
               action: TextButton.icon(
                 onPressed: () => context.go('/alerts'),
-                icon: const Icon(Icons.notifications_active_outlined),
-                label: const Text('Central de alertas'),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Ver todos os eventos'),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 10,
+              runSpacing: 10,
               children: [
                 StatusPill(
-                  'Alertas registrados: ${data.alertEventsTotal}',
+                  'Eventos registrados: ${data.alertEventsTotal}',
                   color: data.alertEventsTotal > 0
                       ? AppTheme.warning
                       : AppTheme.success,
@@ -74,33 +82,61 @@ class _AdminMonitoringPanelState extends State<AdminMonitoringPanel> {
                   color: AppTheme.blue,
                 ),
                 StatusPill(
-                  'Em manutenção: ${data.maintenance}',
+                  'Retiradas em andamento: ${data.openSessions}',
                   color: AppTheme.muted,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             const Text(
-              'Eventos históricos, não alarmes ativos. Abertura de porta isolada não indica invasão.',
-              style: TextStyle(color: AppTheme.muted, fontSize: 12),
+              'Este histórico não indica alarmes ativos. Uma abertura de porta isolada não caracteriza invasão.',
+              style: TextStyle(color: AppTheme.muted),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
             if (data.recentAlerts.isEmpty)
-              const Text('Nenhum evento de alerta registrado.')
+              const StateMessage(
+                message: 'Nenhuma ocorrência crítica registrada.',
+                icon: Icons.verified_outlined,
+                color: AppTheme.success,
+              )
             else
               ...data.recentAlerts.map(
-                (event) => ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.warning_amber_outlined,
-                    color: event.severity == 'high'
-                        ? AppTheme.danger
-                        : AppTheme.warning,
-                  ),
-                  title: Text(event.title),
-                  subtitle: Text(
-                    'Registro: ${event.occurredAt.day}/${event.occurredAt.month}/${event.occurredAt.year} · ${event.eventId}',
+                (event) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.warning_amber_outlined,
+                          color: event.severity == 'high'
+                              ? AppTheme.danger
+                              : AppTheme.warning,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.title,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              formatDateTime(event.occurredAt),
+                              style: const TextStyle(color: AppTheme.muted),
+                            ),
+                            Text(
+                              'Registro ${event.eventId}',
+                              style: const TextStyle(color: AppTheme.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
