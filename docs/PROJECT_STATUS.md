@@ -1,12 +1,28 @@
 # Estado da engenharia — Secury Tablet
 
-Atualizado em 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
+Atualizado em 2026-11-12 (America/Sao_Paulo). Estado: em revisão.
 Branch atual: feat/SEC-007-integration-review, baseada em
 feat/terminal-rfid-authorization (árvore compatível com feat/docker-full-stack).
 Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
 581b8dc (navegação da autorização do terminal). Main observada: 14002e6;
 base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
+
+## Revisão SEC-004 — 2026-11-12
+
+Branch `feat/SEC-004-separate-role-access`, base `origin/main` em 1d87ba0
+(SEC-007 já integrado por outra ação no PR #10). Logins Flutter separados por
+rota: professor `/#/login`, administrador `/#/admin/login`. Professor acessa
+apenas início pessoal, totem, retirada, devolução e próprio histórico; agenda
+sem agendamento real não é mais exposta nesse perfil. API de disponibilidade
+omite detalhes individuais do patrimônio para professor e mantém-os para admin.
+
+90 unitários Python aprovados; Ruff/formatação dos 3 Python alterados e diff
+aprovados. Flutter analyze, 11 testes e build Web aprovados em Docker. Sem novas
+migrações ou alteração de dados reais; hardware simulado. Integração MySQL local,
+CI remoto e aceite visual manual pendentes nesta revisão. Estado em revisão.
+Documentação em role-access-mobile.md; PR [#11](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/11) em rascunho, sem merge automático.
+Runtime local atualizado em localhost:8081, API/web saudáveis; smoke HTTP e acesso administrativo aprovados. Commit funcional 505490a.
 
 ## Atualização SEC-007 — 2026-11-05
 

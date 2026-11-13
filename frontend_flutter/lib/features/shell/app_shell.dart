@@ -35,7 +35,6 @@ class _AppShellState extends State<AppShell> {
   static const _teacherItems = [
     _NavItem('Início', Icons.home_outlined, '/home'),
     _NavItem('Totem', Icons.touch_app_outlined, '/totem'),
-    _NavItem('Minhas aulas', Icons.calendar_month_outlined, '/agenda'),
     _NavItem('Retirar tablets', Icons.output_outlined, '/movements'),
     _NavItem('Devolver tablets', Icons.assignment_return_outlined, '/returns'),
     _NavItem('Meu histórico', Icons.receipt_long_outlined, '/history'),

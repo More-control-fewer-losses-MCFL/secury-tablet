@@ -10,9 +10,10 @@ import '../shell/brand_mark.dart';
 import '../shell/locker_illustration.dart';
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({required this.controller, super.key});
+  const AuthPage({required this.controller, this.adminMode = false, super.key});
 
   final AppController controller;
+  final bool adminMode;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -24,7 +25,7 @@ class _AuthPageState extends State<AuthPage> {
   final adminPasswordController = TextEditingController();
   bool loading = false;
   bool checkingApi = true;
-  bool adminMode = false;
+  bool get adminMode => widget.adminMode;
   bool authorizeTerminal = false;
   String? error;
   ApiHealth? health;
@@ -87,11 +88,8 @@ class _AuthPageState extends State<AuthPage> {
           adminPasswordController.text,
         );
         if (mounted) {
-          setState(() {
-            adminMode = false;
-            authorizeTerminal = false;
-            adminPasswordController.clear();
-          });
+          adminPasswordController.clear();
+          context.go('/login');
         }
         return;
       }
@@ -208,10 +206,7 @@ class _AuthPageState extends State<AuthPage> {
           child: TextButton(
             onPressed: loading
                 ? null
-                : () => setState(() {
-                    adminMode = !adminMode;
-                    error = null;
-                  }),
+                : () => context.go(adminMode ? '/login' : '/admin/login'),
             child: Text(
               adminMode
                   ? 'Voltar ao acesso por RFID'

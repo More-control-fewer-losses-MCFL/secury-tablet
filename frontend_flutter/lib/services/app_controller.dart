@@ -36,7 +36,6 @@ class AppController extends ChangeNotifier {
     if (isTeacher) {
       return const {
         '/home',
-        '/agenda',
         '/movements',
         '/returns',
         '/history',

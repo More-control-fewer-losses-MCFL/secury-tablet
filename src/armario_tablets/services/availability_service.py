@@ -9,11 +9,11 @@ class AvailabilityService:
     def available_count(self) -> int:
         return self._tablets.count_available()
 
-    def snapshot(self) -> AvailabilityOut:
-        available = self._tablets.list_available()
+    def snapshot(self, *, include_tablets: bool = True) -> AvailabilityOut:
+        available = self._tablets.list_available() if include_tablets else []
         total = sum(self._tablets.count_by_status().values())
         return AvailabilityOut(
-            available=len(available),
+            available=len(available) if include_tablets else self.available_count(),
             total=total,
             tablets=[TabletOut.from_model(tablet) for tablet in available],
         )

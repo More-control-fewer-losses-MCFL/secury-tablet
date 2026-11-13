@@ -20,7 +20,9 @@ GoRouter createAppRouter(AppController controller) => GoRouter(
   initialLocation: '/login',
   refreshListenable: controller,
   redirect: (context, state) {
-    final onLogin = state.matchedLocation == '/login';
+    final onLogin =
+        state.matchedLocation == '/login' ||
+        state.matchedLocation == '/admin/login';
     if (!controller.hasIdentity && !onLogin) return '/login';
     if (controller.hasIdentity && onLogin) return '/home';
     // The backend remains the authority: this is a second, UX-level guard.
@@ -34,6 +36,11 @@ GoRouter createAppRouter(AppController controller) => GoRouter(
     GoRoute(
       path: '/login',
       builder: (context, state) => AuthPage(controller: controller),
+    ),
+    GoRoute(
+      path: '/admin/login',
+      builder: (context, state) =>
+          AuthPage(controller: controller, adminMode: true),
     ),
     ShellRoute(
       builder: (context, state, child) =>

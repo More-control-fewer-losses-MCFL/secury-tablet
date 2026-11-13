@@ -72,6 +72,7 @@ void main() {
     expect(controller.isTeacher, true);
     expect(controller.canAccessRoute('/movements'), true);
     expect(controller.canAccessRoute('/totem'), true);
+    expect(controller.canAccessRoute('/agenda'), false);
     expect(controller.canAccessRoute('/alerts'), false);
     expect(controller.canAccessRoute('/teachers'), false);
     expect(controller.canAccessRoute('/tablets'), false);
@@ -99,7 +100,14 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(routerConfig: router));
     await tester.pumpAndSettle();
     expect(find.text('Disponíveis agora'), findsOneWidget);
-    for (final path in ['/teachers', '/tablets', '/settings', '/alerts']) {
+    for (final path in [
+      '/teachers',
+      '/tablets',
+      '/settings',
+      '/alerts',
+      '/agenda',
+      '/admin/login',
+    ]) {
       router.go(path);
       await tester.pumpAndSettle();
       expect(router.routeInformationProvider.value.uri.path, '/home');
@@ -109,6 +117,32 @@ void main() {
     expect(find.text('Solicitar retirada'), findsOneWidget);
     expect(find.text('Registrar devolução'), findsOneWidget);
     expect(find.text('Meu histórico'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    router.dispose();
+    controller.dispose();
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
+
+  testWidgets('teacher and administrator have distinct login routes', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    final controller = AppController(_testApi());
+    final router = createAppRouter(controller);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+    expect(find.text('Senha de administrador'), findsNothing);
+    await tester.tap(find.text('Entrar como administrador'));
+    await tester.pumpAndSettle();
+    expect(router.routeInformationProvider.value.uri.path, '/admin/login');
+    expect(find.text('Senha de administrador'), findsOneWidget);
+    expect(find.text('Validar crachá'), findsNothing);
+    router.go('/login');
+    await tester.pumpAndSettle();
+    expect(find.text('Senha de administrador'), findsNothing);
+    expect(find.byType(TextField), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     router.dispose();
     controller.dispose();

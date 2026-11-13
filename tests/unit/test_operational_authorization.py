@@ -228,6 +228,8 @@ def test_teacher_sees_availability_but_not_full_inventory(auth_client):
     headers = teacher_headers(auth_client)
     available = auth_client.get("/tablets/available", headers=headers)
     assert available.status_code == 200
+    assert available.json() == {"available": 5, "total": 5, "tablets": []}
+    assert "asset_code" not in available.text
     full_inventory = auth_client.get("/tablets", headers=headers)
     assert full_inventory.status_code == 403
     assert auth_client.get("/tablets", headers=admin_headers(auth_client)).status_code == 200
@@ -242,3 +244,24 @@ def test_inventory_access_is_rejected_before_services(auth_client):
 
     auth_client.app.dependency_overrides[get_services] = forbidden
     assert auth_client.get("/tablets", headers=headers).status_code == 403
+
+
+def test_admin_availability_retains_asset_details(auth_client):
+    response = auth_client.get("/tablets/available", headers=admin_headers(auth_client))
+    assert response.status_code == 200
+    body = response.json()
+    assert body["available"] == 5
+    assert len(body["tablets"]) == 5
+    assert body["tablets"][0]["asset_code"].startswith("TAB-")
+
+
+def test_teacher_availability_never_loads_asset_details(auth_client, services, monkeypatch):
+    headers = teacher_headers(auth_client)
+
+    def forbidden():
+        pytest.fail("Teacher availability loaded administrative asset records")
+
+    monkeypatch.setattr(services.tablets, "list_available", forbidden)
+    response = auth_client.get("/tablets/available", headers=headers)
+    assert response.status_code == 200
+    assert response.json() == {"available": 5, "total": 5, "tablets": []}
