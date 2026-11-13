@@ -270,3 +270,5 @@ Próximos três itens:
 1. Conferir CI do head atualizado no PR #14.
 2. Revisar marca e navegação assistiva em desktop/celular.
 3. Validar jornada de crachá com cadastro/terminal autorizado no ambiente de testes.
+
+Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).

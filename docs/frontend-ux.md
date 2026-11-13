@@ -121,3 +121,5 @@ legível sobre azul; o carregamento da marca não exige rede.
 Analyze sem problemas, 17 testes existentes e build Web release aprovados com
 Flutter 3.47.8. Capturas em 1440px e 390px conferidas; prévia 8082 atualizada.
 CI do PR #14 e aceite assistivo manual pendentes. Sem alterações de autenticação.
+
+Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
