@@ -20,6 +20,7 @@ from armario_tablets.services.event_service import HardwareEventService
 from armario_tablets.services.history_service import HistoryService
 from armario_tablets.services.inventory_service import InventoryService
 from armario_tablets.services.monitoring_service import MonitoringService
+from armario_tablets.services.professor_sync_service import ProfessorSyncService
 from armario_tablets.services.return_service import ReturnService
 
 
@@ -35,6 +36,7 @@ class Services:
     cabinets: CabinetService
     professors: ProfessorRepository
     tablets: TabletRepository
+    professor_sync: ProfessorSyncService
     monitoring: MonitoringService
 
 
@@ -72,6 +74,7 @@ def build_services(
     returns = ReturnService(db, cabinets, checkouts, tablets, events, inventory)
     return Services(
         badges=badges,
+        professor_sync=ProfessorSyncService(db, professors),
         availability=AvailabilityService(tablets),
         checkout=checkout,
         returns=returns,

@@ -144,3 +144,30 @@ Próximos três itens: conferir CI/PR; validar visualmente os dois perfis; homol
 terminal e HTTPS antes de uso fora da máquina. Estado em revisão.
 
 Entradas locais: professor http://localhost:8081/#/login; administrador http://localhost:8081/#/admin/login.
+
+## J. Cadastro Google Sheets — 2026-11-12
+
+Branch feat/google-sheets-professor-sync, base 393abd4 (PR #11 pendente em main).
+Fonte confirmada pelo usuário: aba de cadastro, não campo Status de Leituras_RFID.
+Professores!A1:D exige registration,name,badge_uid,active. Importação por Bearer
+admin em POST /admin/professors/sync-google-sheets e botão Professores/Sincronizar.
+Adapter somente leitura, serviço transacional e repositório, sem nova migração.
+Google não entra no login: professor precisa de cadastro MySQL ativo e terminal
+autorizado. Sincronizar após mudar cadastro; active FALSE bloqueia próximas ações.
+Ausência de linha não exclui nem desativa; IDs/histórico preservados, conflitos
+não transferem crachás e anulam o lote. Tokens Google nunca seguem para Flutter.
+
+109 unitários Python, Ruff e format, Flutter Analyze, 12 testes e build Web
+aprovados. OAuth refresh e leitura Google com credenciais do ZIP: ambos HTTP 200.
+Credenciais privadas fora do Git; .env preservado. Fonte sem aba Professores;
+tentativa de criar só cabeçalhos via conector recusada com 403, sem mudança.
+Nenhum professor real importado. Arquivo de cabeçalho e guia em
+[google-sheets-professors.md](../google-sheets-professors.md).
+Runtime local atualizado em 8081: interface/API 200, importação anônima 401.
+Credencial privada montada somente no backend. Sem migrações; CI, MySQL local e aceite real
+pendentes. Notion não alterado. Sem merge automático ou hardware físico.
+
+Próximos três itens: proprietário criar/preencher Professores; sincronizar como
+admin e validar jornada controlada; conferir PR/CI e dependência SEC-004.
+
+Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.

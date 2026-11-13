@@ -8,6 +8,20 @@ Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
 base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
 
+## Integração de cadastro Google Sheets — 2026-11-12
+
+Branch feat/google-sheets-professor-sync, dependente da revisão SEC-004 do PR #11.
+Importação manual administrativa da aba Professores, sem usar leituras RFID como
+permissão. Atualiza cadastro MySQL por matrícula, preservando ID/histórico;
+validação estrita, idempotência e rollback de todo o lote em caso de conflito.
+Botão de sincronização na área administrativa; credenciais apenas no servidor.
+
+109 testes Python, Ruff, Flutter Analyze, 12 testes Flutter e build Web aprovados.
+Credenciais fornecidas validaram OAuth/read com HTTP 200. Criação da aba vazia foi
+recusada com 403; o proprietário precisa criar Professores e preencher os dados.
+Nenhum cadastro real importado. Sem migração; MySQL local desta revisão, CI e
+aceite real pendentes. Estado em revisão. Guia em google-sheets-professors.md.
+
 ## Revisão SEC-004 — 2026-11-12
 
 Branch `feat/SEC-004-separate-role-access`, base `origin/main` em 1d87ba0
@@ -117,3 +131,5 @@ Prioridades: revisar/integrar a cadeia de PRs com CI aprovado; homologar adaptad
 e equipamentos em sala conforme hardware-sala.md; validar requisitos restantes da
 primeira versão e proteção HTTPS para eventual acesso em rede.
 Notion não alterado. Evidência e instruções em coordination/CODEX_HANDOFF.md.
+
+Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.

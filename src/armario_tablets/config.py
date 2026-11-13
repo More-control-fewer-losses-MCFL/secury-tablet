@@ -1,6 +1,7 @@
 """Configurações lidas do ambiente / arquivo .env (nunca hardcode de senhas)."""
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -38,6 +39,11 @@ class Settings(BaseSettings):
     cors_allowed_origins: str = (
         "http://localhost:8080,http://127.0.0.1:8080,http://localhost:8502,http://127.0.0.1:8502"
     )
+    google_sheets_enabled: bool = False
+    google_sheets_spreadsheet_id: str = ""
+    google_sheets_professors_tab: str = "Professores"
+    google_sheets_token_file: Path | None = None
+    google_sheets_max_professors: int = Field(default=1000, ge=1, le=10000)
     log_level: str = "INFO"
 
     @property
