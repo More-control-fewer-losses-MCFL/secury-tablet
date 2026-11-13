@@ -2,7 +2,7 @@
 
 Pedido explícito do usuário em 2026-11-13. SEC-004: adicionar credencial individual
 sem substituir RFID/terminal supervisionado ou conceder privilégios administrativos.
-Branch feat/professor-password-login, base e08b5b1 (PR #14); estado em revisão.
+Implementação integrada à main nos PRs #14/#15 em 2026-11-13; aceite assistivo pendente.
 
 Escopo: credencial vinculada ao professor no MySQL via Alembic; cadastro/redefinição
 somente pela administração; hash com salt; login/sessão curta de professor no backend;
@@ -76,8 +76,8 @@ senha errada 401, inventário e sessão administrativa bloqueados ao professor.
 Nenhuma retirada real executada; testes de operações usam hardware simulado.
 Aviso Starlette/httpx preexistente nos testes Python permanece.
 
-CI remoto e aceite assistivo/manual completos pendentes; sem merge ou produção.
+CI dos PRs aprovado e merges em main confirmados. Aceite assistivo/manual e preparo do Render pendentes; sem publicação em produção.
 Referência de decisão: ADR 0002. Esta decisão complementa o RFID do ADR 0001,
 conforme o novo pedido explícito do usuário.
 
-Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) em rascunho para feat/professional-access-screen. Sem merge; CI a conferir.
+Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) integrado à main por [0138c06](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/0138c069661c33b341f29a30215b1922556f1852). CI pós-merge: [Actions](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions?query=branch%3Amain).

@@ -1,5 +1,41 @@
 # Estado da engenharia — Secury Tablet
 
+## Integração autorizada em main — 2026-11-13
+
+Pedido explícito do usuário: “de merge na main”. Integração funcional concluída.
+
+- PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) integrado em `main` por
+  [c7a8d3d](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c7a8d3ded48576b3e029e06df750e413ee0c3297):
+  acesso institucional, logotipo SENAI e portais professor/admin.
+- PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) teve base alterada da branch do #14 para `main`
+  e foi integrado por [0138c06](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/0138c069661c33b341f29a30215b1922556f1852):
+  credencial individual de professor e migração Alembic 0004.
+- Heads conferidos antes dos merges: e08b5b1 e 42307ea. Jobs unit, mysql, flutter
+  e docker aprovados em ambos: [CI #14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions/runs/43495926122),
+  [CI #15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions/runs/43517103551).
+- Merges explícitos com SHA esperado; sem habilitar auto-merge ou ignorar proteções.
+  Árvore final de `main` conferida igual à do head validado 42307ea.
+
+Main funcional desta integração: `0138c069661c33b341f29a30215b1922556f1852`.
+Registro documental separado, sem alteração funcional. CI pós-merge acompanhado em
+[Actions da main](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions?query=branch%3Amain); o resultado final deve ser
+conferido no head vigente, distinguindo-o do CI dos PRs e de execuções intermediárias.
+Validação local anterior: 130 unitários, 28 integrações em MySQL isolado, 24 Flutter,
+análise/build Web e Ruff aprovados; não reexecutados neste merge sem mudança de código.
+
+Clone local sincronizado por fast-forward; `.env`, segredos, dados e serviços
+preservados. Nenhum deploy, custo, importação ou comando de hardware executado.
+Conta professor.demo continua somente na demonstração local isolada; não está
+embutida no repositório nem será criada automaticamente ao hospedar. Notion não alterado.
+Aceite assistivo, homologação física e preparo do Render continuam pendentes.
+
+Próximos três itens:
+1. Preparar a configuração do Render para frontend, API e MySQL persistente.
+2. Aplicar Alembic 0004 e criar credenciais no banco hospedado quando o deploy for autorizado.
+3. Concluir aceite de teclado/leitor de tela e validação física no escopo apropriado.
+
+## Histórico anterior ao merge dos PRs #14 e #15
+
 ## Professor por usuário e senha — 2026-11-13
 
 Estado: em revisão. Branch `feat/professor-password-login`, base e08b5b1,
