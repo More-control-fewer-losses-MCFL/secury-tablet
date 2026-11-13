@@ -186,14 +186,25 @@ void main() {
       controller: controller,
     );
     try {
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Senha de administrador'), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('Senha'), findsOneWidget);
+      expect(find.text('Passe o crachá'), findsOneWidget);
+      expect(find.textContaining('Google'), findsNothing);
       expect(tester.takeException(), isNull);
 
-      router.go('/admin/login');
+      await tester.ensureVisible(find.byKey(const Key('badge-access')));
+      await tester.tap(find.byKey(const Key('badge-access')));
       await tester.pumpAndSettle();
-      expect(find.text('Acesso administrativo'), findsOneWidget);
-      expect(find.text('Senha de administrador'), findsOneWidget);
+      expect(router.routeInformationProvider.value.uri.path, '/login');
+      expect(find.text('Passe o crachá'), findsOneWidget);
+      expect(find.text('Senha'), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.text('Acessar com cadastro'));
+      await tester.tap(find.text('Acessar com cadastro'));
+      await tester.pumpAndSettle();
+      expect(router.routeInformationProvider.value.uri.path, '/admin/login');
       expect(find.byType(TextField), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     } finally {

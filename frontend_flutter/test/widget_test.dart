@@ -61,7 +61,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Identificação por RFID'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('badge-access')));
+    await tester.pumpAndSettle();
+    expect(find.text('Passe o crachá'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'AABB1234');
     await tester.tap(find.text('Validar crachá'));
     await tester.pumpAndSettle();
@@ -128,11 +130,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Entrar como administrador').first);
-    await tester.pumpAndSettle();
-    expect(find.text('Acesso administrativo'), findsOneWidget);
+    expect(find.text('Bem-vindo ao Secury Tablet'), findsOneWidget);
     await tester.enterText(find.byType(TextField).at(1), 'test-admin-password');
-    await tester.tap(find.text('Entrar como administrador').first);
+    await tester.ensureVisible(find.text('Acessar'));
+    await tester.tap(find.text('Acessar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Olá, admin'), findsOneWidget);
@@ -183,14 +184,17 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Entrar como administrador').first);
+    await tester.ensureVisible(find.text('Configurar acesso por crachá'));
+    await tester.tap(find.text('Configurar acesso por crachá'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byType(CheckboxListTile));
     await tester.tap(find.byType(CheckboxListTile));
     await tester.enterText(find.byType(TextField).at(1), 'test-password');
-    await tester.tap(find.text('Entrar como administrador').first);
+    await tester.ensureVisible(find.text('Autorizar terminal'));
+    await tester.tap(find.text('Autorizar terminal'));
     await tester.pumpAndSettle();
     expect(enrolled, true);
-    expect(find.text('Identificação por RFID'), findsOneWidget);
+    expect(find.text('Passe o crachá'), findsOneWidget);
     expect(find.text('Olá, admin'), findsNothing);
     await tester.pumpWidget(const SizedBox());
     tester.view.resetPhysicalSize();

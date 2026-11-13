@@ -7,7 +7,6 @@ import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
 import '../shell/brand_mark.dart';
-import '../shell/locker_illustration.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({required this.controller, this.adminMode = false, super.key});
@@ -110,64 +109,32 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.white,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final wide = constraints.maxWidth >= 980;
-          return Column(
+          return Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: wide ? 32 : 16,
-                  vertical: 18,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(bottom: BorderSide(color: AppTheme.border)),
-                ),
-                child: Row(
-                  children: [
-                    const Expanded(child: BrandMark()),
-                    if (wide)
-                      const Text(
-                        'SECURY TABLET  /  ACESSO SEGURO',
-                        style: TextStyle(
-                          color: AppTheme.muted,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+              if (wide) const Expanded(child: _InstitutionPanel()),
               Expanded(
-                child: SingleChildScrollView(
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  child: Center(
+                child: LayoutBuilder(
+                  builder: (context, pane) => SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1180),
+                      constraints: BoxConstraints(minHeight: pane.maxHeight),
                       child: Padding(
-                        padding: EdgeInsets.all(wide ? 40 : 16),
-                        child: wide
-                            ? Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Expanded(
-                                    flex: 6,
-                                    child: _InstitutionPanel(),
-                                  ),
-                                  const SizedBox(width: 32),
-                                  Expanded(flex: 5, child: _buildForm(context)),
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  _buildForm(context),
-                                  const SizedBox(height: 20),
-                                  const _InstitutionPanel(compact: true),
-                                ],
-                              ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: wide ? 56 : 24,
+                          vertical: wide ? 48 : 28,
+                        ),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 400),
+                            child: _buildForm(context, wide: wide),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -180,307 +147,457 @@ class _AuthPageState extends State<AuthPage> {
     ),
   );
 
-  Widget _buildForm(BuildContext context) => SectionCard(
-    padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 20 : 28),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          adminMode ? Icons.admin_panel_settings_outlined : Icons.contactless,
-          color: AppTheme.blue,
-          size: 30,
+  Widget _buildForm(BuildContext context, {required bool wide}) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      if (!wide) ...[
+        const BrandMark(compact: true),
+        const SizedBox(height: 36),
+      ],
+      Text(
+        adminMode ? 'ACESSO COM CADASTRO' : 'ACESSO POR CRACHÁ',
+        style: const TextStyle(
+          color: _accessBlue,
+          fontSize: 11,
+          letterSpacing: 1.6,
+          fontWeight: FontWeight.w700,
         ),
-        const SizedBox(height: 14),
-        Text(
-          adminMode ? 'Acesso administrativo' : 'Identificação por RFID',
-          style: Theme.of(context).textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          adminMode ? 'Acesse a gestão do armário com seu usuário e senha.' : 'Aproxime seu crachá para retirar, devolver e consultar seus tablets.',
-          style: TextStyle(color: AppTheme.muted),
-        ),
-        const SizedBox(height: 8),
-        if (adminMode) ...[
-          CheckboxListTile(
-            value: authorizeTerminal,
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Autorizar este terminal e voltar ao RFID'),
-            onChanged: loading
-                ? null
-                : (value) => setState(() => authorizeTerminal = value ?? false),
+      ),
+      const SizedBox(height: 12),
+      Semantics(
+        header: true,
+        child: Text(
+          adminMode ? 'Bem-vindo ao Secury Tablet' : 'Passe o crachá',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            height: 1.25,
+            letterSpacing: -.6,
           ),
-          TextField(
-            controller: adminUsernameController,
-            autofillHints: const [AutofillHints.username],
-            enabled: !loading,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Usuário',
-              prefixIcon: Icon(Icons.person_outline),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: adminPasswordController,
-            enabled: !loading,
-            autofillHints: const [AutofillHints.password],
-            obscureText: !passwordVisible,
-            onSubmitted: (_) => _loginAdmin(),
-            textInputAction: TextInputAction.go,
-            decoration: InputDecoration(
-              labelText: 'Senha de administrador',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                tooltip: passwordVisible ? 'Ocultar senha' : 'Mostrar senha',
-                onPressed: loading
-                    ? null
-                    : () => setState(() => passwordVisible = !passwordVisible),
-                icon: Icon(
-                  passwordVisible
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+        ),
+      ),
+      const SizedBox(height: 10),
+      Text(
+        adminMode
+            ? 'Entre com seu usuário e senha para acessar a gestão de tablets.'
+            : 'Aproxime seu crachá do leitor para acessar seus tablets.',
+        style: const TextStyle(color: AppTheme.muted, height: 1.6),
+      ),
+      const SizedBox(height: 28),
+      if (adminMode)
+        AutofillGroup(
+          child: Column(
+            children: [
+              TextField(
+                controller: adminUsernameController,
+                autofillHints: const [AutofillHints.username],
+                autocorrect: false,
+                enableSuggestions: false,
+                enabled: !loading,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'Usuário',
+                  hintText: 'Informe seu usuário',
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
               ),
-            ),
-          ),
-        ] else ...[
-          TextField(
-            controller: badgeController,
-            autocorrect: false,
-            enableSuggestions: false,
-            autofocus: true,
-            enabled: !loading,
-            onSubmitted: (_) => _identify(),
-            textInputAction: TextInputAction.go,
-            decoration: const InputDecoration(
-              labelText: 'Leitura do crachá',
-              hintText: 'Aproxime seu crachá',
-              prefixIcon: Icon(Icons.rss_feed),
-            ),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Após a leitura, pressione Enter ou selecione Validar crachá. '
-            'No primeiro uso, solicite a autorização deste terminal à administração.',
-            style: TextStyle(color: AppTheme.muted, fontSize: 12),
-          ),
-        ],
-        const SizedBox(height: 18),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: loading
-                ? null
-                : adminMode
-                ? _loginAdmin
-                : _identify,
-            icon: loading
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
+              const SizedBox(height: 20),
+              TextField(
+                controller: adminPasswordController,
+                enabled: !loading,
+                autofillHints: const [AutofillHints.password],
+                obscureText: !passwordVisible,
+                onSubmitted: (_) => _loginAdmin(),
+                textInputAction: TextInputAction.go,
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  hintText: 'Informe sua senha',
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: IconButton(
+                    tooltip: passwordVisible
+                        ? 'Ocultar senha'
+                        : 'Mostrar senha',
+                    onPressed: loading
+                        ? null
+                        : () => setState(
+                            () => passwordVisible = !passwordVisible,
+                          ),
+                    icon: Icon(
+                      passwordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
-                  )
-                : const Icon(Icons.verified_user_outlined),
-            label: Text(
-              loading
-                  ? adminMode
-                        ? 'Validando acesso…'
-                        : 'Validando cadastro…'
-                  : adminMode
-                  ? 'Entrar como administrador'
-                  : 'Validar crachá',
-            ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      else ...[
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: _accessBlue.withValues(alpha: .05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _accessBlue.withValues(alpha: .16)),
+          ),
+          child: const Column(
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.contactless_outlined,
+                  size: 52,
+                  color: _accessBlue,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'Aproxime do leitor',
+                style: TextStyle(
+                  color: AppTheme.navy,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Retire, devolva e acompanhe seus tablets.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppTheme.muted, fontSize: 13),
+              ),
+            ],
           ),
         ),
-        Center(
-          child: TextButton(
-            onPressed: loading
-                ? null
-                : () => context.go(adminMode ? '/login' : '/admin/login'),
-            child: Text(
-              adminMode
-                  ? 'Voltar ao acesso por RFID'
-                  : 'Entrar como administrador',
-            ),
+        const SizedBox(height: 24),
+        TextField(
+          controller: badgeController,
+          autocorrect: false,
+          enableSuggestions: false,
+          autofocus: true,
+          enabled: !loading,
+          onSubmitted: (_) => _identify(),
+          textInputAction: TextInputAction.go,
+          decoration: const InputDecoration(
+            labelText: 'Leitura do crachá',
+            hintText: 'Aguardando leitura',
+            prefixIcon: Icon(Icons.badge_outlined),
           ),
         ),
-        const SizedBox(height: 8),
-        if (error != null) ...[
-          const SizedBox(height: 16),
-          StateMessage(
+        const SizedBox(height: 10),
+        const Text(
+          'Após a leitura, pressione Enter ou selecione Validar crachá.',
+          style: TextStyle(color: AppTheme.muted, fontSize: 12),
+        ),
+      ],
+      if (error != null) ...[
+        const SizedBox(height: 12),
+        Semantics(
+          liveRegion: true,
+          child: StateMessage(
             message: error!,
             icon: Icons.error_outline,
             color: AppTheme.danger,
           ),
-        ],
-        if (!adminMode && identified != null) ...[
-          const SizedBox(height: 16),
-          StateMessage(
-            message: 'Crachá identificado: ${identified!.name}',
-            icon: Icons.check_circle_outline,
-            color: AppTheme.success,
+        ),
+      ],
+      const SizedBox(height: 20),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: _accessBlue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
-        ],
-        Align(
-          alignment: Alignment.centerLeft,
-          child: StatusPill(
-            checkingApi
-                ? 'Verificando conexão'
-                : health == null
-                ? 'Sistema indisponível'
-                : 'Sistema disponível',
-            color: checkingApi
-                ? AppTheme.warning
-                : health == null
-                ? AppTheme.danger
-                : AppTheme.success,
+          onPressed: loading
+              ? null
+              : adminMode
+              ? _loginAdmin
+              : _identify,
+          child: loading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  adminMode
+                      ? authorizeTerminal
+                            ? 'Autorizar terminal'
+                            : 'Acessar'
+                      : 'Validar crachá',
+                ),
+        ),
+      ),
+      const SizedBox(height: 24),
+      const Divider(height: 1),
+      const SizedBox(height: 24),
+      if (adminMode)
+        _BadgePrompt(onTap: loading ? null : () => context.go('/login'))
+      else
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: loading ? null : () => context.go('/admin/login'),
+            icon: const Icon(Icons.person_outline),
+            label: const Text('Acessar com cadastro'),
           ),
         ),
-        const SizedBox(height: 16),
+      const SizedBox(height: 20),
+      Text(
+        adminMode
+            ? 'Precisa de um cadastro ou esqueceu a senha? Procure a administração.'
+            : 'Primeiro acesso? Solicite à administração a autorização deste terminal.',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppTheme.muted,
+          fontSize: 12,
+          height: 1.6,
+        ),
+      ),
+      const SizedBox(height: 20),
+      Center(
+        child: StatusPill(
+          checkingApi
+              ? 'Verificando conexão'
+              : health == null
+              ? 'Sistema indisponível'
+              : 'Sistema disponível',
+          color: checkingApi
+              ? AppTheme.warning
+              : health == null
+              ? AppTheme.danger
+              : AppTheme.success,
+        ),
+      ),
+      const SizedBox(height: 12),
+      if (adminMode)
         ExpansionTile(
           tilePadding: EdgeInsets.zero,
-          childrenPadding: const EdgeInsets.only(bottom: 12),
           title: const Text(
-            'Como funciona o acesso por crachá',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            'Configurar acesso por crachá',
+            style: TextStyle(color: AppTheme.muted, fontSize: 12),
           ),
           children: [
-            const Text(
-              'O acesso por RFID exige um terminal autorizado pela administração. '
-              'O crachá identifica o cadastro; um UID copiado ainda pode ser usado neste terminal. '
-              'No primeiro uso, entre como administrador e marque a autorização do terminal.',
-              style: TextStyle(color: AppTheme.warning, fontSize: 12),
+            CheckboxListTile(
+              value: authorizeTerminal,
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Autorizar este terminal e voltar ao RFID'),
+              onChanged: loading
+                  ? null
+                  : (value) =>
+                        setState(() => authorizeTerminal = value ?? false),
+            ),
+          ],
+        )
+      else
+        const Text(
+          'O crachá identifica seu cadastro. O acesso depende de um terminal autorizado.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppTheme.muted, fontSize: 12, height: 1.6),
+        ),
+    ],
+  );
+}
+
+const _accessBlue = Color(0xFF075DA8);
+
+class _BadgePrompt extends StatelessWidget {
+  const _BadgePrompt({required this.onTap});
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: const Color(0xFFF2F7FC),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: const BorderSide(color: Color(0xFFD8E5F2)),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: InkWell(
+      key: const Key('badge-access'),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            const ExcludeSemantics(
+              child: Icon(
+                Icons.contactless_outlined,
+                color: _accessBlue,
+                size: 36,
+              ),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Passe o crachá',
+                    style: TextStyle(
+                      color: AppTheme.navy,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Acesso para professores pelo leitor.',
+                    style: TextStyle(
+                      color: AppTheme.muted,
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const ExcludeSemantics(
+              child: Icon(Icons.arrow_forward, color: _accessBlue, size: 20),
             ),
           ],
         ),
-      ],
+      ),
     ),
   );
 }
 
 class _InstitutionPanel extends StatelessWidget {
-  const _InstitutionPanel({this.compact = false});
-  final bool compact;
+  const _InstitutionPanel();
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(compact ? 24 : 32),
-    decoration: BoxDecoration(
-      color: AppTheme.navy,
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'SEU ARMÁRIO DE TABLETS',
-          style: TextStyle(
-            color: Color(0xFFBDCEE8),
-            fontSize: 12,
-            letterSpacing: 1,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Text(
-          'Retire com facilidade.\nDevolva com segurança.',
-          style: Theme.of(context).textTheme.headlineMedium
-              ?.copyWith(color: Colors.white),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'Um acesso para cada perfil e o registro de cada movimentação.',
-          style: TextStyle(color: Color(0xFFDDE7F5), fontSize: 16, height: 1.5),
-        ),
-        if (!compact) ...[
-          const SizedBox(height: 24),
-          Center(
-            child: Semantics(
-              image: true,
-              label: 'Armário com compartimentos individuais para tablets',
-              child: const ExcludeSemantics(
-                child: SizedBox(
-                  width: 210,
-                  height: 180,
-                  child: LockerIllustration(light: true),
-                ),
+  Widget build(BuildContext context) => ColoredBox(
+    color: _accessBlue,
+    child: CustomPaint(
+      painter: const _AccessBackdrop(),
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight > 680
+                  ? constraints.maxHeight
+                  : 680,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(56),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const BrandMark(inverted: true),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 64),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'TECNOLOGIA A SERVIÇO DA EDUCAÇÃO',
+                          style: TextStyle(
+                            color: Color(0xFFD3E7FA),
+                            fontSize: 11,
+                            letterSpacing: 1.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Seus tablets.\nSempre em\nboas mãos.',
+                          style: Theme.of(context).textTheme.displaySmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontSize: 48,
+                                fontWeight: FontWeight.w700,
+                                height: 1.15,
+                                letterSpacing: -1.4,
+                              ),
+                        ),
+                        const SizedBox(height: 24),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 360),
+                          child: const Text(
+                            'Mais praticidade para retirar, devolver e acompanhar '
+                            'os tablets da sua instituição.',
+                            style: TextStyle(
+                              color: Color(0xFFE1EEFA),
+                              fontSize: 16,
+                              height: 1.7,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Divider(color: Color(0xFF6C9FCB)),
+                      SizedBox(height: 12),
+                      Text(
+                        'SECURY TABLET',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.8,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Controle e cuidado em cada movimentação.',
+                        style: TextStyle(
+                          color: Color(0xFFD3E7FA),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-        const SizedBox(height: 24),
-        const _AccessStep(
-          icon: Icons.contactless_outlined,
-          title: '1. Identifique-se',
-          detail: 'Use seu crachá no terminal autorizado.',
         ),
-        const SizedBox(height: 18),
-        const _AccessStep(
-          icon: Icons.tablet_android_outlined,
-          title: '2. Escolha sua operação',
-          detail: 'Solicite uma retirada ou registre uma devolução.',
-        ),
-        const SizedBox(height: 18),
-        const _AccessStep(
-          icon: Icons.fact_check_outlined,
-          title: '3. Confira a confirmação',
-          detail: 'Acompanhe os tablets confirmados e suas pendências.',
-        ),
-      ],
+      ),
     ),
   );
 }
 
-class _AccessStep extends StatelessWidget {
-  const _AccessStep({
-    required this.icon,
-    required this.title,
-    required this.detail,
-  });
-  final IconData icon;
-  final String title;
-  final String detail;
+class _AccessBackdrop extends CustomPainter {
+  const _AccessBackdrop();
+
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      ExcludeSemantics(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.white, size: 22),
-        ),
-      ),
-      const SizedBox(width: 14),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              detail,
-              style: const TextStyle(color: Color(0xFFDDE7F5), height: 1.5),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    final wave = Path()
+      ..moveTo(size.width * .1, 0)
+      ..cubicTo(
+        size.width * .5,
+        size.height * .25,
+        size.width * .95,
+        -size.height * .1,
+        size.width,
+        size.height * .3,
+      )
+      ..lineTo(size.width, 0)
+      ..close();
+    canvas.drawPath(wave, Paint()..color = Colors.white.withValues(alpha: .06));
+    final rings = Paint()
+      ..color = Colors.white.withValues(alpha: .055)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 48;
+    final center = Offset(-size.width * .18, size.height * 1.03);
+    canvas.drawCircle(center, size.width * .48, rings);
+    canvas.drawCircle(center, size.width * .7, rings);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_AccessBackdrop oldDelegate) => false;
 }

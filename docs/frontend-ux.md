@@ -70,3 +70,36 @@ não são adicionados ao Git. Nenhum teste real de hardware, importação de cad
 ou alteração em banco foi executado por esta revisão de interface.
 
 Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
+
+## Tela de acesso institucional — 2026-11-13
+
+Escopo SEC-004: aplicar a referência visual de acesso, com painel azul institucional
+ocupando metade do desktop, grafismos nativos e formulário branco centralizado.
+Entrada inicial em `/#/admin/login` com usuário/senha do cadastro administrativo
+existente e área clicável “Passe o crachá” para `/#/login`, destinada a professores.
+O celular mostra marca compacta e formulário, sem painel institucional alto.
+Não há autenticação Google nem autocadastro/senha de professor implementados.
+Cadastro e recuperação de senha são orientados à administração, sem links fictícios.
+RFID continua usando o serviço existente e exige terminal autorizado/cadastro ativo.
+A autorização do terminal fica em “Configurar acesso por crachá”, com a credencial
+administrativa e retorno ao RFID sem manter sessão de administrador.
+
+Critérios BDD:
+
+- Dado visitante, ao abrir o app, vê usuário/senha, “Acessar” e “Passe o crachá”.
+- Dado cadastro administrativo válido, ao acessar, a API confirma a sessão antes do painel.
+- Ao selecionar “Passe o crachá”, abre o leitor; Enter ou “Validar crachá” usa a API.
+- Dado terminal sem autorização ou crachá inválido, o erro mantém o visitante no acesso.
+- Ao autorizar terminal com credenciais administrativas, volta ao leitor sem sessão admin.
+- Em 360px com texto 1,5x e desktop, campos e troca de acesso continuam utilizáveis.
+
+Validação local: Flutter 3.47.8/Dart 3.13.7 em Docker, analyze sem problemas,
+17 testes Flutter aprovados e build Web release concluído. 109 testes unitários
+Python aprovados com `.venv/Scripts/python.exe`; aviso Starlette/httpx preexistente.
+`git diff --check` aprovado. Sem Python alterado: Ruff não se aplica ao diff.
+Integração MySQL não executada nesta alteração de interface.
+Capturas desktop/crachá em 1440px e celular real em 390px conferidas no Chrome
+headless com perfil isolado; testes cobrem 360px/texto 1,5x e fluxos em 1440px.
+Prévia local separada em http://localhost:8082; página/healthz e API health HTTP 200.
+Build e capturas temporários fora do Git. Não houve login com credenciais reais.
+Aceite assistivo manual e CI remoto pendentes: estado em revisão.

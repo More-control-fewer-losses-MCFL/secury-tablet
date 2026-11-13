@@ -1,5 +1,7 @@
 # Handoff Codex → ChatGPT
 
+Atualização mais recente: seção M, 2026-11-13 — tela de acesso institucional.
+
 ## A. Identificação
 
 Data: 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
@@ -215,3 +217,30 @@ bypassar proteção da branch. Permissão para merge se limita ao pedido atual.
 Próximos três itens: integrar a cadeia com CI aprovado; conferir main e sincronizar
 clone local sem reset; proprietário criar cadastro Sheets e executar aceite real.
 Notion não alterado. Hardware simulado, nenhum cadastro real importado.
+
+## M. Tela de acesso institucional — 2026-11-13
+
+Estado: em revisão. Branch `feat/professional-access-screen`, base `main`
+`8716f5c557dcf6902c73d45cc3b79d18efcd22e7`, confirmada no remoto nesta sessão.
+Clone selecionado: raiz do workspace; clone aninhado não encontrado nesta sessão.
+SEC-004: acesso com cadastro administrativo em destaque, painel azul/branco inspirado
+na referência e área “Passe o crachá” para o fluxo de professor. Sem acesso Google.
+Backend, sessão assinada, autorização do terminal e perfis preservados.
+Detalhes/BDD: [frontend-ux.md](../frontend-ux.md).
+Validação local: Flutter 3.47.8/Dart 3.13.7 em Docker, analyze sem problemas,
+17 testes Flutter aprovados e build Web release concluído. 109 testes unitários
+Python aprovados com `.venv/Scripts/python.exe`; aviso Starlette/httpx preexistente.
+`git diff --check` aprovado. Sem Python alterado: Ruff não se aplica ao diff.
+Integração MySQL não executada nesta alteração de interface.
+Capturas desktop/crachá em 1440px e celular real em 390px conferidas no Chrome
+headless com perfil isolado; testes cobrem 360px/texto 1,5x e fluxos em 1440px.
+Prévia local separada em http://localhost:8082; página/healthz e API health HTTP 200.
+Build e capturas temporários fora do Git. Não houve login com credenciais reais.
+Aceite assistivo manual e CI remoto pendentes: estado em revisão.
+Commit/PR: a publicar. Sem deploy em produção ou merge.
+Sem alteração de banco, `.env`, credenciais reais ou hardware. Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI e revisar PR para main, sem merge automático.
+2. Realizar aceite assistivo manual de teclado/leitor de tela.
+3. Validar jornada de cadastro/crachá em terminal autorizado; hardware segue simulado.
