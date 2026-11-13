@@ -56,8 +56,8 @@ class _ReturnsPageState extends State<ReturnsPage> {
       builder: (context) => AlertDialog(
         title: Text('Confirmar devolução #${row.sessionId}'),
         content: const Text(
-          'A API solicitará a leitura do inventário ao leitor RFID configurado. '
-          'Nenhuma etiqueta será simulada pelo navegador.',
+          'Os tablets devolvidos serão conferidos pelo inventário. '
+          'Itens não identificados continuarão pendentes nesta solicitação.',
         ),
         actions: [
           TextButton(
@@ -104,10 +104,15 @@ class _ReturnsPageState extends State<ReturnsPage> {
     children: [
       PageHeading(
         'Registrar devolução',
-        'Solicitações em aberto carregadas do histórico da API.',
+        widget.controller.isAdmin
+            ? 'Acompanhe as solicitações pendentes e registre os tablets devolvidos.'
+            : 'Confira suas solicitações pendentes e registre os tablets devolvidos.',
       ),
       if (error != null) ...[
-        Text(error!, style: const TextStyle(color: AppTheme.danger)),
+        Semantics(
+          liveRegion: true,
+          child: Text(error!, style: const TextStyle(color: AppTheme.danger)),
+        ),
         const SizedBox(height: 12),
       ],
       if (result != null) ...[
@@ -115,7 +120,7 @@ class _ReturnsPageState extends State<ReturnsPage> {
           child: StateMessage(
             message:
                 result!.divergence ??
-                'Conciliação confirmada pela API: ${result!.status}.',
+                'Devolução registrada: ${sessionStatusLabel(result!.status)}.',
             icon: result!.divergence == null
                 ? Icons.check_circle_outline
                 : Icons.warning_amber_outlined,
@@ -155,31 +160,12 @@ class _ReturnsPageState extends State<ReturnsPage> {
                   'Pendentes (${rows.length})',
                   action: IconButton(
                     onPressed: _reload,
-                    tooltip: 'Atualizar',
+                    tooltip: 'Atualizar devoluções',
                     icon: const Icon(Icons.refresh),
                   ),
                 ),
                 const Divider(height: 24),
-                ...rows.map(
-                  (row) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.assignment_return_outlined,
-                      color: AppTheme.blue,
-                    ),
-                    title: Text(row.professorName),
-                    subtitle: Text(
-                      'Solicitação #${row.sessionId} · '
-                      'Retirados ${row.takenQuantity} · Pendentes ${row.pendingQuantity}\n'
-                      '${formatDateTime(row.startedAt)} · ${row.purpose}',
-                    ),
-                    isThreeLine: true,
-                    trailing: FilledButton(
-                      onPressed: submitting ? null : () => _reconcile(row),
-                      child: const Text('Ler devolução'),
-                    ),
-                  ),
-                ),
+                for (final row in rows) _pendingSession(context, row),
               ],
             ),
           );
@@ -189,11 +175,89 @@ class _ReturnsPageState extends State<ReturnsPage> {
       const SectionCard(
         child: StateMessage(
           message:
-              'A rota de devolução depende do leitor de inventário configurado no backend. '
-              'Se o hardware não estiver disponível, a API rejeitará a operação; o app não marcará a devolução como concluída.',
+              'Somente os tablets identificados na conferência são registrados como devolvidos. '
+              'Se houver itens faltando ou falha na leitura, as pendências serão preservadas.',
           icon: Icons.info_outline,
         ),
       ),
     ],
+  );
+
+  Widget _pendingSession(BuildContext context, HistoryRow row) => Padding(
+    padding: const EdgeInsets.only(bottom: 16),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppTheme.border),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.assignment_return_outlined,
+                  color: AppTheme.blue,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        row.professorName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Solicitação #${row.sessionId} · ${formatDateTime(row.startedAt)}',
+                        style: const TextStyle(color: AppTheme.muted),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(row.purpose),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                StatusPill(
+                  '${row.pendingQuantity} pendentes',
+                  color: AppTheme.warning,
+                ),
+                Text('${row.takenQuantity} retirados'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: submitting ? null : () => _reconcile(row),
+              icon: reconciling.contains(row.sessionId)
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.assignment_return_outlined),
+              label: Text(
+                reconciling.contains(row.sessionId)
+                    ? 'Conferindo devolução…'
+                    : 'Ler devolução',
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
   );
 }

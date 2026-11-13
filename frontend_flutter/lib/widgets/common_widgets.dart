@@ -25,17 +25,31 @@ class SectionTitle extends StatelessWidget {
   final Widget? action;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Expanded(
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final titleWidget = Semantics(
+        header: true,
         child: Text(
           title,
           style: Theme.of(context).textTheme.titleMedium
               ?.copyWith(fontWeight: FontWeight.w700),
         ),
-      ),
-      ?action,
-    ],
+      );
+      if (action != null &&
+          (constraints.maxWidth < 480 ||
+              MediaQuery.textScalerOf(context).scale(1) > 1.3)) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [titleWidget, const SizedBox(height: 8), action!],
+        );
+      }
+      return Row(
+        children: [
+          Expanded(child: titleWidget),
+          if (action != null) ...[const SizedBox(width: 12), action!],
+        ],
+      );
+    },
   );
 }
 
@@ -73,26 +87,26 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.10),
-      borderRadius: BorderRadius.circular(20),
+      color: color.withValues(alpha: .08),
+      border: Border.all(color: color.withValues(alpha: .18)),
+      borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
+        ExcludeSemantics(child: Icon(Icons.circle, size: 7, color: color)),
         const SizedBox(width: 7),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              height: 1.4,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -112,10 +126,9 @@ class PageHeading extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w700),
+        Semantics(
+          header: true,
+          child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
         ),
         const SizedBox(height: 5),
         Text(subtitle, style: const TextStyle(color: AppTheme.muted)),
@@ -134,10 +147,13 @@ class ErrorPanel extends StatelessWidget {
   Widget build(BuildContext context) => SectionCard(
     child: Column(
       children: [
-        StateMessage(
-          message: message,
-          icon: Icons.cloud_off_outlined,
-          color: AppTheme.danger,
+        Semantics(
+          liveRegion: true,
+          child: StateMessage(
+            message: message,
+            icon: Icons.cloud_off_outlined,
+            color: AppTheme.danger,
+          ),
         ),
         if (onRetry != null)
           OutlinedButton.icon(

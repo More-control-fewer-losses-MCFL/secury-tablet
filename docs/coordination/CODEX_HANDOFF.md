@@ -171,3 +171,47 @@ Próximos três itens: proprietário criar/preencher Professores; sincronizar co
 admin e validar jornada controlada; conferir PR/CI e dependência SEC-004.
 
 Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho sobre a branch do PR #11. Credenciais privadas não versionadas; aba e CI pendentes, sem merge.
+
+## K. Interface Flutter — 2026-11-12
+
+Branch feat/frontend-clarity-accessibility sobre 827b326, dependente do PR #12.
+Tema com tipografia/espaçamento/contraste consistentes; componentes se adaptam a
+texto ampliado. Login móvel começa pelo formulário e mantém orientação de RFID;
+menu por finalidade/perfil, atalhos móveis e drawer funcional. Conta professor
+não oferece Configurações; notificação admin abre alertas. Dashboard tem métricas
+reais e histórico recente; formulários/cartões de retirada, devolução, totem e
+consulta fluem em tela estreita. A lista de patrimônio omitida do professor não
+é confundida com estoque vazio. Handlers/API/permissões/diálogos preservados.
+
+17 testes Flutter aprovados; Analyze sem problemas, build Web concluído com SDK
+3.47.8 em Docker. Novos cenários em 360/1440px e texto1,5x; contraste >=4.5 para
+rótulos/status; cancelamentos não enviam POST de negócio. Três prévias renderizadas
+inspecionadas (dados fictícios; imagens temporárias fora do Git). Ilustração
+LockerIllustration e ícones Material reutilizados; nenhuma dependência adicionada.
+Sem alteração de Python/schema, escrita em dados reais ou hardware físico.
+CI e avaliação com leitor de tela/teclado reais pendentes; estado em revisão.
+Runtime local atualizado em 8081, sem reiniciar API/MySQL. Página, health e bootstrap HTTP 200. Guia frontend-ux.md.
+Notion não alterado. PR a publicar, sem merge automático.
+
+Próximos três itens: conferir PR/CI e dependências; aceite assistivo manual;
+proprietário preencher a aba de cadastro e validar jornada real controlada.
+
+Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
+
+## L. Merge autorizado — 2026-11-12
+
+Pedido explícito do usuário: fazer merge para main. Workspace limpo, sem mexer
+no .env, dados ou serviços. PRs #11 -> #12 -> #13 dependentes e sem conflitos.
+Antes de integrar, os CIs falharam apenas no analyze: stable instalou Flutter
+3.50.0, diferente do SDK 3.47.8 validado no Docker/local. Python e MySQL passaram.
+Ajuste mínimo: flutter-version 3.47.8 no workflow; sem silenciar deprecateds ou
+migrar a arquitetura durante o merge. Fixes nas branches de acesso e Sheets
+foram publicados; aguardando checks completos. Conferir heads antes de merge.
+
+Preparação registrada antes da integração final. Confirmar PRs/commits no GitHub
+e separar sucesso dos PRs de execução pós-merge. Não habilitar auto-merge nem
+bypassar proteção da branch. Permissão para merge se limita ao pedido atual.
+
+Próximos três itens: integrar a cadeia com CI aprovado; conferir main e sincronizar
+clone local sem reset; proprietário criar cadastro Sheets e executar aceite real.
+Notion não alterado. Hardware simulado, nenhum cadastro real importado.

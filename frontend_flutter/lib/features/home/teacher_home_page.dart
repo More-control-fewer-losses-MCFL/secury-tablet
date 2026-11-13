@@ -8,7 +8,7 @@ import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
 
-/// Self-service landing page; the server only returns this teacher's history.
+/// Personal self-service overview. Ownership remains enforced by the API.
 class TeacherHomePage extends StatefulWidget {
   const TeacherHomePage({required this.controller, super.key});
   final AppController controller;
@@ -44,11 +44,22 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      PageHeading(
-        'Olá, ${widget.controller.displayName}',
-        'Seu painel de retiradas e devoluções de tablets.',
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: PageHeading(
+              'Olá, ${widget.controller.displayName}',
+              'Retire, devolva e acompanhe seus tablets em um só lugar.',
+            ),
+          ),
+          IconButton(
+            tooltip: 'Atualizar meus dados',
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
-      const SizedBox(height: 16),
       FutureBuilder<({Availability availability, HistoryResultPage history})>(
         future: data,
         builder: (context, snapshot) {
@@ -72,33 +83,87 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SectionTitle('Disponíveis agora'),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${result.availability.available} de ${result.availability.total} tablets',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FilledButton.icon(
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.paleBlue,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.tablet_android_outlined,
+                            color: AppTheme.blue,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SectionTitle('Disponíveis agora'),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${result.availability.available}',
+                                style: Theme.of(context).textTheme.displaySmall
+                                    ?.copyWith(
+                                      color: AppTheme.navy,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                              ),
+                              Text(
+                                'de ${result.availability.total} tablets cadastrados',
+                                style: const TextStyle(color: AppTheme.muted),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      result.availability.available == 0
+                          ? 'Nenhum tablet disponível neste momento. Você ainda pode devolver tablets ou consultar seu histórico.'
+                          : 'Escolha uma ação para começar. As movimentações são confirmadas após a conferência dos tablets.',
+                    ),
+                    const SizedBox(height: 20),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final withdraw = FilledButton.icon(
                           onPressed: () => context.go('/movements'),
                           icon: const Icon(Icons.output_outlined),
                           label: const Text('Retirar tablets'),
-                        ),
-                        OutlinedButton.icon(
+                        );
+                        final giveBack = OutlinedButton.icon(
                           onPressed: () => context.go('/returns'),
                           icon: const Icon(Icons.assignment_return_outlined),
                           label: const Text('Devolver tablets'),
-                        ),
-                      ],
+                        );
+                        if (constraints.maxWidth >= 560) {
+                          return Row(
+                            children: [
+                              Expanded(child: withdraw),
+                              const SizedBox(width: 12),
+                              Expanded(child: giveBack),
+                            ],
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            withdraw,
+                            const SizedBox(height: 12),
+                            giveBack,
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,25 +175,22 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                         child: const Text('Ver histórico'),
                       ),
                     ),
+                    const SizedBox(height: 8),
                     if (result.history.rows.isEmpty)
                       const StateMessage(
-                        message:
-                            'Você ainda não tem movimentações registradas.',
-                        icon: Icons.receipt_long_outlined,
+                        message: 'Você ainda não tem movimentações registradas.\nSua próxima retirada aparecerá aqui.',
+                        icon: Icons.history_outlined,
                       )
                     else
-                      ...result.history.rows.map(
-                        (row) => ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(
-                            Icons.history,
-                            color: AppTheme.blue,
-                          ),
-                          title: Text(row.purpose),
-                          subtitle: Text(formatDateTime(row.startedAt)),
-                          trailing: Text(sessionStatusLabel(row.status)),
-                        ),
-                      ),
+                      for (
+                        var index = 0;
+                        index < result.history.rows.length;
+                        index++
+                      ) ...[
+                        _PersonalMovement(result.history.rows[index]),
+                        if (index < result.history.rows.length - 1)
+                          const Divider(height: 24),
+                      ],
                   ],
                 ),
               ),
@@ -137,5 +199,48 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
         },
       ),
     ],
+  );
+}
+
+class _PersonalMovement extends StatelessWidget {
+  const _PersonalMovement(this.row);
+
+  final HistoryRow row;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: Icon(Icons.tablet_android_outlined, color: AppTheme.blue),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                row.purpose,
+                style: Theme.of(context).textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                formatDateTime(row.startedAt),
+                style: const TextStyle(color: AppTheme.muted),
+              ),
+              const SizedBox(height: 10),
+              StatusPill(
+                sessionStatusLabel(row.status),
+                color: sessionStatusColor(row.status),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
 }
