@@ -303,3 +303,5 @@ Próximos três itens:
 1. Conferir CI do PR #14 no head publicado e revisar para main.
 2. Realizar aceite manual de teclado/leitor de tela e confirmar as cores por perfil.
 3. Validar jornada real controlada de cadastro/terminal, mantendo hardware simulado.
+
+Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.

@@ -258,3 +258,5 @@ Integração Google Sheets: commit 66cf422; PR [#12](https://github.com/More-con
 Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
 
 Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
+
+Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.

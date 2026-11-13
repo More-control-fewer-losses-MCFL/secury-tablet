@@ -149,3 +149,5 @@ BDD:
 
 Analyze sem problemas; 20 testes Flutter, contraste, quatro prévias com fixtures e
 build Web release aprovados. Prévia 8082 atualizada; CI e aceite assistivo pendentes.
+
+Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.
