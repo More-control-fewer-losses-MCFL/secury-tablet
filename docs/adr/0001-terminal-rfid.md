@@ -18,3 +18,5 @@ Consequências: preserva leitura simples para professores; requer preparação i
 do terminal por admin. Não impede impersonação com crachá clonado no terminal
 supervisionado. Login visual não concede autorização; backend aplica ownership.
 Implantação fora do loopback requer HTTPS e revisão do modelo de ameaça.
+
+Complemento autorizado em 2026-11-13: [ADR 0002](0002-professor-password-login.md) adiciona login individual por usuário/senha. A restrição a não adicionar senha implicitamente permanece atendida pelo pedido explícito; o modo RFID mantém esta decisão.

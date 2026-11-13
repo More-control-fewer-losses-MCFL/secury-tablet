@@ -13,19 +13,26 @@ router = APIRouter(tags=["retirada"], dependencies=[Depends(require_principal)])
 
 def authorize_checkout(
     body: CheckoutRequestIn, principal: Principal = Depends(require_principal)
-) -> None:
-    if principal.role != "admin" and body.badge_uid != principal.badge_uid:
+) -> str:
+    if principal.role == "admin":
+        if body.badge_uid is None:
+            raise HTTPException(
+                422, "Informe o crachá do professor para a operação administrativa."
+            )
+        return body.badge_uid
+    if body.badge_uid is not None and body.badge_uid != principal.badge_uid:
         raise HTTPException(403, "Não é permitido solicitar em nome de outro professor.")
+    return principal.badge_uid
 
 
 @router.post(
     "/checkout-requests",
     response_model=CheckoutOut,
     status_code=201,
-    dependencies=[Depends(authorize_checkout)],
 )
 def create_checkout_request(
     body: CheckoutRequestIn,
+    badge_uid: str = Depends(authorize_checkout),
     services: Services = Depends(get_services),
     settings: Settings = Depends(get_settings),
 ) -> CheckoutOut:
@@ -35,7 +42,7 @@ def create_checkout_request(
     via POST /hardware/events (INVENTORY_AFTER_CHECKOUT).
     """
     return services.checkout.request_checkout(
-        body.badge_uid, body.quantity, body.purpose, body.class_name, settings.cabinet_code
+        badge_uid, body.quantity, body.purpose, body.class_name, settings.cabinet_code
     )
 
 

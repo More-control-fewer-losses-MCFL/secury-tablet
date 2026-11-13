@@ -18,7 +18,8 @@ Com Docker Desktop ativo, execute `.\scripts\start_local.ps1` na raiz.
 Abra http://localhost:8080. O script preserva .env existente e sobe Flutter Web,
 API, migrações e MySQL. Use `-Demo` apenas para criar dados falsos.
 Veja [guia Docker](docs/docker.md) e [homologação em sala](docs/hardware-sala.md).
-O acesso de professores continua somente RFID, em terminal autorizado pelo admin.
+Professores podem entrar com usuário/senha individual ou RFID em terminal autorizado.
+A administração cria/redefine credenciais; veja [o guia de acesso](docs/professor-password-login.md).
 
 ## O que você precisa ter instalado (Windows)
 

@@ -1,5 +1,34 @@
 # Estado da engenharia — Secury Tablet
 
+## Professor por usuário e senha — 2026-11-13
+
+Estado: em revisão. Branch `feat/professor-password-login`, base e08b5b1,
+dependente do PR #14 (`feat/professional-access-screen`), main remota 8716f5c.
+Pedido explícito do usuário autoriza senha individual; ADR 0002 complementa RFID.
+Login verde de professor, credencial gerenciada pelo admin, sessão assinada revogável
+por redefinição e sem requisito de cookie do terminal no modo senha. RFID preservado.
+MySQL/Alembic 0004 adiciona tabela opcional de credenciais scrypt; nenhum segredo no
+Flutter ou no Git. Retirada deriva o cadastro da sessão; perfis/ownership mantidos.
+
+130 unitários Python e 28 integrações MySQL aprovados; Ruff check/format e diff aprovados.
+MySQL novo/isolado, bancos secury_professor_auth_test e secury_professor_demo_test,
+credenciais exclusivas. Migração, FK, unicidade, reset e persistência validados.
+Flutter 3.47.8: análise sem problemas, 24 testes e build Web aprovados; tela real em
+1440px/390px conferida. Casos cobrem sessão, erros, escopo, ausência de UID e admin.
+Smoke real via prévia: login/sessão 200, senha inválida 401, admin/inventário negados.
+Conta `professor.demo`, Professora Ana (demo)/DEMO-001 criada só no runtime isolado.
+Senha gerada em arquivo privado no perfil do usuário, fora do workspace/Git/logs.
+Prévia 8082 usa API isolada; banco/API anteriores preservados, `.env` não alterado.
+Sem retirada real ou hardware físico; sem produção, merge ou atualização do Notion.
+Aviso Starlette/httpx preexistente. CI e aceite assistivo pendentes; PR referenciado abaixo.
+Guia/BDD: docs/professor-password-login.md. Decisão: docs/adr/0002-professor-password-login.md.
+
+Próximos três itens:
+1. Revisar PR dependente de #14 e conferir CI do head publicado.
+2. Confirmar aceite do login/cadastro de credencial em ambos os perfis e teclado.
+3. Planejar integração das migrações/HTTPS conforme ambiente, sem homologação física implícita.
+
+
 ## Portais personalizados por perfil — 2026-11-13
 
 Estado: em revisão. SEC-004/SEC-007, branch `feat/professional-access-screen`,
@@ -260,3 +289,5 @@ Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-
 Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
 
 Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.
+
+Implementação: [c9e3c01](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/c9e3c0136cb19a032df153b3b60839846b5e9ada); PR [#15](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/15) em rascunho para feat/professional-access-screen. Sem merge; CI a conferir.

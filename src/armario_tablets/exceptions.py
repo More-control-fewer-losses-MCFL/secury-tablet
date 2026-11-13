@@ -55,3 +55,11 @@ class ProfessorImportInvalidError(AppError):
 
 class ProfessorImportConflictError(AppError):
     """An imported badge belongs to another local professor."""
+
+
+class ProfessorLoginInvalidError(AppError):
+    """Generic login error that does not disclose account existence or status."""
+
+
+class ProfessorCredentialsConflictError(AppError):
+    """A username already belongs to a different professor."""

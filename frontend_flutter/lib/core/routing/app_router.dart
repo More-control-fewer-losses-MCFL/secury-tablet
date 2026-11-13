@@ -22,6 +22,7 @@ GoRouter createAppRouter(AppController controller) => GoRouter(
   redirect: (context, state) {
     final onLogin =
         state.matchedLocation == '/login' ||
+        state.matchedLocation == '/professor/login' ||
         state.matchedLocation == '/admin/login';
     if (!controller.hasIdentity && !onLogin) return '/admin/login';
     if (controller.hasIdentity && onLogin) return '/home';
@@ -41,6 +42,11 @@ GoRouter createAppRouter(AppController controller) => GoRouter(
       path: '/admin/login',
       builder: (context, state) =>
           AuthPage(controller: controller, adminMode: true),
+    ),
+    GoRoute(
+      path: '/professor/login',
+      builder: (context, state) =>
+          AuthPage(controller: controller, professorPasswordMode: true),
     ),
     ShellRoute(
       builder: (context, state, child) =>

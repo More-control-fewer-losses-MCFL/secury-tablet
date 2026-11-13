@@ -8,6 +8,9 @@ class ProfessorRepository:
     def __init__(self, db: Session) -> None:
         self._db = db
 
+    def get_by_id(self, professor_id: int, *, lock: bool = False) -> Professor | None:
+        return self._db.get(Professor, professor_id, with_for_update=lock, populate_existing=lock)
+
     def get_by_badge(self, badge_uid: str) -> Professor | None:
         return self._db.scalar(select(Professor).where(Professor.badge_uid == badge_uid))
 

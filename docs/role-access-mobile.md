@@ -13,7 +13,7 @@ validadas pela API; esconder menus não constitui segurança.
 |---|---|---|
 | Início | Resumo pessoal | Dashboard global |
 | Consulta de disponibilidade | Sim | Sim |
-| Retirada por crachá | Própria sessão RFID | Somente API; fluxo administrativo futuro |
+| Retirada por crachá | Própria sessão autenticada | Somente API; fluxo administrativo futuro |
 | Devolução | Somente própria solicitação | Qualquer solicitação |
 | Histórico | Somente o próprio | Global |
 | Agenda baseada no histórico | Não disponível no perfil | Global |
@@ -24,8 +24,9 @@ validadas pela API; esconder menus não constitui segurança.
 
 ## Segurança
 
-- Professor: necessita de terminal autorizado previamente pelo administrador;
-  apresenta UID RFID e recebe token de duração curta, vinculado ao terminal.
+- Professor: usuário/senha individual validado no backend ou RFID em terminal
+  autorizado; ambos geram sessão curta e limitada ao próprio cadastro.
+  Somente o modo RFID vincula token ao terminal.
 - Administrador: acesso por usuário/senha configurados no servidor.
 - Backend bloqueia leitura do inventário completo para professores (HTTP 403);
   a consulta `/tablets/available` continua autorizada.
@@ -58,7 +59,7 @@ leitor/fechadura permanece simulado até homologação física.
 
 ## Limitações deliberadas
 
-Não adiciona login por senha para professor, funções para vários administradores,
+Não adiciona autocadastro público, funções para vários administradores,
 integração NFC nativa, push notifications ou conectividade pública. Isso precisa
 ser planejado como requisitos independentes com segurança apropriada.
 
@@ -93,3 +94,5 @@ Integração MySQL local não executada nesta revisão; CI remoto e aceite visua
 manual ainda pendentes. Estado em revisão; PR [#11](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/11) em rascunho, sem merge automático.
 
 Disponível localmente: professor http://localhost:8081/#/login e administrador http://localhost:8081/#/admin/login. API e web saudáveis após atualização; verificação HTTP aprovada.
+
+Atualização 2026-11-13: login por senha em `/#/professor/login`, com credenciais gerenciadas pelo administrador. RFID `/login` e admin `/admin/login` preservados. Contrato e evidências em [professor-password-login.md](professor-password-login.md).
