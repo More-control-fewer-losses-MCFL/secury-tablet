@@ -9,53 +9,37 @@ class BrandMark extends StatelessWidget {
   final bool compact;
 
   @override
-  Widget build(BuildContext context) {
-    final foreground = inverted ? Colors.white : AppTheme.navy;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: compact ? 34 : 40,
-          height: compact ? 34 : 40,
-          decoration: BoxDecoration(
-            color: inverted ? Colors.white : AppTheme.paleBlue,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Icon(
-            Icons.shield_outlined,
-            color: inverted ? AppTheme.blue : AppTheme.blue,
-            size: compact ? 20 : 24,
-          ),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        color: inverted ? Colors.transparent : const Color(0xFF075DA8),
+        padding: inverted
+            ? EdgeInsets.zero
+            : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Image.asset(
+          'assets/branding/senai-white.webp',
+          width: compact ? 108 : 144,
+          height: compact ? 30 : 40,
+          fit: BoxFit.contain,
+          alignment: Alignment.centerLeft,
+          semanticLabel: 'SENAI',
         ),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'SENAI',
-                style: TextStyle(
-                  color: foreground,
-                  fontSize: compact ? 13 : 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              Text(
-                'Tablet de Segurança',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: foreground.withValues(alpha: inverted ? 0.78 : 0.72),
-                  fontSize: compact ? 10 : 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        'Tablet de Segurança',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: inverted
+              ? Colors.white.withValues(alpha: .78)
+              : AppTheme.muted,
+          fontSize: compact ? 10 : 12,
+          fontWeight: FontWeight.w500,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
 }

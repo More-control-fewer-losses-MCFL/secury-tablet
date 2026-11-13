@@ -105,3 +105,19 @@ Build e capturas temporários fora do Git. Não houve login com credenciais reai
 Aceite assistivo manual e CI remoto pendentes: estado em revisão.
 
 Implementação: [7172693](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/71726938c2fd4685e9f5e728941ac041cd291ee8); PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main`. CI remoto pendente, sem merge.
+
+## Marca SENAI padronizada — 2026-11-13
+
+`BrandMark` agora exibe o logotipo branco do AVA SENAI/SC, correspondente à
+referência fornecida, em lugar do escudo acompanhado de texto comum.
+O mesmo asset local atende login desktop/móvel e menu lateral/drawer de ambos os
+perfis; fundos claros recebem uma base azul. Mantém proporção e rótulo semântico SENAI.
+Arquivo original e proveniência: `frontend_flutter/assets/branding/README.md`.
+
+BDD: dado qualquer tela com a marca SENAI, ao exibir o cabeçalho/menu,
+usa o mesmo logotipo sem distorção; em área branca, o símbolo branco permanece
+legível sobre azul; o carregamento da marca não exige rede.
+
+Analyze sem problemas, 17 testes existentes e build Web release aprovados com
+Flutter 3.47.8. Capturas em 1440px e 390px conferidas; prévia 8082 atualizada.
+CI do PR #14 e aceite assistivo manual pendentes. Sem alterações de autenticação.

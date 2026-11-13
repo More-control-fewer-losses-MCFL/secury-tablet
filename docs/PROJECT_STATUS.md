@@ -1,5 +1,31 @@
 # Estado da engenharia — Secury Tablet
 
+## Padronização da marca SENAI — 2026-11-13
+
+Estado: em revisão. Continuação de SEC-004 na branch `feat/professional-access-screen`,
+PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main` (base remota 8716f5c confirmada).
+Substituição de todas as marcas visuais SENAI do Flutter pelo logotipo branco
+da referência: painel de acesso desktop, login móvel e menu lateral/drawer dos
+perfis professor e administrador. `BrandMark` usa um único WebP local original do
+AVA SENAI/SC, com proporção preservada, descrição semântica e fundo azul em área clara.
+Removido o escudo com texto genérico da marca. Nenhum login/permissão foi alterado.
+Fonte e SHA-256 registrados em `frontend_flutter/assets/branding/README.md`.
+
+Validação desta troca: analyze sem problemas, 17 testes Flutter existentes aprovados,
+build Web release e `git diff --check` aprovados. Capturas Chrome desktop 1440px e
+celular 390px conferidas; testes abrangem 360px/texto 1,5x e menus por perfil.
+Prévia http://localhost:8082 atualizada; imagem empacotada responde HTTP 200.
+Sem novo teste para imagem estática, nova dependência ou chamada de rede para a marca.
+Python/MySQL não reexecutados nesta troca estática; sem backend/schema alterado.
+CI remoto/aceite assistivo manual pendentes. Sem merge, produção ou hardware físico.
+Notion não alterado; `.env` e dados reais preservados.
+
+Próximos três itens:
+1. Conferir CI do head atualizado no PR #14.
+2. Revisar marca e navegação assistiva em desktop/celular.
+3. Validar jornada de crachá com cadastro/terminal autorizado no ambiente de testes.
+
+
 ## Tela de acesso institucional — 2026-11-13
 
 Estado: em revisão. Branch `feat/professional-access-screen`, base `main`
