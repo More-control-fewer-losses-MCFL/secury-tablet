@@ -197,3 +197,21 @@ Próximos três itens: conferir PR/CI e dependências; aceite assistivo manual;
 proprietário preencher a aba de cadastro e validar jornada real controlada.
 
 Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
+
+## L. Merge autorizado — 2026-11-12
+
+Pedido explícito do usuário: fazer merge para main. Workspace limpo, sem mexer
+no .env, dados ou serviços. PRs #11 -> #12 -> #13 dependentes e sem conflitos.
+Antes de integrar, os CIs falharam apenas no analyze: stable instalou Flutter
+3.50.0, diferente do SDK 3.47.8 validado no Docker/local. Python e MySQL passaram.
+Ajuste mínimo: flutter-version 3.47.8 no workflow; sem silenciar deprecateds ou
+migrar a arquitetura durante o merge. Fixes nas branches de acesso e Sheets
+foram publicados; aguardando checks completos. Conferir heads antes de merge.
+
+Preparação registrada antes da integração final. Confirmar PRs/commits no GitHub
+e separar sucesso dos PRs de execução pós-merge. Não habilitar auto-merge nem
+bypassar proteção da branch. Permissão para merge se limita ao pedido atual.
+
+Próximos três itens: integrar a cadeia com CI aprovado; conferir main e sincronizar
+clone local sem reset; proprietário criar cadastro Sheets e executar aceite real.
+Notion não alterado. Hardware simulado, nenhum cadastro real importado.

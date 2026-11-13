@@ -8,6 +8,22 @@ Commits funcionais examinados: 0138744 (locks), f3ffee8 (autorização),
 base desta entrega: 8fb19a9 (árvore compatível com 76e32a4).
 Versão VERSION: 1.2.0; metadados Python/FastAPI ainda indicam 0.1.0 (débito conhecido).
 
+## Preparação de integração em main — 2026-11-12
+
+O usuário autorizou explicitamente o merge para main. Cadeia revisada: PR #11
+(perfis), #12 (cadastro Sheets) e #13 (interface). Não ativar auto-merge do GitHub;
+executar merges explícitos somente depois de conferir checks e SHAs remotos.
+
+Falha remota investigada nos três PRs: canal stable resolveu Flutter 3.50.0 e
+analyze recusou os imports Material depreciados. Python e MySQL aprovados.
+CI agora fixa Flutter 3.47.8, alinhado ao Docker e à validação local; não houve
+supressão de avisos nem retry sem investigar. Correção publicada nas dependências.
+Os novos checks precisam ser conferidos antes da integração de cada PR.
+
+Esta seção registra a preparação; a confirmação do merge e do CI pós-merge deve
+ser verificada no GitHub. Continuam pendentes a aba Professores no Google e o
+aceite assistivo/manual. Não houve importação de dados reais ou mudança de hardware.
+
 ## Revisão da interface Flutter — 2026-11-12
 
 Branch `feat/frontend-clarity-accessibility`, base 827b326 (integração Sheets/PR #12).
