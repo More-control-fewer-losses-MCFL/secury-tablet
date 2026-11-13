@@ -195,3 +195,5 @@ Notion não alterado. PR a publicar, sem merge automático.
 
 Próximos três itens: conferir PR/CI e dependências; aceite assistivo manual;
 proprietário preencher a aba de cadastro e validar jornada real controlada.
+
+Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.

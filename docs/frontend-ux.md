@@ -68,3 +68,5 @@ Docker com Flutter 3.47.8. Três prévias renderizadas (login móvel, professor 
 e administrador desktop) foram inspecionadas com dados fictícios e fonte do SDK. Screenshots temporários usam dados fictícios,
 não são adicionados ao Git. Nenhum teste real de hardware, importação de cadastro
 ou alteração em banco foi executado por esta revisão de interface.
+
+Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
