@@ -151,3 +151,7 @@ Analyze sem problemas; 20 testes Flutter, contraste, quatro prévias com fixture
 build Web release aprovados. Prévia 8082 atualizada; CI e aceite assistivo pendentes.
 
 Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.
+
+## Acesso individual de professor — 2026-11-13
+
+Formulário verde `/#/professor/login`, com usuário/senha, mostrar/ocultar, autofill e Enter para acessar. Crachá e administração permanecem opções distintas. A API confirma identidade antes do portal; senha é limpa ao entrar. Administração configura credenciais no cadastro consultado, com diálogo próprio e sem ecoar senha. Saída retorna ao login correspondente; retirada por senha não exige UID. 24 testes Flutter, análise e build aprovados; evidências completas em [professor-password-login.md](professor-password-login.md).

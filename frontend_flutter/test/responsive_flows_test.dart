@@ -52,10 +52,33 @@ SystemApi createResponsiveApi({List<http.Request>? requests}) => SystemApi(
         body = {'status': 'ok', 'database': 'ok'};
         break;
       case '/auth/rfid':
+      case '/auth/professor/login':
         body = {
           'access_token': 'fictional-teacher-token',
           'expires_in': 600,
           'professor': _professor,
+        };
+        break;
+      case '/auth/professor/session':
+        body = {'role': 'professor', 'professor': _professor};
+        break;
+      case '/admin/professors/7/credentials':
+        body = {
+          'professor_id': 7,
+          'username': jsonDecode(request.body)['username'],
+        };
+        break;
+      case '/checkout-requests':
+        body = {
+          'session_id': 43,
+          'status': 'UNLOCKED',
+          'professor_name': 'Ana Teste',
+          'requested_quantity': 1,
+          'taken_quantity': 0,
+          'pending_quantity': 0,
+          'items': [],
+          'duplicate_event': false,
+          'divergence': null,
         };
         break;
       case '/admin/login':
@@ -225,7 +248,7 @@ void main() {
     );
   }
 
-  testWidgets('both logins fit a 360px screen with enlarged text', (
+  testWidgets('admin RFID and password logins fit 360px with enlarged text', (
     tester,
   ) async {
     final controller = AppController(createResponsiveApi());
@@ -250,10 +273,13 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(tester.takeException(), isNull);
 
-      await tester.ensureVisible(find.text('Acessar com cadastro'));
-      await tester.tap(find.text('Acessar com cadastro'));
+      await tester.ensureVisible(find.text('Entrar com usuário e senha'));
+      await tester.tap(find.text('Entrar com usuário e senha'));
       await tester.pumpAndSettle();
-      expect(router.routeInformationProvider.value.uri.path, '/admin/login');
+      expect(
+        router.routeInformationProvider.value.uri.path,
+        '/professor/login',
+      );
       expect(find.byType(TextField), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     } finally {

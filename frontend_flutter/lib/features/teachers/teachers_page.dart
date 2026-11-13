@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
+import 'professor_credentials_dialog.dart';
 
 class TeachersPage extends StatefulWidget {
   const TeachersPage({required this.controller, super.key});
@@ -187,6 +188,31 @@ class _TeachersPageState extends State<TeachersPage> {
               StatusPill(
                 professor!.active ? 'Cadastro ativo' : 'Cadastro inativo',
                 color: professor!.active ? AppTheme.success : AppTheme.warning,
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: loading || syncing
+                    ? null
+                    : () async {
+                        final value = await showDialog<String>(
+                          context: context,
+                          builder: (context) => ProfessorCredentialsDialog(
+                            professor: professor!,
+                            api: widget.controller.api,
+                          ),
+                        );
+                        if (value != null && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Acesso do professor salvo: $value',
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                icon: const Icon(Icons.manage_accounts_outlined),
+                label: const Text('Configurar usuário e senha'),
               ),
             ],
           ],

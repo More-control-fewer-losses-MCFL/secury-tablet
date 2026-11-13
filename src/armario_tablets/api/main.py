@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -11,6 +12,7 @@ from armario_tablets.api.routes import (
     events,
     health,
     monitoring,
+    professor_auth,
     professor_sync,
     professors,
     returns,
@@ -25,6 +27,8 @@ logger = logging.getLogger(__name__)
 # Cada erro de negócio vira um status HTTP coerente.
 STATUS_BY_ERROR: dict[type[exc.AppError], int] = {
     exc.ProfessorNotFoundError: 404,
+    exc.ProfessorLoginInvalidError: 401,
+    exc.ProfessorCredentialsConflictError: 409,
     exc.SessionNotFoundError: 404,
     exc.CabinetNotFoundError: 404,
     exc.ProfessorInactiveError: 403,
@@ -56,6 +60,19 @@ def create_app() -> FastAPI:
             allow_headers=["Accept", "Authorization", "Content-Type"],
         )
 
+    @app.exception_handler(RequestValidationError)
+    async def handle_validation_error(_: Request, error: RequestValidationError) -> JSONResponse:
+        # Do not echo passwords, UIDs or request bodies in validation errors.
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": [
+                    {"loc": list(item["loc"]), "msg": item["msg"], "type": item["type"]}
+                    for item in error.errors()
+                ]
+            },
+        )
+
     @app.exception_handler(exc.AppError)
     async def handle_app_error(_: Request, error: exc.AppError) -> JSONResponse:
         status = STATUS_BY_ERROR.get(type(error), 400)
@@ -74,6 +91,7 @@ def create_app() -> FastAPI:
         events,
         monitoring,
         professor_sync,
+        professor_auth,
     ):
         app.include_router(module.router)
     return app

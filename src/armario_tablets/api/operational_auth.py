@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from armario_tablets.api.deps import get_db
 from armario_tablets.api.routes.admin import _token_secret, _valid_token
 from armario_tablets.config import Settings, get_settings
-from armario_tablets.models import Professor, TerminalAuthorization
+from armario_tablets.models import Professor, ProfessorCredential, TerminalAuthorization
 
 TERMINAL_COOKIE = "secury_terminal"
 
@@ -97,15 +97,30 @@ def require_principal(
     if _valid_token(token, settings, _token_secret(settings)):
         return Principal("admin")
     claims = read_claims(token, "professor", settings)
-    terminal_claims = validate_terminal(terminal, settings, db)
-    if claims.get("terminal") != terminal_claims.get("sub"):
-        raise HTTPException(401, "Sessão vinculada a outro terminal.")
     professor_id = claims.get("sub")
     if type(professor_id) is not int:
         raise HTTPException(401, "Sessão inválida.")
     professor = db.get(Professor, professor_id)
     if professor is None or not professor.active:
         raise HTTPException(403, "Cadastro indisponível.")
+    method = claims.get("auth", "rfid")
+    if method == "password":
+        credential = db.get(ProfessorCredential, professor.id)
+        revision = claims.get("revision")
+        if (
+            credential is None
+            or not isinstance(revision, str)
+            or not hmac.compare_digest(
+                revision.encode("utf-8"), credential.revision.encode("utf-8")
+            )
+        ):
+            raise HTTPException(401, "Sessão inválida ou revogada. Entre novamente.")
+    elif method == "rfid":
+        terminal_claims = validate_terminal(terminal, settings, db)
+        if claims.get("terminal") != terminal_claims.get("sub"):
+            raise HTTPException(401, "Sessão vinculada a outro terminal.")
+    else:
+        raise HTTPException(401, "Sessão inválida.")
     return Principal("professor", professor.id, professor.badge_uid)
 
 

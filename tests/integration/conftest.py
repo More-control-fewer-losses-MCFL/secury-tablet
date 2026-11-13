@@ -48,7 +48,8 @@ def mysql_engine():
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
         conn.execute(
             text(
-                "DROP TABLE IF EXISTS events, checkout_items, checkout_sessions, "
+                "DROP TABLE IF EXISTS professor_credentials, events, checkout_items, "
+                "checkout_sessions, "
                 "tablets, professors, cabinets, terminal_authorizations, alembic_version"
             )
         )
@@ -74,6 +75,7 @@ def session_factory(mysql_engine):
         conn.execute(text("TRUNCATE checkout_items"))
         conn.execute(text("TRUNCATE checkout_sessions"))
         conn.execute(text("TRUNCATE tablets"))
+        conn.execute(text("TRUNCATE professor_credentials"))
         conn.execute(text("TRUNCATE professors"))
         conn.execute(text("TRUNCATE cabinets"))
         conn.execute(text("TRUNCATE terminal_authorizations"))

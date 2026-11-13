@@ -107,6 +107,7 @@ void main() {
       '/alerts',
       '/agenda',
       '/admin/login',
+      '/professor/login',
     ]) {
       router.go(path);
       await tester.pumpAndSettle();
@@ -143,9 +144,9 @@ void main() {
     expect(find.text('Senha'), findsNothing);
     expect(find.text('Validar crachá'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
-    await tester.tap(find.text('Acessar com cadastro'));
+    await tester.tap(find.text('Entrar com usuário e senha'));
     await tester.pumpAndSettle();
-    expect(router.routeInformationProvider.value.uri.path, '/admin/login');
+    expect(router.routeInformationProvider.value.uri.path, '/professor/login');
     expect(find.text('Senha'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     router.dispose();

@@ -18,3 +18,10 @@ def normalize_uid(value: str) -> str:
 def mask_uid(value: str) -> str:
     """Máscara para logs: nunca grave o UID completo."""
     return f"***{value[-4:]}" if value and len(value) > 4 else "***"
+
+
+def normalize_username(value: str) -> str:
+    normalized = value.strip().lower()
+    if re.fullmatch(r"[a-z0-9_.-]{3,80}", normalized) is None:
+        raise ValueError("Use de 3 a 80 letras, números, pontos, hífens ou sublinhados.")
+    return normalized

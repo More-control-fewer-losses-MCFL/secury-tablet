@@ -77,7 +77,11 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _signOut() {
-    final login = widget.controller.isAdmin ? '/admin/login' : '/login';
+    final login = widget.controller.isAdmin
+        ? '/admin/login'
+        : widget.controller.badgeUid == null
+        ? '/professor/login'
+        : '/login';
     widget.controller.signOut();
     context.go(login);
   }

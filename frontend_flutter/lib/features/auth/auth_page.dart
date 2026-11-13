@@ -9,10 +9,16 @@ import '../../widgets/common_widgets.dart';
 import '../shell/brand_mark.dart';
 
 class AuthPage extends StatefulWidget {
-  const AuthPage({required this.controller, this.adminMode = false, super.key});
+  const AuthPage({
+    required this.controller,
+    this.adminMode = false,
+    this.professorPasswordMode = false,
+    super.key,
+  }) : assert(!(adminMode && professorPasswordMode));
 
   final AppController controller;
   final bool adminMode;
+  final bool professorPasswordMode;
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -20,12 +26,16 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   final badgeController = TextEditingController();
-  final adminUsernameController = TextEditingController(text: 'admin');
+  final adminUsernameController = TextEditingController();
   final adminPasswordController = TextEditingController();
   bool loading = false;
   bool passwordVisible = false;
   bool checkingApi = true;
   bool get adminMode => widget.adminMode;
+  bool get professorPasswordMode => widget.professorPasswordMode;
+  bool get credentialMode => adminMode || professorPasswordMode;
+  Color get accessColor =>
+      professorPasswordMode ? AppTheme.teacherPrimary : _accessBlue;
   bool authorizeTerminal = false;
   String? error;
   ApiHealth? health;
@@ -34,6 +44,7 @@ class _AuthPageState extends State<AuthPage> {
   @override
   void initState() {
     super.initState();
+    if (adminMode) adminUsernameController.text = 'admin';
     _checkApi();
   }
 
@@ -75,14 +86,14 @@ class _AuthPageState extends State<AuthPage> {
     }
   }
 
-  Future<void> _loginAdmin() async {
+  Future<void> _loginCredentials() async {
     if (loading) return;
     setState(() {
       loading = true;
       error = null;
     });
     try {
-      if (authorizeTerminal) {
+      if (adminMode && authorizeTerminal) {
         await widget.controller.authorizeTerminal(
           adminUsernameController.text,
           adminPasswordController.text,
@@ -93,10 +104,18 @@ class _AuthPageState extends State<AuthPage> {
         }
         return;
       }
-      await widget.controller.loginAdmin(
-        adminUsernameController.text,
-        adminPasswordController.text,
-      );
+      if (professorPasswordMode) {
+        await widget.controller.loginProfessor(
+          adminUsernameController.text,
+          adminPasswordController.text,
+        );
+      } else {
+        await widget.controller.loginAdmin(
+          adminUsernameController.text,
+          adminPasswordController.text,
+        );
+      }
+      adminPasswordController.clear();
       if (mounted) context.go('/home');
     } on ApiException catch (exception) {
       if (mounted) setState(() => error = exception.message);
@@ -108,7 +127,12 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => Theme(
+    data: professorPasswordMode ? AppTheme.teacher : AppTheme.light,
+    child: Builder(builder: _buildScaffold),
+  );
+
+  Widget _buildScaffold(BuildContext context) => Scaffold(
     backgroundColor: Colors.white,
     body: SafeArea(
       child: LayoutBuilder(
@@ -116,7 +140,14 @@ class _AuthPageState extends State<AuthPage> {
           final wide = constraints.maxWidth >= 980;
           return Row(
             children: [
-              if (wide) const Expanded(child: _InstitutionPanel()),
+              if (wide)
+                Expanded(
+                  child: _InstitutionPanel(
+                    color: professorPasswordMode
+                        ? AppTheme.teacherHeader
+                        : _accessBlue,
+                  ),
+                ),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, pane) => SingleChildScrollView(
@@ -156,9 +187,13 @@ class _AuthPageState extends State<AuthPage> {
         const SizedBox(height: 36),
       ],
       Text(
-        adminMode ? 'ACESSO COM CADASTRO' : 'ACESSO POR CRACHÁ',
-        style: const TextStyle(
-          color: _accessBlue,
+        professorPasswordMode
+            ? 'ACESSO DO PROFESSOR'
+            : adminMode
+            ? 'ACESSO COM CADASTRO'
+            : 'ACESSO POR CRACHÁ',
+        style: TextStyle(
+          color: accessColor,
           fontSize: 11,
           letterSpacing: 1.6,
           fontWeight: FontWeight.w700,
@@ -168,7 +203,11 @@ class _AuthPageState extends State<AuthPage> {
       Semantics(
         header: true,
         child: Text(
-          adminMode ? 'Bem-vindo ao Secury Tablet' : 'Passe o crachá',
+          professorPasswordMode
+              ? 'Bem-vindo, professor'
+              : adminMode
+              ? 'Bem-vindo ao Secury Tablet'
+              : 'Passe o crachá',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -179,13 +218,15 @@ class _AuthPageState extends State<AuthPage> {
       ),
       const SizedBox(height: 10),
       Text(
-        adminMode
+        professorPasswordMode
+            ? 'Entre com seu usuário e senha para acessar seus tablets.'
+            : adminMode
             ? 'Entre com seu usuário e senha para acessar a gestão de tablets.'
             : 'Aproxime seu crachá do leitor para acessar seus tablets.',
         style: const TextStyle(color: AppTheme.muted, height: 1.6),
       ),
       const SizedBox(height: 28),
-      if (adminMode)
+      if (credentialMode)
         AutofillGroup(
           child: Column(
             children: [
@@ -208,7 +249,7 @@ class _AuthPageState extends State<AuthPage> {
                 enabled: !loading,
                 autofillHints: const [AutofillHints.password],
                 obscureText: !passwordVisible,
-                onSubmitted: (_) => _loginAdmin(),
+                onSubmitted: (_) => _loginCredentials(),
                 textInputAction: TextInputAction.go,
                 decoration: InputDecoration(
                   labelText: 'Senha',
@@ -306,15 +347,15 @@ class _AuthPageState extends State<AuthPage> {
         width: double.infinity,
         child: FilledButton(
           style: FilledButton.styleFrom(
-            backgroundColor: _accessBlue,
+            backgroundColor: accessColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: loading
               ? null
-              : adminMode
-              ? _loginAdmin
+              : credentialMode
+              ? _loginCredentials
               : _identify,
           child: loading
               ? const SizedBox(
@@ -326,8 +367,8 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 )
               : Text(
-                  adminMode
-                      ? authorizeTerminal
+                  credentialMode
+                      ? adminMode && authorizeTerminal
                             ? 'Autorizar terminal'
                             : 'Acessar'
                       : 'Validar crachá',
@@ -337,20 +378,40 @@ class _AuthPageState extends State<AuthPage> {
       const SizedBox(height: 24),
       const Divider(height: 1),
       const SizedBox(height: 24),
-      if (adminMode)
+      if (adminMode) ...[
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            key: const Key('professor-password-access'),
+            onPressed: loading ? null : () => context.go('/professor/login'),
+            icon: const Icon(Icons.school_outlined),
+            label: const Text('Entrar como professor'),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+      if (credentialMode)
         _BadgePrompt(onTap: loading ? null : () => context.go('/login'))
       else
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            onPressed: loading ? null : () => context.go('/admin/login'),
+            key: const Key('professor-password-access'),
+            onPressed: loading ? null : () => context.go('/professor/login'),
             icon: const Icon(Icons.person_outline),
-            label: const Text('Acessar com cadastro'),
+            label: const Text('Entrar com usuário e senha'),
+          ),
+        ),
+      if (!adminMode)
+        Center(
+          child: TextButton(
+            onPressed: loading ? null : () => context.go('/admin/login'),
+            child: const Text('Acesso administrativo'),
           ),
         ),
       const SizedBox(height: 20),
       Text(
-        adminMode
+        credentialMode
             ? 'Precisa de um cadastro ou esqueceu a senha? Procure a administração.'
             : 'Primeiro acesso? Solicite à administração a autorização deste terminal.',
         textAlign: TextAlign.center,
@@ -395,7 +456,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
           ],
         )
-      else
+      else if (!professorPasswordMode)
         const Text(
           'O crachá identifica seu cadastro. O acesso depende de um terminal autorizado.',
           textAlign: TextAlign.center,
@@ -470,11 +531,12 @@ class _BadgePrompt extends StatelessWidget {
 }
 
 class _InstitutionPanel extends StatelessWidget {
-  const _InstitutionPanel();
+  const _InstitutionPanel({this.color = _accessBlue});
+  final Color color;
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-    color: _accessBlue,
+    color: color,
     child: CustomPaint(
       painter: const _AccessBackdrop(),
       child: LayoutBuilder(

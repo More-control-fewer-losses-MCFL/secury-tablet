@@ -57,6 +57,47 @@ class SystemApi {
     return (professor: professor, expiresIn: expiresIn);
   }
 
+  Future<({Professor professor, int expiresIn})> loginProfessor(
+    String username,
+    String password,
+  ) async {
+    final result = _asMap(
+      await _client.post('/auth/professor/login', {
+        'username': username.trim(),
+        'password': password,
+      }),
+    );
+    final professor = Professor.fromJson(_asMap(result['professor']));
+    _client.accessToken = result['access_token'] as String;
+    try {
+      final session = _asMap(await _client.get('/auth/professor/session'));
+      final verified = Professor.fromJson(_asMap(session['professor']));
+      if (session['role'] != 'professor' || verified.id != professor.id) {
+        throw const FormatException(
+          'A API não confirmou a sessão de professor.',
+        );
+      }
+      return (professor: verified, expiresIn: result['expires_in'] as int);
+    } catch (_) {
+      _client.accessToken = null;
+      rethrow;
+    }
+  }
+
+  Future<String> setProfessorCredentials({
+    required int professorId,
+    required String username,
+    required String password,
+  }) async {
+    final result = _asMap(
+      await _client.post('/admin/professors/$professorId/credentials', {
+        'username': username.trim(),
+        'password': password,
+      }),
+    );
+    return result['username'] as String;
+  }
+
   Future<({int created, int updated, int unchanged})> syncProfessors() async {
     final value = _asMap(
       await _client.post('/admin/professors/sync-google-sheets', {}),
@@ -134,14 +175,14 @@ class SystemApi {
   }
 
   Future<CheckoutResult> createCheckout({
-    required String badgeUid,
+    String? badgeUid,
     required int quantity,
     required String purpose,
     String? className,
   }) async => CheckoutResult.fromJson(
     _asMap(
       await _client.post('/checkout-requests', {
-        'badge_uid': badgeUid,
+        'badge_uid': ?badgeUid,
         'quantity': quantity,
         'purpose': purpose,
         if (className != null && className.isNotEmpty) 'class_name': className,

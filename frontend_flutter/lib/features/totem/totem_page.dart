@@ -152,8 +152,11 @@ class _TotemPageState extends State<TotemPage> {
             const SizedBox(height: 20),
             OutlinedButton.icon(
               onPressed: () {
+                final login = widget.controller.badgeUid == null
+                    ? '/professor/login'
+                    : '/login';
                 widget.controller.signOut();
-                context.go('/login');
+                context.go(login);
               },
               icon: const Icon(Icons.logout),
               label: const Text('Encerrar meu acesso'),

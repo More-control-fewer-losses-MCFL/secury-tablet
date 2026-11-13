@@ -1,5 +1,7 @@
 # Revisão incremental de autenticação e autorização
 
+Atualização atual: [login individual de professor](professor-password-login.md) e [ADR 0002](adr/0002-professor-password-login.md), 2026-11-13. A revisão de 2026-10-28 abaixo é histórica; sessão, ownership e login por senha já possuem implementação posterior em revisão.
+
 Data: 2026-10-28. Baseline: `23578bc` em main; mudanças adicionais examinadas:
 `4119b65` (PR #3) e `4e9946e` (PR #4). Esta revisão não certifica segurança de produção.
 

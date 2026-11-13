@@ -6,15 +6,15 @@ from armario_tablets.utils.validators import normalize_uid
 
 
 class CheckoutRequestIn(BaseModel):
-    badge_uid: str
+    badge_uid: str | None = None
     quantity: int = Field(gt=0, le=50)
     purpose: str = Field(min_length=3, max_length=200)
     class_name: str | None = Field(default=None, max_length=100)
 
     @field_validator("badge_uid")
     @classmethod
-    def _normalize_badge(cls, value: str) -> str:
-        return normalize_uid(value)
+    def _normalize_badge(cls, value: str | None) -> str | None:
+        return normalize_uid(value) if value is not None else None
 
 
 class CheckoutItemOut(BaseModel):

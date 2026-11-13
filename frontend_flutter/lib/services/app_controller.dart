@@ -64,6 +64,17 @@ class AppController extends ChangeNotifier {
     return session.professor;
   }
 
+  Future<Professor> loginProfessor(String username, String password) async {
+    final session = await api.loginProfessor(username.trim(), password);
+    _adminSessionExpiry?.cancel();
+    _adminSessionExpiry = Timer(Duration(seconds: session.expiresIn), signOut);
+    adminSession = null;
+    professor = session.professor;
+    _badgeUid = null;
+    notifyListeners();
+    return session.professor;
+  }
+
   Future<void> loginAdmin(String username, String password) async {
     final session = await api.loginAdmin(username.trim(), password);
     _adminSessionExpiry?.cancel();

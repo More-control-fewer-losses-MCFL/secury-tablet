@@ -78,11 +78,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     });
     try {
       final badgeUid = widget.controller.badgeUid;
-      if (badgeUid == null) {
-        throw const ApiException(
-          'Identifique novamente o crachá antes de continuar.',
-        );
-      }
       result = await widget.controller.api.createCheckout(
         badgeUid: badgeUid,
         quantity: quantity,

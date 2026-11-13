@@ -1,6 +1,6 @@
 # API HTTP
 
-Documentação interativa (Swagger): `http://127.0.0.1:8000/docs`. Rode apenas em rede local protegida. O login administrativo possui token próprio, mas as rotas operacionais de professores ainda não exigem sessão autenticada.
+Documentação interativa (Swagger): `http://127.0.0.1:8000/docs`. Rode apenas em rede local protegida. As rotas operacionais exigem sessão autenticada com permissões por perfil.
 
 ## Credencial do controlador
 
@@ -74,7 +74,7 @@ Tipos de evento aceitos do hardware: `DOOR_OPENED`, `DOOR_CLOSED`, `INVENTORY_AF
 
 ## Terminal autorizado e escopo operacional (nova entrega)
 
-O professor continua usando apenas RFID, por escolha do Product Owner. O UID não
+O professor pode usar senha individual conforme ADR 0002; esta seção descreve o modo RFID do ADR 0001. O UID não
 é prova criptográfica de identidade: o controle confia no terminal autorizado e
 permanece vulnerável ao uso de um crachá copiado nesse terminal. Uso supervisionado.
 
@@ -104,3 +104,20 @@ Sair do Flutter apaga o Bearer da memória; o terminal continua autorizado até 
 revogação/expiração. Recarregar a página exige nova identificação RFID. Cópias de
 Bearer + cookie podem ser usadas até expiração/revogação: proteger o terminal.
 Não existe autenticação forte do portador do crachá neste modo.
+
+## Login de professor por senha — 2026-11-13
+
+POST `/auth/professor/login` recebe username/password; emite Bearer de professor
+por 10 minutos (configurável), vinculado à revisão da credencial. Não exige cookie
+de terminal. GET `/auth/professor/session` confirma role e ProfessorOut; não retorna UID.
+Credencial inválida/usuário ausente/inativo: 401 genérico. Redefinição revoga o token;
+desativação impede operações. Erros 422 não devolvem inputs de requisição.
+
+POST `/admin/professors/{professor_id}/credentials` exige Bearer administrativo e
+recebe username/password (12–256 caracteres de senha). Responde professor_id/username;
+409 para usuário já vinculado a outro cadastro, 404 para professor inexistente.
+
+POST `/checkout-requests`: professor pode omitir badge_uid; o servidor usa o cadastro
+autenticado e rejeita substituição por terceiro. Admin deve informar badge_uid.
+Outras validações de operação, inventário e sensores permanecem.
+Guia e evidências: [professor-password-login.md](professor-password-login.md).

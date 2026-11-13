@@ -100,3 +100,7 @@ e [OAuth offline](https://developers.google.com/identity/protocols/oauth2/web-se
 Runtime local atualizado em http://localhost:8081: interface e API respondem 200; sincronização anônima retorna 401. Arquivo privado montado somente no backend, integração configurada sem importar dados reais.
 
 Implementação: commit 66cf422. PR [#12](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/12) em rascunho, base feat/SEC-004-separate-role-access (PR #11). CI remoto e aba real ainda pendentes; sem merge.
+
+## Credencial individual — 2026-11-13
+
+Professor também pode entrar por usuário/senha criados pela administração. A planilha não recebe senhas nem cria credenciais: vínculos permanecem no MySQL e a sincronização por matrícula preserva seus IDs. Desativar o cadastro bloqueia sessões RFID e por senha. Consulte [o guia](professor-password-login.md).
