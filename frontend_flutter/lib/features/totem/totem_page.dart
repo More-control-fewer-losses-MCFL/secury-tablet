@@ -58,13 +58,13 @@ class _TotemPageState extends State<TotemPage> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.paleBlue,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.tablet_android_outlined,
                     size: 28,
-                    color: AppTheme.blue,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -259,7 +259,9 @@ class _OperationStep extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ExcludeSemantics(child: Icon(icon, color: AppTheme.blue)),
+      ExcludeSemantics(
+        child: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      ),
       const SizedBox(width: 12),
       Expanded(
         child: Column(

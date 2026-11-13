@@ -196,10 +196,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.tablet_android_outlined,
                   size: 40,
-                  color: AppTheme.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -255,7 +255,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.badge_outlined, color: AppTheme.blue),
+            Icon(
+              Icons.badge_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

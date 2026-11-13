@@ -5,7 +5,7 @@ Estado em revisão. Sem alteração de regras de negócio, autenticação ou sch
 
 ## Organização visual
 
-- Azul institucional para ações principais, superfícies claras e bordas suaves.
+- Azul SENAI para administração e verde para professor; superfícies claras e bordas suaves.
 - Tipografia padrão do Material/SDK, sem pacote de fontes adicional.
 - Escala consistente de títulos, textos, espaçamentos e raios de cartão.
 - Contraste reforçado nas cores de sucesso, aviso, erro e texto secundário.
@@ -14,8 +14,8 @@ Estado em revisão. Sem alteração de regras de negócio, autenticação ou sch
 
 ## Navegação e perfis
 
-Desktop: menu lateral com grupos Acompanhar/Gerenciar/Consultar/Sistema.
-Celular: drawer que abre por referência ao Scaffold correto; professor também
+Desktop: menu superior com ícones e ações permitidas para o perfil.
+Celular ou texto ampliado: drawer com grupos Acompanhar/Gerenciar/Consultar/Sistema que abre por referência ao Scaffold correto; professor também
 conta com atalhos inferiores Início/Retirar/Devolver/Histórico. O totem permanece
 no menu completo. Não há item selecionado artificialmente quando a rota não
 pertence aos atalhos inferiores. O drawer fecha antes de navegar, sem pop da
@@ -123,3 +123,29 @@ Flutter 3.47.8. Capturas em 1440px e 390px conferidas; prévia 8082 atualizada.
 CI do PR #14 e aceite assistivo manual pendentes. Sem alterações de autenticação.
 
 Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
+
+## Portais personalizados por perfil — 2026-11-13
+
+Professor: verde próximo à referência, cabeçalho #2C8375, ações #17695D e superfícies
+suaves. Administração: azul SENAI #075DA8. O tom mais escuro nas áreas com texto
+branco mantém contraste mínimo de 4,5:1. Avisos, erros e sucessos conservam sua semântica.
+
+Menu superior no desktop, drawer e atalhos do professor no celular/texto ampliado.
+O cabeçalho PortalWelcome reutilizável mostra identidade real, matrícula do professor,
+resumo da API e atalhos do perfil. Mantém os painéis de disponibilidade, movimentos,
+patrimônio e ocorrências. Nenhuma notícia, horário ou foto de pessoa foi inventada.
+A marca SENAI usa o mesmo asset local. Login institucional e autorização permanecem.
+
+Temas por perfil são instâncias estáveis entre rotas; recriá-los em cada build causava
+notificação de tema durante navegação e assertions de layout nos formulários móveis.
+Cache corrigiu a causa, verificada nos mesmos cenários, sem supressão/retry cego.
+
+BDD:
+- Dado professor autenticado, ao abrir o início, vê verde, seu nome/matrícula e ações próprias.
+- Dado administrador autenticado, vê azul SENAI, patrimônio e ações administrativas.
+- Ao navegar pelos atalhos superiores, mantém tema e permissões do perfil.
+- Em 360px com texto 1,5x, mantém campos, menus e operações utilizáveis sem overflow.
+- Dados dos painéis continuam vindo da API; alerta visual não confirma sensor físico.
+
+Analyze sem problemas; 20 testes Flutter, contraste, quatro prévias com fixtures e
+build Web release aprovados. Prévia 8082 atualizada; CI e aceite assistivo pendentes.

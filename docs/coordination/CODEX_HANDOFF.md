@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção N, 2026-11-13 — marca SENAI padronizada.
+Atualização mais recente: seção O, 2026-11-13 — portais personalizados por perfil.
 
 ## A. Identificação
 
@@ -272,3 +272,34 @@ Próximos três itens:
 3. Validar jornada de crachá com cadastro/terminal autorizado no ambiente de testes.
 
 Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
+
+## O. Portais personalizados por perfil — 2026-11-13
+
+Estado: em revisão. SEC-004/SEC-007, branch `feat/professional-access-screen`,
+continuação do PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para `main` (8716f5c confirmado no remoto).
+Interface autenticada personalizada por perfil: professor em verde e administrador
+em azul SENAI (#075DA8). Referência verde #3A9988; cabeçalho #2C8375 e ações #17695D
+preservam contraste com branco. Estados de aviso/erro mantêm significado próprio.
+Desktop usa menu superior com ícones; celular/texto ampliado mantém drawer e atalhos
+inferiores do professor. Boas-vindas mostram nome/perfil/matrícula reais, resumo da
+API e atalhos permitidos. Cartões claros organizam disponibilidade, movimentos,
+patrimônio e ocorrências existentes; não cria notícias, agenda ou dados fictícios no app.
+Logotipo SENAI padrão preservado. Autenticação, API, regras e permissões não alteradas.
+
+Validação: Flutter 3.47.8, analyze sem problemas, 20 testes aprovados e build Web
+release concluído. Cobertura: portais desktop 1440px dos dois perfis, navegação por
+rota/permissão, mobile 360px/texto 1,5x, fluxos administrativos e contraste >=4,5:1.
+Quatro prévias adicionais de professor/admin em desktop/celular com dados fictícios
+foram renderizadas e conferidas; arquivos temporários fora do Git.
+A validação revelou uma falha de layout ao recriar ThemeData por navegação;
+temas agora são reutilizados por perfil. Os cenários móveis passaram após a correção,
+sem suprimir assertions nem aplicar retries para encobrir a falha.
+Prévia local http://localhost:8082 atualizada; página e API health HTTP 200.
+`git diff --check` aprovado. Python/MySQL não reexecutados: mudança somente Flutter.
+CI remoto do novo head e aceite assistivo manual pendentes. Sem merge ou produção.
+Hardware simulado, `.env`/dados reais preservados; Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI do PR #14 no head publicado e revisar para main.
+2. Realizar aceite manual de teclado/leitor de tela e confirmar as cores por perfil.
+3. Validar jornada real controlada de cadastro/terminal, mantendo hardware simulado.
