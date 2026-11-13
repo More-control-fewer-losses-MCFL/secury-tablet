@@ -198,9 +198,9 @@ class _ReturnsPageState extends State<ReturnsPage> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.assignment_return_outlined,
-                  color: AppTheme.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/network/api_exception.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/utils/display.dart';
 import '../../core/utils/csv_download.dart';
 import '../../models/system_models.dart';
@@ -293,11 +292,11 @@ class _HistoryTile extends StatelessWidget {
     leading: SizedBox(
       width: 44,
       child: CircleAvatar(
-        backgroundColor: AppTheme.paleBlue,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         child: Text(
           '${row.sessionId}',
-          style: const TextStyle(
-            color: AppTheme.blue,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w700,
             fontSize: 11,
           ),

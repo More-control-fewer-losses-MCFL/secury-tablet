@@ -90,99 +90,274 @@ class _AppShellState extends State<AppShell> {
     final selectedIndex = items
         .indexWhere((item) => item.path == path)
         .clamp(0, items.length - 1);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final desktop =
-            constraints.maxWidth >= 1100 &&
-            MediaQuery.textScalerOf(context).scale(1) <= 1.4;
-        final sidebar = _Sidebar(
-          items: items,
-          selectedIndex: selectedIndex,
-          role: admin ? 'Administrador' : 'Professor',
-          name: widget.controller.displayName,
-          onSelect: (index) {
-            if (!desktop) scaffoldKey.currentState?.closeDrawer();
-            context.go(items[index].path);
-          },
-          onLogout: _signOut,
-        );
-        return Scaffold(
-          key: scaffoldKey,
-          drawer: desktop ? null : Drawer(child: SafeArea(child: sidebar)),
-          bottomNavigationBar: !desktop && !admin && _mobilePaths.contains(path)
-              ? NavigationBar(
-                  selectedIndex: _mobilePaths.indexOf(path).clamp(0, 3),
-                  onDestinationSelected: (index) =>
-                      context.go(_mobilePaths[index]),
-                  destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.home_outlined),
-                      selectedIcon: Icon(Icons.home),
-                      label: 'Início',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.output_outlined),
-                      label: 'Retirar',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.assignment_return_outlined),
-                      label: 'Devolver',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.history),
-                      label: 'Histórico',
-                    ),
-                  ],
-                )
-              : null,
-          body: SafeArea(
-            child: Row(
-              children: [
-                if (desktop) SizedBox(width: 248, child: sidebar),
-                Expanded(
-                  child: Column(
-                    children: [
+    return Theme(
+      data: admin ? AppTheme.light : AppTheme.teacher,
+      child: Builder(
+        builder: (context) => LayoutBuilder(
+          builder: (context, constraints) {
+            final desktop =
+                constraints.maxWidth >= 1180 &&
+                MediaQuery.textScalerOf(context).scale(1) <= 1.3;
+            void select(int index) {
+              if (!desktop) scaffoldKey.currentState?.closeDrawer();
+              context.go(items[index].path);
+            }
+
+            void search(String query) {
+              widget.controller.searchQuery = query;
+              context.go('/history');
+            }
+
+            final sidebar = _Sidebar(
+              items: items,
+              selectedIndex: selectedIndex,
+              role: admin ? 'Administrador' : 'Professor',
+              name: widget.controller.displayName,
+              onSelect: select,
+              onLogout: _signOut,
+            );
+            return Scaffold(
+              key: scaffoldKey,
+              drawer: desktop ? null : Drawer(child: SafeArea(child: sidebar)),
+              bottomNavigationBar:
+                  !desktop && !admin && _mobilePaths.contains(path)
+                  ? NavigationBar(
+                      selectedIndex: _mobilePaths.indexOf(path).clamp(0, 3),
+                      onDestinationSelected: (index) =>
+                          context.go(_mobilePaths[index]),
+                      destinations: const [
+                        NavigationDestination(
+                          icon: Icon(Icons.home_outlined),
+                          selectedIcon: Icon(Icons.home),
+                          label: 'Início',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.output_outlined),
+                          label: 'Retirar',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.assignment_return_outlined),
+                          label: 'Devolver',
+                        ),
+                        NavigationDestination(
+                          icon: Icon(Icons.history),
+                          label: 'Histórico',
+                        ),
+                      ],
+                    )
+                  : null,
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    if (desktop)
+                      _PortalNavigation(
+                        admin: admin,
+                        items: items,
+                        selectedIndex: selectedIndex,
+                        api: widget.controller.api,
+                        name: widget.controller.displayName,
+                        onSelect: select,
+                        onLogout: _signOut,
+                        onSearch: () => showDialog<void>(
+                          context: context,
+                          builder: (dialogContext) => AlertDialog(
+                            title: const Text('Pesquisar histórico'),
+                            content: TextField(
+                              controller: searchController,
+                              autofocus: true,
+                              textInputAction: TextInputAction.search,
+                              decoration: const InputDecoration(
+                                labelText: 'Termo de pesquisa',
+                              ),
+                              onSubmitted: (query) {
+                                Navigator.of(dialogContext).pop();
+                                search(query);
+                              },
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(dialogContext).pop(),
+                                child: const Text('Cancelar'),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(dialogContext).pop();
+                                  search(searchController.text);
+                                },
+                                child: const Text('Pesquisar'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
                       _TopBar(
-                        compact: !desktop,
+                        compact: true,
                         admin: admin,
                         title: items[selectedIndex].title,
                         api: widget.controller.api,
                         searchController: searchController,
-                        onSearch: (query) {
-                          widget.controller.searchQuery = query;
-                          context.go('/history');
-                        },
+                        onSearch: search,
                         onMenu: () => scaffoldKey.currentState?.openDrawer(),
                         onLogout: _signOut,
                       ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 1280),
-                            child: SingleChildScrollView(
-                              key: PageStorageKey('page-$path'),
-                              keyboardDismissBehavior:
-                                  ScrollViewKeyboardDismissBehavior.onDrag,
-                              padding: EdgeInsets.all(desktop ? 32 : 16),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: widget.child,
-                              ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1360),
+                          child: SingleChildScrollView(
+                            key: PageStorageKey('page-$path'),
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            padding: EdgeInsets.all(desktop ? 32 : 16),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: widget.child,
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
+}
+
+class _PortalNavigation extends StatelessWidget {
+  const _PortalNavigation({
+    required this.admin,
+    required this.items,
+    required this.selectedIndex,
+    required this.api,
+    required this.name,
+    required this.onSelect,
+    required this.onLogout,
+    required this.onSearch,
+  });
+  final bool admin;
+  final List<_NavItem> items;
+  final int selectedIndex;
+  final SystemApi api;
+  final String name;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onLogout;
+  final VoidCallback onSearch;
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    color: AppTheme.headerFor(admin),
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1440),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 148,
+                child: BrandMark(inverted: true, compact: true),
+              ),
+              const SizedBox(width: 20),
+              for (var index = 0; index < items.length; index++)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Semantics(
+                      selected: selectedIndex == index,
+                      child: Material(
+                        color: selectedIndex == index
+                            ? Colors.white
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(14),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          key: ValueKey('portal-nav-${items[index].path}'),
+                          onTap: () => onSelect(index),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 4,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  items[index].icon,
+                                  size: 21,
+                                  color: selectedIndex == index
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.white,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  items[index].title,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: selectedIndex == index
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 12),
+              IconButton(
+                onPressed: onSearch,
+                tooltip: 'Pesquisar histórico',
+                icon: const Icon(Icons.search, color: Colors.white),
+              ),
+              _ApiStatusIndicator(compact: true, api: api, inverted: true),
+              if (admin)
+                IconButton(
+                  onPressed: () => context.go('/alerts'),
+                  tooltip: 'Central de alertas',
+                  icon: const Icon(
+                    Icons.notifications_none,
+                    color: Colors.white,
+                  ),
+                ),
+              PopupMenuButton<String>(
+                tooltip: 'Conta de $name',
+                icon: const Icon(
+                  Icons.account_circle_outlined,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                onSelected: (value) {
+                  if (value == 'logout') onLogout();
+                  if (value == 'settings' && admin) context.go('/settings');
+                },
+                itemBuilder: (context) => [
+                  if (admin)
+                    const PopupMenuItem(
+                      value: 'settings',
+                      child: Text('Configurações'),
+                    ),
+                  const PopupMenuItem(value: 'logout', child: Text('Sair')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _TopBar extends StatelessWidget {
@@ -209,16 +384,13 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(minHeight: 80),
     padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 28, vertical: 8),
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      border: Border(bottom: BorderSide(color: AppTheme.border)),
-    ),
+    decoration: BoxDecoration(color: AppTheme.headerFor(admin)),
     child: Row(
       children: [
         if (compact)
           IconButton(
             onPressed: onMenu,
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
             tooltip: 'Abrir menu',
           ),
         Expanded(
@@ -229,11 +401,13 @@ class _TopBar extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(color: Colors.white),
               ),
               Text(
                 admin ? 'Área administrativa' : 'Área do professor',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: Colors.white),
               ),
             ],
           ),
@@ -254,16 +428,16 @@ class _TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 16),
         ],
-        _ApiStatusIndicator(compact: compact, api: api),
+        _ApiStatusIndicator(compact: compact, api: api, inverted: true),
         if (admin)
           IconButton(
             tooltip: 'Central de alertas',
             onPressed: () => context.go('/alerts'),
-            icon: const Icon(Icons.notifications_none),
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
           ),
         PopupMenuButton<String>(
           tooltip: 'Conta',
-          icon: const Icon(Icons.account_circle_outlined),
+          icon: const Icon(Icons.account_circle_outlined, color: Colors.white),
           onSelected: (value) {
             if (value == 'logout') onLogout();
             if (value == 'settings' && admin) context.go('/settings');
@@ -283,7 +457,12 @@ class _TopBar extends StatelessWidget {
 }
 
 class _ApiStatusIndicator extends StatefulWidget {
-  const _ApiStatusIndicator({required this.compact, required this.api});
+  const _ApiStatusIndicator({
+    required this.compact,
+    required this.api,
+    this.inverted = false,
+  });
+  final bool inverted;
   final bool compact;
   final SystemApi api;
   @override
@@ -328,7 +507,7 @@ class _ApiStatusIndicatorState extends State<_ApiStatusIndicator> {
               onPressed: refresh,
               icon: Icon(
                 snapshot.data == false ? Icons.wifi_off : Icons.wifi,
-                color: color,
+                color: widget.inverted ? Colors.white : color,
                 size: 20,
               ),
             )
@@ -358,7 +537,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: AppTheme.navy,
+    color: Theme.of(context).colorScheme.primary,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -382,7 +561,7 @@ class _Sidebar extends StatelessWidget {
                       child: Text(
                         item.group,
                         style: const TextStyle(
-                          color: Color(0xFFB9CAE2),
+                          color: Colors.white,
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           letterSpacing: .8,
@@ -399,13 +578,17 @@ class _Sidebar extends StatelessWidget {
                       ),
                       leading: Icon(
                         item.icon,
-                        color: selected ? AppTheme.blue : Colors.white70,
+                        color: selected
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.white,
                         size: 22,
                       ),
                       title: Text(
                         item.title,
                         style: TextStyle(
-                          color: selected ? AppTheme.blue : Colors.white,
+                          color: selected
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.white,
                           fontSize: 14,
                           fontWeight: selected
                               ? FontWeight.w700
@@ -427,7 +610,7 @@ class _Sidebar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.account_circle_outlined, color: Colors.white70),
+              const Icon(Icons.account_circle_outlined, color: Colors.white),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -445,10 +628,7 @@ class _Sidebar extends StatelessWidget {
                     ),
                     Text(
                       role,
-                      style: const TextStyle(
-                        color: Color(0xFFB9CAE2),
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ],
                 ),
@@ -456,7 +636,7 @@ class _Sidebar extends StatelessWidget {
               IconButton(
                 onPressed: onLogout,
                 tooltip: 'Sair',
-                icon: const Icon(Icons.logout, color: Colors.white70),
+                icon: const Icon(Icons.logout, color: Colors.white),
               ),
             ],
           ),

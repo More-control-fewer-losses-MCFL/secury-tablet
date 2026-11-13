@@ -1,5 +1,7 @@
 # Handoff Codex → ChatGPT
 
+Atualização mais recente: seção O, 2026-11-13 — portais personalizados por perfil.
+
 ## A. Identificação
 
 Data: 2026-11-05 (America/Sao_Paulo). Estado: em revisão.
@@ -215,3 +217,91 @@ bypassar proteção da branch. Permissão para merge se limita ao pedido atual.
 Próximos três itens: integrar a cadeia com CI aprovado; conferir main e sincronizar
 clone local sem reset; proprietário criar cadastro Sheets e executar aceite real.
 Notion não alterado. Hardware simulado, nenhum cadastro real importado.
+
+## M. Tela de acesso institucional — 2026-11-13
+
+Estado: em revisão. Branch `feat/professional-access-screen`, base `main`
+`8716f5c557dcf6902c73d45cc3b79d18efcd22e7`, confirmada no remoto nesta sessão.
+Clone selecionado: raiz do workspace; clone aninhado não encontrado nesta sessão.
+SEC-004: acesso com cadastro administrativo em destaque, painel azul/branco inspirado
+na referência e área “Passe o crachá” para o fluxo de professor. Sem acesso Google.
+Backend, sessão assinada, autorização do terminal e perfis preservados.
+Detalhes/BDD: [frontend-ux.md](../frontend-ux.md).
+Validação local: Flutter 3.47.8/Dart 3.13.7 em Docker, analyze sem problemas,
+17 testes Flutter aprovados e build Web release concluído. 109 testes unitários
+Python aprovados com `.venv/Scripts/python.exe`; aviso Starlette/httpx preexistente.
+`git diff --check` aprovado. Sem Python alterado: Ruff não se aplica ao diff.
+Integração MySQL não executada nesta alteração de interface.
+Capturas desktop/crachá em 1440px e celular real em 390px conferidas no Chrome
+headless com perfil isolado; testes cobrem 360px/texto 1,5x e fluxos em 1440px.
+Prévia local separada em http://localhost:8082; página/healthz e API health HTTP 200.
+Build e capturas temporários fora do Git. Não houve login com credenciais reais.
+Aceite assistivo manual e CI remoto pendentes: estado em revisão.
+Implementação: [7172693](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/71726938c2fd4685e9f5e728941ac041cd291ee8);
+PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main`, sem dependências pendentes. CI a conferir. Sem deploy em produção ou merge.
+Sem alteração de banco, `.env`, credenciais reais ou hardware. Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI e revisar PR para main, sem merge automático.
+2. Realizar aceite assistivo manual de teclado/leitor de tela.
+3. Validar jornada de cadastro/crachá em terminal autorizado; hardware segue simulado.
+
+## N. Padronização da marca SENAI — 2026-11-13
+
+Estado: em revisão. Continuação de SEC-004 na branch `feat/professional-access-screen`,
+PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main` (base remota 8716f5c confirmada).
+Substituição de todas as marcas visuais SENAI do Flutter pelo logotipo branco
+da referência: painel de acesso desktop, login móvel e menu lateral/drawer dos
+perfis professor e administrador. `BrandMark` usa um único WebP local original do
+AVA SENAI/SC, com proporção preservada, descrição semântica e fundo azul em área clara.
+Removido o escudo com texto genérico da marca. Nenhum login/permissão foi alterado.
+Fonte e SHA-256 registrados em `frontend_flutter/assets/branding/README.md`.
+
+Validação desta troca: analyze sem problemas, 17 testes Flutter existentes aprovados,
+build Web release e `git diff --check` aprovados. Capturas Chrome desktop 1440px e
+celular 390px conferidas; testes abrangem 360px/texto 1,5x e menus por perfil.
+Prévia http://localhost:8082 atualizada; imagem empacotada responde HTTP 200.
+Sem novo teste para imagem estática, nova dependência ou chamada de rede para a marca.
+Python/MySQL não reexecutados nesta troca estática; sem backend/schema alterado.
+CI remoto/aceite assistivo manual pendentes. Sem merge, produção ou hardware físico.
+Notion não alterado; `.env` e dados reais preservados.
+
+Próximos três itens:
+1. Conferir CI do head atualizado no PR #14.
+2. Revisar marca e navegação assistiva em desktop/celular.
+3. Validar jornada de crachá com cadastro/terminal autorizado no ambiente de testes.
+
+Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
+
+## O. Portais personalizados por perfil — 2026-11-13
+
+Estado: em revisão. SEC-004/SEC-007, branch `feat/professional-access-screen`,
+continuação do PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para `main` (8716f5c confirmado no remoto).
+Interface autenticada personalizada por perfil: professor em verde e administrador
+em azul SENAI (#075DA8). Referência verde #3A9988; cabeçalho #2C8375 e ações #17695D
+preservam contraste com branco. Estados de aviso/erro mantêm significado próprio.
+Desktop usa menu superior com ícones; celular/texto ampliado mantém drawer e atalhos
+inferiores do professor. Boas-vindas mostram nome/perfil/matrícula reais, resumo da
+API e atalhos permitidos. Cartões claros organizam disponibilidade, movimentos,
+patrimônio e ocorrências existentes; não cria notícias, agenda ou dados fictícios no app.
+Logotipo SENAI padrão preservado. Autenticação, API, regras e permissões não alteradas.
+
+Validação: Flutter 3.47.8, analyze sem problemas, 20 testes aprovados e build Web
+release concluído. Cobertura: portais desktop 1440px dos dois perfis, navegação por
+rota/permissão, mobile 360px/texto 1,5x, fluxos administrativos e contraste >=4,5:1.
+Quatro prévias adicionais de professor/admin em desktop/celular com dados fictícios
+foram renderizadas e conferidas; arquivos temporários fora do Git.
+A validação revelou uma falha de layout ao recriar ThemeData por navegação;
+temas agora são reutilizados por perfil. Os cenários móveis passaram após a correção,
+sem suprimir assertions nem aplicar retries para encobrir a falha.
+Prévia local http://localhost:8082 atualizada; página e API health HTTP 200.
+`git diff --check` aprovado. Python/MySQL não reexecutados: mudança somente Flutter.
+CI remoto do novo head e aceite assistivo manual pendentes. Sem merge ou produção.
+Hardware simulado, `.env`/dados reais preservados; Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI do PR #14 no head publicado e revisar para main.
+2. Realizar aceite manual de teclado/leitor de tela e confirmar as cores por perfil.
+3. Validar jornada real controlada de cadastro/terminal, mantendo hardware simulado.
+
+Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.

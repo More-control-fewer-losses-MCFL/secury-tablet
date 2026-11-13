@@ -5,7 +5,7 @@ Estado em revisão. Sem alteração de regras de negócio, autenticação ou sch
 
 ## Organização visual
 
-- Azul institucional para ações principais, superfícies claras e bordas suaves.
+- Azul SENAI para administração e verde para professor; superfícies claras e bordas suaves.
 - Tipografia padrão do Material/SDK, sem pacote de fontes adicional.
 - Escala consistente de títulos, textos, espaçamentos e raios de cartão.
 - Contraste reforçado nas cores de sucesso, aviso, erro e texto secundário.
@@ -14,8 +14,8 @@ Estado em revisão. Sem alteração de regras de negócio, autenticação ou sch
 
 ## Navegação e perfis
 
-Desktop: menu lateral com grupos Acompanhar/Gerenciar/Consultar/Sistema.
-Celular: drawer que abre por referência ao Scaffold correto; professor também
+Desktop: menu superior com ícones e ações permitidas para o perfil.
+Celular ou texto ampliado: drawer com grupos Acompanhar/Gerenciar/Consultar/Sistema que abre por referência ao Scaffold correto; professor também
 conta com atalhos inferiores Início/Retirar/Devolver/Histórico. O totem permanece
 no menu completo. Não há item selecionado artificialmente quando a rota não
 pertence aos atalhos inferiores. O drawer fecha antes de navegar, sem pop da
@@ -70,3 +70,84 @@ não são adicionados ao Git. Nenhum teste real de hardware, importação de cad
 ou alteração em banco foi executado por esta revisão de interface.
 
 Revisão visual: commit a07204f; PR [#13](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/13) em rascunho sobre feat/google-sheets-professor-sync (dependência PR #12). Runtime local atualizado; CI remoto e aceite assistivo manual pendentes. Sem merge.
+
+## Tela de acesso institucional — 2026-11-13
+
+Escopo SEC-004: aplicar a referência visual de acesso, com painel azul institucional
+ocupando metade do desktop, grafismos nativos e formulário branco centralizado.
+Entrada inicial em `/#/admin/login` com usuário/senha do cadastro administrativo
+existente e área clicável “Passe o crachá” para `/#/login`, destinada a professores.
+O celular mostra marca compacta e formulário, sem painel institucional alto.
+Não há autenticação Google nem autocadastro/senha de professor implementados.
+Cadastro e recuperação de senha são orientados à administração, sem links fictícios.
+RFID continua usando o serviço existente e exige terminal autorizado/cadastro ativo.
+A autorização do terminal fica em “Configurar acesso por crachá”, com a credencial
+administrativa e retorno ao RFID sem manter sessão de administrador.
+
+Critérios BDD:
+
+- Dado visitante, ao abrir o app, vê usuário/senha, “Acessar” e “Passe o crachá”.
+- Dado cadastro administrativo válido, ao acessar, a API confirma a sessão antes do painel.
+- Ao selecionar “Passe o crachá”, abre o leitor; Enter ou “Validar crachá” usa a API.
+- Dado terminal sem autorização ou crachá inválido, o erro mantém o visitante no acesso.
+- Ao autorizar terminal com credenciais administrativas, volta ao leitor sem sessão admin.
+- Em 360px com texto 1,5x e desktop, campos e troca de acesso continuam utilizáveis.
+
+Validação local: Flutter 3.47.8/Dart 3.13.7 em Docker, analyze sem problemas,
+17 testes Flutter aprovados e build Web release concluído. 109 testes unitários
+Python aprovados com `.venv/Scripts/python.exe`; aviso Starlette/httpx preexistente.
+`git diff --check` aprovado. Sem Python alterado: Ruff não se aplica ao diff.
+Integração MySQL não executada nesta alteração de interface.
+Capturas desktop/crachá em 1440px e celular real em 390px conferidas no Chrome
+headless com perfil isolado; testes cobrem 360px/texto 1,5x e fluxos em 1440px.
+Prévia local separada em http://localhost:8082; página/healthz e API health HTTP 200.
+Build e capturas temporários fora do Git. Não houve login com credenciais reais.
+Aceite assistivo manual e CI remoto pendentes: estado em revisão.
+
+Implementação: [7172693](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/71726938c2fd4685e9f5e728941ac041cd291ee8); PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main`. CI remoto pendente, sem merge.
+
+## Marca SENAI padronizada — 2026-11-13
+
+`BrandMark` agora exibe o logotipo branco do AVA SENAI/SC, correspondente à
+referência fornecida, em lugar do escudo acompanhado de texto comum.
+O mesmo asset local atende login desktop/móvel e menu lateral/drawer de ambos os
+perfis; fundos claros recebem uma base azul. Mantém proporção e rótulo semântico SENAI.
+Arquivo original e proveniência: `frontend_flutter/assets/branding/README.md`.
+
+BDD: dado qualquer tela com a marca SENAI, ao exibir o cabeçalho/menu,
+usa o mesmo logotipo sem distorção; em área branca, o símbolo branco permanece
+legível sobre azul; o carregamento da marca não exige rede.
+
+Analyze sem problemas, 17 testes existentes e build Web release aprovados com
+Flutter 3.47.8. Capturas em 1440px e 390px conferidas; prévia 8082 atualizada.
+CI do PR #14 e aceite assistivo manual pendentes. Sem alterações de autenticação.
+
+Commit da marca: [3d28117](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/3d2811745842232e48321b2c2713e73253db4725), incluído no PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14).
+
+## Portais personalizados por perfil — 2026-11-13
+
+Professor: verde próximo à referência, cabeçalho #2C8375, ações #17695D e superfícies
+suaves. Administração: azul SENAI #075DA8. O tom mais escuro nas áreas com texto
+branco mantém contraste mínimo de 4,5:1. Avisos, erros e sucessos conservam sua semântica.
+
+Menu superior no desktop, drawer e atalhos do professor no celular/texto ampliado.
+O cabeçalho PortalWelcome reutilizável mostra identidade real, matrícula do professor,
+resumo da API e atalhos do perfil. Mantém os painéis de disponibilidade, movimentos,
+patrimônio e ocorrências. Nenhuma notícia, horário ou foto de pessoa foi inventada.
+A marca SENAI usa o mesmo asset local. Login institucional e autorização permanecem.
+
+Temas por perfil são instâncias estáveis entre rotas; recriá-los em cada build causava
+notificação de tema durante navegação e assertions de layout nos formulários móveis.
+Cache corrigiu a causa, verificada nos mesmos cenários, sem supressão/retry cego.
+
+BDD:
+- Dado professor autenticado, ao abrir o início, vê verde, seu nome/matrícula e ações próprias.
+- Dado administrador autenticado, vê azul SENAI, patrimônio e ações administrativas.
+- Ao navegar pelos atalhos superiores, mantém tema e permissões do perfil.
+- Em 360px com texto 1,5x, mantém campos, menus e operações utilizáveis sem overflow.
+- Dados dos painéis continuam vindo da API; alerta visual não confirma sensor físico.
+
+Analyze sem problemas; 20 testes Flutter, contraste, quatro prévias com fixtures e
+build Web release aprovados. Prévia 8082 atualizada; CI e aceite assistivo pendentes.
+
+Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/5328625785cdc134468f532cb563f4f7c7f82ab8), PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) para main.

@@ -7,6 +7,7 @@ import '../../core/utils/display.dart';
 import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
+import 'portal_welcome.dart';
 
 /// Personal self-service overview. Ownership remains enforced by the API.
 class TeacherHomePage extends StatefulWidget {
@@ -44,22 +45,6 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: PageHeading(
-              'Olá, ${widget.controller.displayName}',
-              'Retire, devolva e acompanhe seus tablets em um só lugar.',
-            ),
-          ),
-          IconButton(
-            tooltip: 'Atualizar meus dados',
-            onPressed: _refresh,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
       FutureBuilder<({Availability availability, HistoryResultPage history})>(
         future: data,
         builder: (context, snapshot) {
@@ -79,6 +64,33 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              PortalWelcome(
+                controller: widget.controller,
+                summary: '${result.availability.available} tablets disponíveis',
+                detail: result.history.rows.isEmpty
+                    ? 'Seu próximo registro de retirada ou devolução aparecerá aqui.'
+                    : 'Última movimentação: ${formatDateTime(result.history.rows.first.startedAt)}. '
+                          'Consulte seu histórico para acompanhar os detalhes e as pendências.',
+                onRefresh: _refresh,
+                shortcuts: const [
+                  PortalShortcut(
+                    'Iniciar retirada',
+                    Icons.output_outlined,
+                    '/movements',
+                  ),
+                  PortalShortcut(
+                    'Registrar devolução',
+                    Icons.assignment_return_outlined,
+                    '/returns',
+                  ),
+                  PortalShortcut(
+                    'Consultar histórico',
+                    Icons.history_outlined,
+                    '/history',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               SectionCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,12 +101,14 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppTheme.paleBlue,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer,
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.tablet_android_outlined,
-                            color: AppTheme.blue,
+                            color: Theme.of(context).colorScheme.primary,
                             size: 28,
                           ),
                         ),
@@ -213,9 +227,12 @@ class _PersonalMovement extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 2),
-          child: Icon(Icons.tablet_android_outlined, color: AppTheme.blue),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Icon(
+            Icons.tablet_android_outlined,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(

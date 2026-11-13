@@ -17,13 +17,13 @@ import '../../features/totem/totem_page.dart';
 import '../../services/app_controller.dart';
 
 GoRouter createAppRouter(AppController controller) => GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/admin/login',
   refreshListenable: controller,
   redirect: (context, state) {
     final onLogin =
         state.matchedLocation == '/login' ||
         state.matchedLocation == '/admin/login';
-    if (!controller.hasIdentity && !onLogin) return '/login';
+    if (!controller.hasIdentity && !onLogin) return '/admin/login';
     if (controller.hasIdentity && onLogin) return '/home';
     // The backend remains the authority: this is a second, UX-level guard.
     if (controller.hasIdentity &&

@@ -3,6 +3,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend_flutter/core/theme/app_theme.dart';
 
 void main() {
+  test('profile headers and action colors keep readable white text', () {
+    for (final color in [
+      AppTheme.blue,
+      AppTheme.teacherHeader,
+      AppTheme.teacherPrimary,
+    ]) {
+      final ratio =
+          (Colors.white.computeLuminance() + .05) /
+          (color.computeLuminance() + .05);
+      expect(ratio, greaterThanOrEqualTo(4.5));
+    }
+  });
+
   test('body and status text retain readable contrast on their surfaces', () {
     for (final color in [
       AppTheme.text,

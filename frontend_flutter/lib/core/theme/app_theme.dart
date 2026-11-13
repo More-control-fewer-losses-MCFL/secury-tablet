@@ -4,7 +4,7 @@ class AppTheme {
   AppTheme._();
 
   static const navy = Color(0xFF142C4B);
-  static const blue = Color(0xFF1D4ED8);
+  static const blue = Color(0xFF075DA8);
   static const buttonBlue = blue;
   static const paleBlue = Color(0xFFEEF4FF);
   static const background = Color(0xFFF4F6FA);
@@ -15,14 +15,44 @@ class AppTheme {
   static const warning = Color(0xFF95520B);
   static const border = Color(0xFFDDE4EE);
 
-  static ThemeData get light {
+  static const teacherGreen = Color(0xFF3A9988);
+  static const teacherHeader = Color(0xFF2C8375);
+  static const teacherPrimary = Color(0xFF17695D);
+  static const teacherSurface = Color(0xFFE8F5F0);
+
+  static Color headerFor(bool admin) => admin ? blue : teacherHeader;
+
+  static final ThemeData _adminTheme = _build(
+    primary: blue,
+    soft: paleBlue,
+    canvas: background,
+  );
+
+  static ThemeData get light => _adminTheme;
+
+  static final ThemeData _teacherTheme = _build(
+    primary: teacherPrimary,
+    soft: teacherSurface,
+    canvas: const Color(0xFFF1F6F4),
+  );
+
+  static ThemeData get teacher => _teacherTheme;
+
+  static ThemeData _build({
+    required Color primary,
+    required Color soft,
+    required Color canvas,
+  }) {
     final typography = ThemeData.light().textTheme.apply(
       bodyColor: text,
       displayColor: text,
     );
     final scheme = ColorScheme.fromSeed(
-      seedColor: blue,
-      primary: blue,
+      seedColor: primary,
+      primary: primary,
+      primaryContainer: soft,
+      onPrimary: Colors.white,
+      onPrimaryContainer: primary,
       surface: Colors.white,
       error: danger,
     );
@@ -33,7 +63,7 @@ class AppTheme {
       useMaterial3: true,
       fontFamily: 'Roboto',
       colorScheme: scheme,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: canvas,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
       textTheme: typography.copyWith(
@@ -93,7 +123,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: blue, width: 2),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
       ),
       cardTheme: CardThemeData(
@@ -108,7 +138,7 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: blue,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -122,8 +152,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: blue,
-          side: const BorderSide(color: blue),
+          foregroundColor: primary,
+          side: BorderSide(color: primary),
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           shape: shape,
@@ -131,6 +161,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
+          foregroundColor: primary,
           minimumSize: const Size(48, 48),
           textStyle: const TextStyle(
             fontFamily: 'Roboto',
@@ -140,7 +171,10 @@ class AppTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(minimumSize: const Size(48, 48)),
+        style: IconButton.styleFrom(
+          foregroundColor: primary,
+          minimumSize: const Size(48, 48),
+        ),
       ),
       dividerTheme: const DividerThemeData(
         color: border,
@@ -149,10 +183,10 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: paleBlue,
+        indicatorColor: soft,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => TextStyle(
-            color: states.contains(WidgetState.selected) ? blue : muted,
+            color: states.contains(WidgetState.selected) ? primary : muted,
             fontWeight: FontWeight.w600,
             fontSize: 12,
           ),

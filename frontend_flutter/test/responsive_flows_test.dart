@@ -176,6 +176,55 @@ Future<void> _unmount(
 }
 
 void main() {
+  for (final admin in [false, true]) {
+    testWidgets(
+      '${admin ? 'admin' : 'teacher'} desktop portal keeps role styling and navigation',
+      (tester) async {
+        final controller = AppController(createResponsiveApi());
+        if (admin) {
+          await controller.loginAdmin('admin', 'fictional-password');
+        } else {
+          await controller.identify('DEADBEEF');
+        }
+        final router = await _mount(
+          tester,
+          size: const Size(1440, 1000),
+          controller: controller,
+          textScale: 1,
+        );
+        try {
+          expect(find.byType(NavigationBar), findsNothing);
+          expect(find.byKey(const Key('portal-welcome')), findsOneWidget);
+          final theme = Theme.of(
+            tester.element(find.byKey(const Key('portal-welcome'))),
+          );
+          expect(
+            theme.colorScheme.primary,
+            admin ? AppTheme.blue : AppTheme.teacherPrimary,
+          );
+          expect(
+            find.text(
+              admin ? 'Seu espaço de gestão.' : 'Seu espaço de professor.',
+            ),
+            findsOneWidget,
+          );
+          if (!admin) {
+            expect(find.text('Matrícula: P-007'), findsOneWidget);
+            expect(find.text('Configurações'), findsNothing);
+          }
+          expect(tester.takeException(), isNull);
+          final target = admin ? '/alerts' : '/movements';
+          await tester.tap(find.byKey(ValueKey('portal-nav-$target')));
+          await tester.pumpAndSettle();
+          expect(router.routeInformationProvider.value.uri.path, target);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await _unmount(tester, router, controller);
+        }
+      },
+    );
+  }
+
   testWidgets('both logins fit a 360px screen with enlarged text', (
     tester,
   ) async {
@@ -186,14 +235,25 @@ void main() {
       controller: controller,
     );
     try {
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Senha de administrador'), findsNothing);
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('Senha'), findsOneWidget);
+      expect(find.text('Passe o crachá'), findsOneWidget);
+      expect(find.textContaining('Google'), findsNothing);
       expect(tester.takeException(), isNull);
 
-      router.go('/admin/login');
+      await tester.ensureVisible(find.byKey(const Key('badge-access')));
+      await tester.tap(find.byKey(const Key('badge-access')));
       await tester.pumpAndSettle();
-      expect(find.text('Acesso administrativo'), findsOneWidget);
-      expect(find.text('Senha de administrador'), findsOneWidget);
+      expect(router.routeInformationProvider.value.uri.path, '/login');
+      expect(find.text('Passe o crachá'), findsOneWidget);
+      expect(find.text('Senha'), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.ensureVisible(find.text('Acessar com cadastro'));
+      await tester.tap(find.text('Acessar com cadastro'));
+      await tester.pumpAndSettle();
+      expect(router.routeInformationProvider.value.uri.path, '/admin/login');
       expect(find.byType(TextField), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     } finally {

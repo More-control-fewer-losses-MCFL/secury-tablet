@@ -9,6 +9,7 @@ import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
 import '../shell/locker_illustration.dart';
 import 'admin_monitoring_panel.dart';
+import 'portal_welcome.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({required this.controller, super.key});
@@ -106,22 +107,32 @@ class _HomePageState extends State<HomePage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: PageHeading(
-                  'Olá, ${widget.controller.displayName}',
-                  'Acompanhe os tablets, as ocorrências e as movimentações da instituição.',
-                ),
+          PortalWelcome(
+            controller: widget.controller,
+            summary: '$available tablets disponíveis',
+            detail:
+                '$checkedOut em circulação e $maintenance em manutenção. '
+                'Acompanhe as ocorrências e as devoluções nos painéis abaixo.',
+            onRefresh: _refresh,
+            shortcuts: const [
+              PortalShortcut(
+                'Consultar patrimônio',
+                Icons.tablet_mac_outlined,
+                '/tablets',
               ),
-              IconButton(
-                onPressed: _refresh,
-                tooltip: 'Atualizar painel',
-                icon: const Icon(Icons.refresh),
+              PortalShortcut(
+                'Ver ocorrências',
+                Icons.notifications_active_outlined,
+                '/alerts',
+              ),
+              PortalShortcut(
+                'Ver devoluções',
+                Icons.assignment_return_outlined,
+                '/returns',
               ),
             ],
           ),
+          const SizedBox(height: 24),
           const SectionTitle('Visão geral do patrimônio'),
           const SizedBox(height: 12),
           LayoutBuilder(
