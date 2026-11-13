@@ -103,3 +103,5 @@ headless com perfil isolado; testes cobrem 360px/texto 1,5x e fluxos em 1440px.
 Prévia local separada em http://localhost:8082; página/healthz e API health HTTP 200.
 Build e capturas temporários fora do Git. Não houve login com credenciais reais.
 Aceite assistivo manual e CI remoto pendentes: estado em revisão.
+
+Implementação: [7172693](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/71726938c2fd4685e9f5e728941ac041cd291ee8); PR [#14](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/14) em rascunho para `main`. CI remoto pendente, sem merge.
