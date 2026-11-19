@@ -1,0 +1,54 @@
+# Disposable stack: all credentials are fictional and test-only.
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: secury_proxy_test
+      MYSQL_USER: proxy_test
+      MYSQL_PASSWORD: fictional-proxy-test-password
+      MYSQL_ROOT_PASSWORD: fictional-proxy-root-password
+    ports: ["127.0.0.1::3306"]
+    tmpfs: ["/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 2s
+      timeout: 3s
+      retries: 45
+  migrate:
+    image: ${API_TEST_IMAGE:-secury-tablet-api:local}
+    environment: &api_env
+      MYSQL_HOST: db
+      MYSQL_DATABASE: secury_proxy_test
+      MYSQL_USER: proxy_test
+      MYSQL_PASSWORD: fictional-proxy-test-password
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: fictional-administrator-password
+      ADMIN_TOKEN_SECRET: fictional-proxy-signing-secret-at-least-32-bytes
+      HARDWARE_API_KEY: fictional-hardware-key-for-isolated-tests
+      HARDWARE_SIMULATED: "true"
+      SESSION_COOKIE_SECURE: "true"
+      # Wildcard trust is limited to this disposable, unexposed fixture API.
+      FORWARDED_ALLOW_IPS: "*"
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    image: ${API_TEST_IMAGE:-secury-tablet-api:local}
+    environment: *api_env
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=3)"]
+      interval: 2s
+      timeout: 4s
+      retries: 20
+  web:
+    image: ${WEB_PROXY_TEST_IMAGE:-secury-web-runtime:review}
+    ports: ["127.0.0.1::80"]
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1/healthz"]
+      interval: 2s
+      timeout: 3s
+      retries: 10

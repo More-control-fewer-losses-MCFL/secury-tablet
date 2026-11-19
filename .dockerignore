@@ -20,3 +20,5 @@ secrets/
 **/credentials.json
 **/token.json
 **/google_sheets*token*.json
+
+docs/professor-demo.txt
