@@ -74,6 +74,15 @@ concluídos. Publicação Git autorizada em 2026-11-19 na branch
 `fix/railway-nginx-runtime`, dependente do PR #17. Merge, publicação de imagem
 e mudanças de configuração Railway continuam sem autorização.
 
+Branch publicada no GitHub; PR [#18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/18) em rascunho,
+base `fix/SEC-004-form-focus-feedback`, dependente do PR #17.
+Commits: [2425a25](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/2425a25)
+(proteção do contexto Docker) e
+[603c754](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/603c75495092c7e9aea5295720d6fb6db0b7dbf5)
+(configuração runtime, testes e documentação).
+CI do head documental final a conferir; sem merge ou deploy.
+
+
 ### Diagnóstico com evidências e limites
 
 - O código anterior fixa `api:8000`, `resolver 127.0.0.11` e `ipv6=off`.

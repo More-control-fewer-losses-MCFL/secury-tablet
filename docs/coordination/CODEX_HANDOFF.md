@@ -408,6 +408,15 @@ base enquanto essa dependência estiver aberta. Sem autorização de merge/deplo
 A proteção do TXT privado no `.dockerignore` foi registrada separadamente em
 `2425a25`; nenhum arquivo de credenciais foi incluído.
 
+Branch publicada no GitHub; PR [#18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/18) em rascunho,
+base `fix/SEC-004-form-focus-feedback`, dependente do PR #17.
+Commits: [2425a25](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/2425a25)
+(proteção do contexto Docker) e
+[603c754](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/603c75495092c7e9aea5295720d6fb6db0b7dbf5)
+(configuração runtime, testes e documentação).
+CI do head documental final a conferir; sem merge ou deploy.
+
+
 Template oficial Nginx em runtime, upstream por variável, DNS de resolv.conf
 com re-resolução/IPv6, validação de host/porta, envsubst restrito e headers HTTPS
 compartilhados. Prefixo, query, Authorization, cookies e limites preservados.
@@ -432,5 +441,5 @@ Guia completo, comandos, variáveis, diagnóstico e rollback:
 
 Próximos três itens:
 1. Confirmar domínio/target 80 no Railway e inspecionar DNS/logs privados em leitura.
-2. Revisar o PR desta branch e seu CI, conferindo a dependência #17 antes de integrar.
+2. Revisar PR #18 e seu CI, conferindo a dependência #17 antes de integrar.
 3. Autorizar e validar publicação apenas do frontend, com plano de reversão do guia.
