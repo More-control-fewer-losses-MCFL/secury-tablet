@@ -1,5 +1,32 @@
 # Estado da engenharia — Secury Tablet
 
+## Preparação local para Render — 2026-11-19
+
+Estado: em revisão na branch `deploy/render`; sem PR, merge ou implantação.
+O Blueprint define Web público, API privada e MySQL 8.4
+privado com disco de 10 GB na mesma região. Auto-Deploy está desligado nos três
+serviços; Auto Sync do Blueprint deverá ser desligado no painel após o primeiro
+sync autorizado. O procedimento está em [docs/render.md](render.md).
+
+Validação local em containers: API e Web construídos; imagem MySQL construída;
+131 testes unitários, 28 de integração em MySQL `_test` descartável e 24 testes
+Flutter aprovados; `flutter analyze`, Ruff, sintaxe do Blueprint e `nginx -t`
+aprovados. Alembic 0001–0004, dump consistente e restauração com conferência de
+uma linha passaram em MySQL isolado. A stack Compose segue saudável após recriar
+somente API e Web; o MySQL local e seu volume não foram recriados. Backup externo
+não foi testado nem configurado. Login administrativo via proxy, sessão com token
+e acesso sem token retornaram 200/200/401; limite por IP confiável retornou 429
+sem afetar outro cliente no Nginx simulado para Render.
+
+Próximos três itens:
+1. Escolher destino externo, retenção e rotina de backup; testar envio, recuperação
+   e restauração em banco separado antes de tratar dados importantes.
+2. Conferir o CI do commit publicado, configuração, custo e preview do Blueprint;
+   solicitar aprovação específica para o primeiro sync manual pago e desligar
+   Auto Sync no painel.
+3. Conferir no Render HTTPS, proxy, cabeçalho `CF-Connecting-IP`, limites, cookies,
+   migrações e fluxos de login/logout antes de liberar uso.
+
 ## Integração autorizada em main — 2026-11-13
 
 Pedido explícito do usuário: “de merge na main”. Integração funcional concluída.

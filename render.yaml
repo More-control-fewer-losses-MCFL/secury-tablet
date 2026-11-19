@@ -1,0 +1,95 @@
+# Render Blueprint: review costs and secrets before the first manual sync.
+services:
+  - type: web
+    name: secury-tablet-web
+    runtime: docker
+    branch: deploy/render
+    autoDeployTrigger: "off"
+    region: virginia
+    plan: 0.5c-512mb
+    dockerfilePath: ./docker/web.Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: API_UPSTREAM
+        fromService:
+          type: pserv
+          name: secury-tablet-api
+          property: hostport
+      - key: PUBLIC_SCHEME
+        value: https
+      - key: TRUST_CF_CONNECTING_IP
+        value: "true"
+
+  - type: pserv
+    name: secury-tablet-api
+    runtime: docker
+    branch: deploy/render
+    autoDeployTrigger: "off"
+    region: virginia
+    plan: 0.5c-512mb
+    dockerfilePath: ./docker/api.Dockerfile
+    dockerContext: .
+    preDeployCommand: python -m alembic upgrade head
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: MYSQL_HOST
+        fromService:
+          type: pserv
+          name: secury-tablet-mysql
+          property: host
+      - key: MYSQL_PORT
+        value: "3306"
+      - key: MYSQL_DATABASE
+        value: armario_tablets
+      - key: MYSQL_USER
+        value: armario
+      - key: MYSQL_PASSWORD
+        fromService:
+          type: pserv
+          name: secury-tablet-mysql
+          envVarKey: MYSQL_PASSWORD
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_TOKEN_SECRET
+        generateValue: true
+      - key: HARDWARE_API_KEY
+        generateValue: true
+      - key: HARDWARE_SIMULATED
+        value: "true"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: CORS_ALLOWED_ORIGINS
+        value: ""
+      - key: GOOGLE_SHEETS_ENABLED
+        value: "false"
+      - key: CABINET_CODE
+        value: ARM-01
+
+  - type: pserv
+    name: secury-tablet-mysql
+    runtime: docker
+    branch: deploy/render
+    autoDeployTrigger: "off"
+    region: virginia
+    plan: 1c-2g
+    dockerfilePath: ./docker/mysql.Dockerfile
+    dockerContext: .
+    envVars:
+      - key: MYSQL_DATABASE
+        value: armario_tablets
+      - key: MYSQL_USER
+        value: armario
+      - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
+    disk:
+      name: secury-tablet-mysql-data
+      mountPath: /var/lib/mysql
+      sizeGB: 10

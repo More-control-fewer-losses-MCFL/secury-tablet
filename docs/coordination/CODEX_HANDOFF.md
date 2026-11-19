@@ -1,6 +1,28 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção Q, 2026-11-13 — PRs #14/#15 integrados à main.
+Atualização mais recente: preparação local para Render, 2026-11-19.
+
+## R. Preparação do Render em revisão
+
+Branch `deploy/render`, sem PR, merge, serviços ou deploy Render. O estado de
+`main` não foi alterado. Foram preparados
+`render.yaml`, Dockerfile MySQL sem banco de testes/demo, Nginx para Compose e
+Render, migração no pre-deploy, lock Python, utilitário de dump e restauração
+isolada e [guia](../render.md). Auto-Deploy está explicitamente desligado em cada
+serviço; o painel exige Auto Sync = No para o Blueprint.
+
+Validação: builds API/Web/MySQL; 131 unitários, 28 integrações em MySQL `_test`
+descartável, 24 Flutter, análise Flutter, Ruff, Alembic 0001–0004, dump/restauração
+de uma linha, sintaxe YAML/Nginx aprovados. Compose respondeu HTTP 200 no Flutter
+e `/api/health` com banco `ok` após recriar API/Web; banco local permaneceu
+saudável e sem recriação. Login/sessão/sem token via proxy: 200/200/401; limite
+Nginx por `CF-Connecting-IP`: 429 para o mesmo IP e 422 para outro.
+Backup externo pendente de escolha, envio, recuperação
+e restauração; não foi declarado validado. Não houve teste real no Render.
+
+Próximos três itens: (1) escolher e provar backup externo; (2) conferir CI e
+aprovar separadamente o primeiro sync manual pago; (3) validar HTTPS, proxy, cookies,
+limites e banco no Render antes do uso.
 
 ## A. Identificação
 

@@ -1,8 +1,8 @@
 FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /app
-COPY pyproject.toml README.md ./
-RUN python -c "import subprocess,sys,tomllib; subprocess.check_call([sys.executable,'-m','pip','install',*tomllib.load(open('pyproject.toml','rb'))['project']['dependencies']])" \
+COPY pyproject.toml README.md requirements.lock ./
+RUN python -m pip install --no-deps -r requirements.lock \
     && useradd --create-home --uid 10001 secury
 COPY src ./src
 RUN pip install --no-deps .

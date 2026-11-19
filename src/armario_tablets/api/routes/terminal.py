@@ -53,13 +53,22 @@ def authorize_terminal(
 
 @router.post("/terminal/revoke", dependencies=[Depends(get_admin_session)])
 def revoke_terminal(
-    response: Response, terminal: dict = Depends(require_terminal), db: Session = Depends(get_db)
+    response: Response,
+    terminal: dict = Depends(require_terminal),
+    settings: Settings = Depends(get_settings),
+    db: Session = Depends(get_db),
 ) -> dict:
     with unit_of_work(db):
         record = db.get(TerminalAuthorization, terminal["sub"])
         if record is not None:
             db.delete(record)
-    response.delete_cookie(TERMINAL_COOKIE, path="/", samesite="strict")
+    response.delete_cookie(
+        TERMINAL_COOKIE,
+        path="/",
+        secure=settings.session_cookie_secure,
+        httponly=True,
+        samesite="strict",
+    )
     return {"authorized": False}
 
 

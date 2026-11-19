@@ -75,6 +75,24 @@ def test_terminal_cookie_is_http_only_and_bounded(auth_client):
     assert "max-age=28800" in cookie
 
 
+def test_secure_terminal_cookie_is_cleared_on_revoke(auth_client, settings):
+    settings.session_cookie_secure = True
+    headers = admin_headers(auth_client)
+    created = auth_client.post("/terminal/authorize", headers=headers)
+    assert created.status_code == 200
+    assert "secure" in created.headers["set-cookie"].lower()
+    token = created.cookies.get(TERMINAL_COOKIE)
+
+    revoked = auth_client.post(
+        "/terminal/revoke",
+        headers={**headers, "Cookie": f"{TERMINAL_COOKIE}={token}"},
+    )
+    assert revoked.status_code == 200
+    deleted = revoked.headers["set-cookie"].lower()
+    assert "max-age=0" in deleted
+    assert "secure" in deleted and "httponly" in deleted and "samesite=strict" in deleted
+
+
 def test_terminal_and_teacher_tokens_do_not_grant_admin(auth_client):
     teacher = teacher_headers(auth_client)
     assert auth_client.post("/terminal/authorize", headers=teacher).status_code == 401

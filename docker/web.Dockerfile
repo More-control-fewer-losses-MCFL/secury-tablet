@@ -18,6 +18,9 @@ COPY frontend_flutter/ ./
 RUN flutter build web --release --no-pub --dart-define=API_BASE_URL=/api
 
 FROM nginx:1.28-alpine
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/templates/default.conf.template
+COPY docker/start-web.sh /usr/local/bin/start-web
+RUN chmod 0755 /usr/local/bin/start-web
 COPY --from=flutter /build/build/web /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 80 10000
+ENTRYPOINT ["/usr/local/bin/start-web"]
