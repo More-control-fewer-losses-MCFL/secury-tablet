@@ -388,10 +388,12 @@ confirmação, erro 401 com instruções e layout em 1440px/390px conferidos.
 Usados apenas dados fictícios. Prévia http://localhost:8082 atualizada;
 página, healthz e saúde API/banco HTTP 200. `git diff --check` aprovado.
 Python/MySQL não reexecutados localmente: backend e schema sem alteração.
-PR/CI remoto: publicação pendente; aceite assistivo com leitor de tela real pendente.
+PR [#17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/17) em rascunho para main;
+implementação [0ebb7dd](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/0ebb7dd7c9fd8075ebbd9e277d57bd982d8b63be).
+CI remoto do head final e aceite com leitor de tela real pendentes. Sem merge.
 Backend, MySQL/schema, regras e hardware simulado preservados. Notion não alterado.
 
 Próximos três itens:
-1. Publicar/revisar PR para main e conferir CI do head exato.
+1. Revisar PR #17 para main e conferir CI do head exato.
 2. Confirmar o aceite do usuário no login do professor; sem merge automático.
 3. Concluir validação com leitor de tela real; hardware permanece simulado.

@@ -199,3 +199,4 @@ Sem mudança de regra de negócio, API, autenticação, schema ou hardware.
 Evidência desta revisão: 44 testes Flutter, analyze e build Web release aprovados;
 Chrome isolado confirmou teclado/envio/erro 401 e prévias desktop/celular.
 Aceite assistivo com leitor de tela real e CI remoto continuam pendentes.
+PR [#17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/17) em rascunho para main, sem dependências pendentes e sem merge.
