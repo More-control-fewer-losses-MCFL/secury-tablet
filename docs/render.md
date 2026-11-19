@@ -25,6 +25,13 @@ As dependências Python de execução e teste estão fixadas em
 `setuptools` também está fixado. Atualizar os locks deliberadamente e repetir
 builds/testes antes de um deploy manual.
 
+O MySQL 8.4 usa `caching_sha2_password`. Em teste isolado, a primeira conexão
+da imagem API e a conexão após reinício do MySQL negociaram TLS e executaram
+Alembic até `0004` sem `cryptography`. O CI agora repete esse teste sem
+healthcheck com o usuário da aplicação antes das migrações. Não desabilitar TLS
+no MySQL; se o transporte mudar, revisar a necessidade de `PyMySQL[rsa]`
+e repetir o teste a frio. A conexão real no Render ainda depende do primeiro deploy.
+
 O Flutter é compilado com `API_BASE_URL=/api`. O navegador usa o mesmo domínio HTTPS
 do Web; Nginx remove o prefixo `/api` e encaminha ao endereço privado da API obtido
 do Blueprint. `API_UPSTREAM` contém apenas host e porta; a API declara `PORT=8000`

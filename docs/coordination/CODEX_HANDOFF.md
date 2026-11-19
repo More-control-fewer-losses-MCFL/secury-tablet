@@ -1,6 +1,16 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: preparação local para Render, 2026-11-19.
+Atualização mais recente: autenticação inicial MySQL 8.4, 2026-11-19.
+
+## S. Verificação da primeira conexão MySQL
+
+Branch `deploy/render`. A imagem API não contém `cryptography`, mas a primeira
+conexão com usuário novo `caching_sha2_password` em MySQL 8.4 descartável
+negociou TLS. Alembic aplicou `0001`–`0004` no banco `_test` e passou após
+reiniciar o servidor, sem healthcheck com o usuário da aplicação. A suspeita
+não se reproduziu; `PyMySQL[rsa]` e os locks não foram alterados. O workflow
+ganhou teste de autenticação a frio. CI remoto e Render ainda não validados.
+O MySQL/volume do Compose local permaneceu intacto.
 
 ## R. Preparação do Render em revisão
 

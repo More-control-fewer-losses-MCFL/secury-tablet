@@ -1,5 +1,16 @@
 # Estado da engenharia — Secury Tablet
 
+## Autenticação inicial MySQL 8.4 — 2026-11-19
+
+Na branch `deploy/render`, a suspeita de falha por ausência de
+`PyMySQL[rsa]` não se reproduziu com a imagem API atual e MySQL 8.4
+descartável. O usuário novo usou `caching_sha2_password`; sem autenticação
+prévia desse usuário, PyMySQL negociou TLS. Alembic chegou a `0004` em
+banco `_test` novo e passou novamente após reiniciar o MySQL, quando o cache
+de autenticação foi limpo. O CI recebeu cobertura a frio com prontidão via root.
+Não houve mudança de dependências; execução real no Render e CI remoto seguem
+pendentes. Compose e volume MySQL local não foram alterados.
+
 ## Preparação local para Render — 2026-11-19
 
 Estado: em revisão na branch `deploy/render`; sem PR, merge ou implantação.

@@ -90,6 +90,51 @@ jobs:
       HARDWARE_API_KEY: ci-only-hardware-key-with-at-least-32-bytes
     steps:
       - uses: actions/checkout@v4
+      - name: Verify cold MySQL authentication and migrations
+        run: |
+          set -euo pipefail
+          export MYSQL_DATABASE=render_auth_test
+          export MYSQL_USER=render_auth_ci
+          export MYSQL_PASSWORD="$(openssl rand -hex 24)"
+          export MYSQL_ROOT_PASSWORD="$(openssl rand -hex 24)"
+          export MYSQL_HOST=render_auth_db
+          docker build -f docker/api.Dockerfile -t secury-tablet-api:cold-auth .
+          docker network create render_auth_net >/dev/null
+          cleanup() {
+            docker rm -f render_auth_db >/dev/null 2>&1 || true
+            docker network rm render_auth_net >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run -d --name render_auth_db --network render_auth_net \
+            -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD -e MYSQL_ROOT_PASSWORD \
+            mysql:8.4 >/dev/null
+          wait_mysql() {
+            for attempt in $(seq 1 60); do
+              if docker exec render_auth_db sh -c \
+                'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping -h 127.0.0.1 -uroot --silent' \
+                >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep 2
+            done
+            echo 'isolated MySQL did not become ready' >&2
+            return 1
+          }
+          wait_mysql
+          plugin=$(printf "SELECT plugin FROM mysql.user WHERE user='render_auth_ci';\n" |
+            docker exec -i render_auth_db sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot -N')
+          test "$plugin" = caching_sha2_password
+          docker run --rm --network render_auth_net \
+            -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
+            secury-tablet-api:cold-auth python -m alembic upgrade head
+          docker restart render_auth_db >/dev/null
+          wait_mysql
+          docker run --rm --network render_auth_net \
+            -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
+            secury-tablet-api:cold-auth python -m alembic upgrade head
+          docker run --rm --network render_auth_net \
+            -e MYSQL_HOST -e MYSQL_DATABASE -e MYSQL_USER -e MYSQL_PASSWORD \
+            secury-tablet-api:cold-auth python -m alembic current | grep -q '0004'
       - run: docker compose config --quiet
       - run: docker compose up -d --build --wait --wait-timeout 180
       - run: |
