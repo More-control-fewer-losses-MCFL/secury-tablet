@@ -1,5 +1,53 @@
 # Estado da engenharia — Secury Tablet
 
+## Integração autorizada em main — 2026-11-19
+
+Pedido explícito do usuário: “de um merge na main para poder dar tudo certo”.
+Integração do código confirmada; validação operacional no Railway continua pendente.
+
+- PR [#17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/17)
+  integrado por [32b9994](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/32b999409ab820c3023f41f0948bd3155d5eb98e):
+  foco persistente nos formulários, mensagens de erro e apresentação do acesso.
+- PR [#18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/18)
+  rebaseado em termos de base do PR para main após integrar #17, sem reescrever
+  commits, e integrado por
+  [ab979ce](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/ab979ce3c18a0a54bc76bacd86bf80059c48b557):
+  upstream/DNS de runtime no Nginx, headers, testes e proteção do contexto Docker.
+- Heads conferidos: `da279fd8f78020960bcef1c0c5ecffe2fa9629cd` (#17)
+  e `be034c343190cfaf15c0733acebb4ace978b168d` (#18).
+  Jobs unit, mysql, flutter e docker aprovados em ambos:
+  [CI #17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions/runs/44595691961)
+  e [CI #18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions/runs/44603672769).
+- Merges explícitos com SHA esperado; auto-merge não habilitado e proteções não
+  ignoradas. Árvore funcional da main `ab979ce` conferida igual à do head #18
+  validado. Branches de origem preservadas.
+- Clone local sincronizado por fast-forward. Arquivos privados ignorados e
+  serviços locais preservados; nenhum segredo incluído no Git.
+- [CI pós-merge ab979ce](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/actions/runs/44604987763)
+  em andamento na consulta. Distinguir esse resultado dos checks dos PRs.
+  Registro documental posterior não altera código funcional; conferir também
+  os checks do head vigente da main.
+
+Validações locais anteriores: 130 unitários Python, 28 integrações MySQL isoladas,
+44 testes Flutter, 20 cenários proxy e 5 da stack Compose, análise/build e Ruff.
+Não repetidas apenas pelo merge, pois o código resultante é o mesmo validado.
+
+Estado: código integrado; CI pós-merge em acompanhamento; **pronto para validação
+no Railway**, sem confirmação de funcionamento da plataforma. Não houve mudança
+direta de configuração ou comando de deploy no Railway. A integração Git pode
+acionar automações já configuradas; seu resultado não foi observado.
+O último diagnóstico público foi 404 `Application not found`; domínio/target 80,
+referência privada real, DNS e configuração de proxy/backend ainda exigem
+validação no projeto `glistening-communication`, ambiente `production`.
+Hardware segue simulado; sem alteração de schema ou de regras. Notion não alterado.
+
+Próximos três itens:
+1. Conferir CI pós-merge do head vigente e revisar o registro documental.
+2. Confirmar domínio/target 80 e referência `${{security-tablet.RAILWAY_PRIVATE_DOMAIN}}`.
+3. Autorizar e validar eventual deploy/configuração no Railway, usando o rollback
+   e os testes do guia Docker.
+
+
 ## Integração Nginx/Railway — 2026-11-19
 
 Estado: **pronto para validação no Railway**; publicação Git autorizada pelo
