@@ -69,19 +69,15 @@ Montagem, protocolo físico e homologação ficam em [hardware-sala.md](hardware
 
 ## Integração Railway: Nginx configurado na inicialização — 2026-11-19
 
-Estado: **pronto para validação no Railway**. Implementação e testes locais
-concluídos. Publicação Git autorizada em 2026-11-19 na branch
-`fix/railway-nginx-runtime`, dependente do PR #17. Merge, publicação de imagem
-e mudanças de configuração Railway continuam sem autorização.
-
-Branch publicada no GitHub; PR [#18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/18) em rascunho,
-base `fix/SEC-004-form-focus-feedback`, dependente do PR #17.
-Commits: [2425a25](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/2425a25)
-(proteção do contexto Docker) e
-[603c754](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/commit/603c75495092c7e9aea5295720d6fb6db0b7dbf5)
-(configuração runtime, testes e documentação).
-CI do head documental final a conferir; sem merge ou deploy.
-
+Estado: **pronto para validação no Railway**. PRs
+[#17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/17) e
+[#18](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/18)
+integrados em main por autorização explícita em 2026-11-19. Código funcional
+`ab979ce`; os dois PRs tiveram unit/mysql/flutter/docker aprovados.
+CI pós-merge em acompanhamento. Não foi alterada diretamente a configuração
+Railway nem confirmado deploy; automações existentes podem ser acionadas pelo Git.
+A referência privada e o domínio público ainda precisam de validação real.
+Histórico, commits e próximos itens em `docs/PROJECT_STATUS.md` e handoff.
 
 ### Diagnóstico com evidências e limites
 
@@ -259,12 +255,11 @@ Banco real de teste desligado produziu 503; `/healthz` continuou respondendo.
 4. Se resolver e não conectar, conferir porta/bind IPv4/IPv6, ambiente e processo
    backend. Se receber 503, investigar banco/logs da API; se o frontend não tiver
    `/healthz`, investigar domínio, target port ou inicialização do Nginx.
-5. A publicação Git desta tarefa foi autorizada. Revisar a branch
-   `fix/railway-nginx-runtime` e o PR dependente do #17; usar a branch
-   `fix/SEC-004-form-focus-feedback` como base enquanto o #17 estiver aberto.
-   A proteção do TXT em `.dockerignore` está em commit separado. Não usar
-   `git add .` nem incluir `.env` ou credenciais. Conferir CI do head e obter
-   autorização explícita antes de merge/deploy.
+5. PRs #17/#18 já foram integrados em main com autorização. Conferir a CI
+   pós-merge do head vigente e o commit usado pelo serviço antes da publicação.
+   A proteção do TXT em `.dockerignore` está integrada. Não incluir `.env`
+   ou credenciais em commits futuros. Mudanças diretas/deploy no Railway
+   continuam exigindo autorização explícita.
 6. Após deploy autorizado somente do frontend, validar HTTPS `/`, `/healthz`
    e `/api/health` com status/tempo; depois testar contas exclusivas de teste,
    login dos dois perfis, sessões, rejeições, cookie seguro e redirects HTTPS.

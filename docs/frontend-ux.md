@@ -200,3 +200,11 @@ Evidência desta revisão: 44 testes Flutter, analyze e build Web release aprova
 Chrome isolado confirmou teclado/envio/erro 401 e prévias desktop/celular.
 Aceite assistivo com leitor de tela real e CI remoto continuam pendentes.
 PR [#17](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/17) em rascunho para main, sem dependências pendentes e sem merge.
+
+## Integração em main — 2026-11-19
+
+PR #17 integrado por `32b9994` e PR #18 por `ab979ce`, com autorização explícita.
+Checks unit/mysql/flutter/docker aprovados nos heads dos dois PRs; árvore funcional
+da main conferida igual ao head #18 validado. CI pós-merge em acompanhamento.
+O merge não confirma configuração ou funcionamento no Railway. Ver estado/handoff
+e `docs/docker.md` para evidências, configuração e limitações.
