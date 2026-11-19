@@ -4,8 +4,8 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F5F8FC",
-    "theme_color": "#0755B8",
-    "description": "Gestão de tablets com identificação RFID.",
+    "theme_color": "#075DA8",
+    "description": "Acesso de professores e gestão de tablets.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

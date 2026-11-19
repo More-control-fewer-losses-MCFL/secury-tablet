@@ -214,7 +214,7 @@ class _AppShellState extends State<AppShell> {
                           child: SingleChildScrollView(
                             key: PageStorageKey('page-$path'),
                             keyboardDismissBehavior:
-                                ScrollViewKeyboardDismissBehavior.onDrag,
+                                ScrollViewKeyboardDismissBehavior.manual,
                             padding: EdgeInsets.all(desktop ? 32 : 16),
                             child: SizedBox(
                               width: double.infinity,

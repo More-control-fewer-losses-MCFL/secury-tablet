@@ -155,3 +155,47 @@ Commit dos portais: [5328625](https://github.com/More-control-fewer-losses-MCFL/
 ## Acesso individual de professor — 2026-11-13
 
 Formulário verde `/#/professor/login`, com usuário/senha, mostrar/ocultar, autofill e Enter para acessar. Crachá e administração permanecem opções distintas. A API confirma identidade antes do portal; senha é limpa ao entrar. Administração configura credenciais no cadastro consultado, com diálogo próprio e sem ecoar senha. Saída retorna ao login correspondente; retirada por senha não exige UID. 24 testes Flutter, análise e build aprovados; evidências completas em [professor-password-login.md](professor-password-login.md).
+
+## Formulários, foco e mensagens de erro — 2026-11-19
+
+SEC-004, branch `fix/SEC-004-form-focus-feedback`. Estado: em revisão.
+Pedido: corrigir perda de foco no login do professor e melhorar clareza e apresentação.
+
+O teste de regressão reproduziu a falha original em Flutter 3.47.8:
+o campo Senha perdia foco após arrastar a página com teclado móvel aberto.
+A causa identificada é `ScrollViewKeyboardDismissBehavior.onDrag`.
+Login e shell agora usam `manual`; os nós de foco pertencem ao estado da tela.
+Tab/clique em outro controle continuam permitidos, sem prender o usuário no campo.
+
+Usuário avança para Senha pelo teclado; senha/crachá enviam somente por Enter
+ou botão. Campos obrigatórios recebem indicação local e foco no primeiro erro.
+Mostrar/ocultar senha preserva edição. Durante envio, campos ficam somente leitura,
+o botão informa a atividade e novos envios são bloqueados.
+
+O acesso mantém cores SENAI/professor, painel institucional, cartão de formulário
+com bordas e sombra discretas, dimensões responsivas e conexão verificável.
+Os avisos combinam título, descrição e orientação, sem depender apenas da cor.
+Categorias distinguem dados inválidos, autenticação, permissão, recurso ausente,
+conflito, limite de tentativas, servidor, rede, timeout e resposta inválida.
+Detalhes brutos do servidor/HTML/listas de validação não são mostrados.
+Falhas de transporte não repetem operações automaticamente; orientar conferência
+do estado antes de nova tentativa de operação com efeito persistente.
+
+BDD:
+- Dado professor digitando, quando saúde da API atualiza ou a página rola,
+  então foco e texto permanecem e não há POST antes da confirmação.
+- Dado formulário vazio, ao confirmar, vê os campos obrigatórios sem chamada de login.
+- Dada senha oculta com seleção, ao mostrar/ocultar, mantém texto, seleção e foco.
+- Dado envio pendente, dois Enters enviam uma única requisição.
+- Dado erro de acesso, permanece no formulário com instruções para corrigir.
+- Dado erro HTTP/proxy/rede, recebe mensagem classificada sem payload sensível.
+- Em celular e texto ampliado, controles e avisos permanecem utilizáveis.
+
+Referências: [W3C WAI: notificações em formulários](https://www.w3.org/WAI/tutorials/forms/notifications/)
+e [Flutter: comportamento de dispensa do teclado](https://api.flutter.dev/flutter/widgets/ScrollViewKeyboardDismissBehavior.html).
+Validação final, PR e limites são registrados no estado do projeto e no handoff.
+Sem mudança de regra de negócio, API, autenticação, schema ou hardware.
+
+Evidência desta revisão: 44 testes Flutter, analyze e build Web release aprovados;
+Chrome isolado confirmou teclado/envio/erro 401 e prévias desktop/celular.
+Aceite assistivo com leitor de tela real e CI remoto continuam pendentes.

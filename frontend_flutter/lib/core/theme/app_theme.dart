@@ -105,6 +105,17 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         floatingLabelBehavior: FloatingLabelBehavior.always,
+        errorMaxLines: 3,
+        helperMaxLines: 3,
+        errorStyle: const TextStyle(color: danger, fontSize: 12, height: 1.4),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: danger, width: 2),
+        ),
         filled: true,
         fillColor: const Color(0xFFFAFBFD),
         contentPadding: const EdgeInsets.symmetric(

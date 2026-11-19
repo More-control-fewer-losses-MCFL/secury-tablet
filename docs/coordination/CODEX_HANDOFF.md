@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção Q, 2026-11-13 — PRs #14/#15 integrados à main.
+Atualização mais recente: seção R, 2026-11-19 — foco e clareza dos formulários em revisão.
 
 ## A. Identificação
 
@@ -369,3 +369,29 @@ Próximos três itens:
 1. Preparar a configuração do Render para frontend, API e MySQL persistente.
 2. Aplicar Alembic 0004 e criar credenciais no banco hospedado quando o deploy for autorizado.
 3. Concluir aceite de teclado/leitor de tela e validação física no escopo apropriado.
+
+## R. SEC-004 — foco e clareza dos formulários — 2026-11-19
+
+Estado: em revisão. Branch `fix/SEC-004-form-focus-feedback`, base main c5b28bc
+confirmada no remoto. Somente frontend Flutter; critérios e referência em
+[frontend-ux.md](frontend-ux.md#formulários-foco-e-mensagens-de-erro--2026-11-19).
+Perda de foco por rolagem reproduzida em teste antes da correção.
+Ajustes de foco persistente, confirmação por teclado, obrigatórios, avisos
+classificados e apresentação responsiva do acesso. Nenhum segredo incorporado.
+
+Validação local: Flutter 3.47.8/Dart 3.13.7 em Docker, analyze sem apontamentos,
+44 testes aprovados e build Web release concluído. Inclui regressão de foco com
+teclado/rolagem/health assíncrono, obrigatórios sem POST, mostrar senha e seleção,
+Enter repetido e 17 cenários de API (HTTP/HTML/422/rede/timeout/resposta inválida/RFID).
+Chrome real com perfil isolado: digitação sem POST, Enter para Senha, uma única
+confirmação, erro 401 com instruções e layout em 1440px/390px conferidos.
+Usados apenas dados fictícios. Prévia http://localhost:8082 atualizada;
+página, healthz e saúde API/banco HTTP 200. `git diff --check` aprovado.
+Python/MySQL não reexecutados localmente: backend e schema sem alteração.
+PR/CI remoto: publicação pendente; aceite assistivo com leitor de tela real pendente.
+Backend, MySQL/schema, regras e hardware simulado preservados. Notion não alterado.
+
+Próximos três itens:
+1. Publicar/revisar PR para main e conferir CI do head exato.
+2. Confirmar o aceite do usuário no login do professor; sem merge automático.
+3. Concluir validação com leitor de tela real; hardware permanece simulado.
