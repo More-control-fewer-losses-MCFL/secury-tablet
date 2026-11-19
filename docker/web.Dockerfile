@@ -18,6 +18,8 @@ COPY frontend_flutter/ ./
 RUN flutter build web --release --no-pub --dart-define=API_BASE_URL=/api
 
 FROM nginx:1.28-alpine
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+ENV API_UPSTREAM_HOST=api API_UPSTREAM_PORT=8000 NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+COPY docker/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --chmod=755 docker/19-validate-upstream.envsh /docker-entrypoint.d/19-validate-upstream.envsh
 COPY --from=flutter /build/build/web /usr/share/nginx/html
 EXPOSE 80

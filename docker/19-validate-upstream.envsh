@@ -1,0 +1,42 @@
+#!/bin/sh
+# Sourced by the official entrypoint, after 15-local-resolvers.envsh.
+# Never print supplied values: a rejected value may contain sensitive data.
+fail_upstream() {
+    echo "Invalid Nginx runtime configuration: $1" >&2
+    exit 1
+}
+
+[ -n "${API_UPSTREAM_HOST:-}" ] || fail_upstream "API_UPSTREAM_HOST is required"
+case "$API_UPSTREAM_HOST" in
+    *[!A-Za-z0-9.-]*) fail_upstream "API_UPSTREAM_HOST must be a DNS hostname" ;;
+esac
+printf '%s\n' "$API_UPSTREAM_HOST" | LC_ALL=C awk '
+    length($0) > 253 { exit 1 }
+    {
+        count = split($0, labels, ".")
+        for (i = 1; i <= count; i++) {
+            if (length(labels[i]) > 63 ||
+                labels[i] !~ /^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$/) exit 1
+        }
+    }
+' || fail_upstream "API_UPSTREAM_HOST must be a DNS hostname"
+
+case "${API_UPSTREAM_PORT:-}" in
+    ""|*[!0-9]*|0*) fail_upstream "API_UPSTREAM_PORT must be an integer from 1 to 65535" ;;
+esac
+[ "${#API_UPSTREAM_PORT}" -le 5 ] &&
+    [ "$API_UPSTREAM_PORT" -le 65535 ] ||
+    fail_upstream "API_UPSTREAM_PORT must be an integer from 1 to 65535"
+
+[ -n "${NGINX_LOCAL_RESOLVERS:-}" ] ||
+    fail_upstream "no DNS resolver found in /etc/resolv.conf"
+for upstream_resolver in $NGINX_LOCAL_RESOLVERS; do
+    printf '%s\n' "$upstream_resolver" | LC_ALL=C awk '
+        $0 !~ /^[0-9.]+$/ && $0 !~ /^\[[0-9A-Fa-f:]+\]$/ { exit 1 }
+    ' || fail_upstream "unsupported DNS resolver in /etc/resolv.conf"
+done
+unset upstream_resolver
+
+# Prevent runtime environment variables named host/uri/etc from modifying Nginx.
+NGINX_ENVSUBST_FILTER='^(API_UPSTREAM_HOST|API_UPSTREAM_PORT|NGINX_LOCAL_RESOLVERS)$'
+export NGINX_ENVSUBST_FILTER

@@ -1,5 +1,43 @@
 # Estado da engenharia — Secury Tablet
 
+## Integração Nginx/Railway — 2026-11-19
+
+Estado: **pronto para validação no Railway**; publicação Git autorizada pelo
+usuário em 2026-11-19. Branch `fix/railway-nginx-runtime`, criada a partir de
+`da279fd` na branch `fix/SEC-004-form-focus-feedback` (PR #17).
+Main remota observada `c5b28bc`. PR desta tarefa deve ter a branch do #17 como
+base enquanto essa dependência estiver aberta. Sem autorização de merge/deploy.
+A proteção do TXT privado no `.dockerignore` foi registrada separadamente em
+`2425a25`; nenhum arquivo de credenciais foi incluído.
+
+Template oficial Nginx em runtime, upstream por variável, DNS de resolv.conf
+com re-resolução/IPv6, validação de host/porta, envsubst restrito e headers HTTPS
+compartilhados. Prefixo, query, Authorization, cookies e limites preservados.
+Backend, modelos, migrações, timeout Flutter de 12 s e hardware não alterados.
+
+Evidência pública: domínio informado retornou 404 Railway `Application not found`
+em ~0,4 s para /, /healthz e /api/health. Não comprovada a causa histórica do
+timeout na plataforma. DNS/logs/domínio privado real continuam pendentes.
+Projeto/ambiente e nomes foram informados pelo usuário, não confirmados via painel.
+Referência exata: `API_UPSTREAM_HOST=${{security-tablet.RAILWAY_PRIVATE_DOMAIN}}`,
+porta 8000; frontend target 80. Não adivinhar hostname privado.
+
+Validação: build frontend real; nginx -t/-T; 20 testes proxy; 5 testes da stack
+Compose descartável; 130 unitários e 28 MySQL isolados aprovados.
+Flutter analyze, 44 testes e build release /api aprovados. Ruff e diff aprovados.
+API existente reutilizada: 84 arquivos Python conferidos sem diferenças.
+Backend de 13 s excedeu o deadline de 12 s no teste específico; limite preservado. Aviso Starlette/httpx
+preexistente. Sem validação privada Railway, Notion ou dados reais.
+
+Guia completo, comandos, variáveis, diagnóstico e rollback:
+[docs/docker.md](docker.md#integração-railway-nginx-configurado-na-inicialização--2026-11-19).
+
+Próximos três itens:
+1. Confirmar domínio/target 80 no Railway e inspecionar DNS/logs privados em leitura.
+2. Revisar o PR desta branch e seu CI, conferindo a dependência #17 antes de integrar.
+3. Autorizar e validar publicação apenas do frontend, com plano de reversão do guia.
+
+
 ## SEC-004 — foco e clareza dos formulários — 2026-11-19
 
 Estado: em revisão. Branch `fix/SEC-004-form-focus-feedback`, base main c5b28bc
