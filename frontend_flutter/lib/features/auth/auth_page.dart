@@ -28,6 +28,12 @@ class _AuthPageState extends State<AuthPage> {
   final badgeController = TextEditingController();
   final adminUsernameController = TextEditingController();
   final adminPasswordController = TextEditingController();
+  final usernameFocus = FocusNode(debugLabel: 'access-username');
+  final passwordFocus = FocusNode(debugLabel: 'access-password');
+  final badgeFocus = FocusNode(debugLabel: 'access-badge');
+  String? usernameError;
+  String? passwordError;
+  String? badgeError;
   bool loading = false;
   bool passwordVisible = false;
   bool checkingApi = true;
@@ -37,7 +43,7 @@ class _AuthPageState extends State<AuthPage> {
   Color get accessColor =>
       professorPasswordMode ? AppTheme.teacherPrimary : _accessBlue;
   bool authorizeTerminal = false;
-  String? error;
+  ApiException? error;
   ApiHealth? health;
   Professor? identified;
 
@@ -50,6 +56,9 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   void dispose() {
+    usernameFocus.dispose();
+    passwordFocus.dispose();
+    badgeFocus.dispose();
     badgeController.dispose();
     adminUsernameController.dispose();
     adminPasswordController.dispose();
@@ -57,10 +66,13 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _checkApi() async {
+    setState(() => checkingApi = true);
     try {
       final result = await widget.controller.api.health();
       if (mounted) setState(() => health = result);
     } on ApiException {
+      if (mounted) setState(() => health = null);
+    } on FormatException {
       if (mounted) setState(() => health = null);
     } finally {
       if (mounted) setState(() => checkingApi = false);
@@ -69,6 +81,11 @@ class _AuthPageState extends State<AuthPage> {
 
   Future<void> _identify() async {
     if (loading) return;
+    if (badgeController.text.trim().isEmpty) {
+      setState(() => badgeError = 'Aproxime o crachá ou informe a leitura.');
+      badgeFocus.requestFocus();
+      return;
+    }
     setState(() {
       loading = true;
       error = null;
@@ -78,9 +95,16 @@ class _AuthPageState extends State<AuthPage> {
       identified = await widget.controller.identify(badgeController.text);
       if (mounted) context.go('/home');
     } on ApiException catch (exception) {
-      if (mounted) setState(() => error = exception.message);
-    } on FormatException catch (exception) {
-      if (mounted) setState(() => error = exception.message);
+      if (mounted) setState(() => error = exception);
+    } on FormatException {
+      if (mounted) {
+        setState(
+          () => error = const ApiException(
+            'Não foi possível confirmar o acesso. Tente entrar novamente.',
+            kind: ApiErrorKind.invalidResponse,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -88,6 +112,17 @@ class _AuthPageState extends State<AuthPage> {
 
   Future<void> _loginCredentials() async {
     if (loading) return;
+    final missingUser = adminUsernameController.text.trim().isEmpty;
+    final missingPassword = adminPasswordController.text.isEmpty;
+    setState(() {
+      usernameError = missingUser ? 'Informe seu usuário.' : null;
+      passwordError = missingPassword ? 'Informe sua senha.' : null;
+      error = null;
+    });
+    if (missingUser || missingPassword) {
+      (missingUser ? usernameFocus : passwordFocus).requestFocus();
+      return;
+    }
     setState(() {
       loading = true;
       error = null;
@@ -118,9 +153,16 @@ class _AuthPageState extends State<AuthPage> {
       adminPasswordController.clear();
       if (mounted) context.go('/home');
     } on ApiException catch (exception) {
-      if (mounted) setState(() => error = exception.message);
-    } on FormatException catch (exception) {
-      if (mounted) setState(() => error = exception.message);
+      if (mounted) setState(() => error = exception);
+    } on FormatException {
+      if (mounted) {
+        setState(
+          () => error = const ApiException(
+            'Não foi possível confirmar o acesso. Tente entrar novamente.',
+            kind: ApiErrorKind.invalidResponse,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -133,7 +175,7 @@ class _AuthPageState extends State<AuthPage> {
   );
 
   Widget _buildScaffold(BuildContext context) => Scaffold(
-    backgroundColor: Colors.white,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -149,10 +191,11 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
               Expanded(
+                key: const ValueKey('access-form-pane'),
                 child: LayoutBuilder(
                   builder: (context, pane) => SingleChildScrollView(
                     keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+                        ScrollViewKeyboardDismissBehavior.manual,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(minHeight: pane.maxHeight),
                       child: Padding(
@@ -162,8 +205,20 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                         child: Center(
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 400),
-                            child: _buildForm(context, wide: wide),
+                            constraints: const BoxConstraints(maxWidth: 460),
+                            child: Material(
+                              color: Colors.white,
+                              elevation: 2,
+                              shadowColor: AppTheme.navy.withValues(alpha: .12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                side: const BorderSide(color: AppTheme.border),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(wide ? 32 : 20),
+                                child: _buildForm(context, wide: wide),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -228,30 +283,49 @@ class _AuthPageState extends State<AuthPage> {
       const SizedBox(height: 28),
       if (credentialMode)
         AutofillGroup(
+          key: const ValueKey('credential-form'),
           child: Column(
             children: [
               TextField(
+                key: const Key('access-username'),
                 controller: adminUsernameController,
+                focusNode: usernameFocus,
                 autofillHints: const [AutofillHints.username],
                 autocorrect: false,
                 enableSuggestions: false,
-                enabled: !loading,
+                readOnly: loading,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
+                onEditingComplete: () => passwordFocus.requestFocus(),
+                onChanged: (_) {
+                  if (usernameError != null) {
+                    setState(() => usernameError = null);
+                  }
+                },
+                decoration: InputDecoration(
+                  errorText: usernameError,
                   labelText: 'Usuário',
                   hintText: 'Informe seu usuário',
-                  prefixIcon: Icon(Icons.person_outline),
+                  prefixIcon: const Icon(Icons.person_outline),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
+                key: const Key('access-password'),
                 controller: adminPasswordController,
-                enabled: !loading,
+                focusNode: passwordFocus,
+                readOnly: loading,
                 autofillHints: const [AutofillHints.password],
                 obscureText: !passwordVisible,
+                onEditingComplete: () {},
                 onSubmitted: (_) => _loginCredentials(),
+                onChanged: (_) {
+                  if (passwordError != null) {
+                    setState(() => passwordError = null);
+                  }
+                },
                 textInputAction: TextInputAction.go,
                 decoration: InputDecoration(
+                  errorText: passwordError,
                   labelText: 'Senha',
                   hintText: 'Informe sua senha',
                   prefixIcon: const Icon(Icons.lock_outline),
@@ -261,9 +335,10 @@ class _AuthPageState extends State<AuthPage> {
                         : 'Mostrar senha',
                     onPressed: loading
                         ? null
-                        : () => setState(
-                            () => passwordVisible = !passwordVisible,
-                          ),
+                        : () {
+                            setState(() => passwordVisible = !passwordVisible);
+                            passwordFocus.requestFocus();
+                          },
                     icon: Icon(
                       passwordVisible
                           ? Icons.visibility_off_outlined
@@ -312,17 +387,24 @@ class _AuthPageState extends State<AuthPage> {
         ),
         const SizedBox(height: 24),
         TextField(
+          key: const Key('access-badge'),
           controller: badgeController,
+          focusNode: badgeFocus,
           autocorrect: false,
           enableSuggestions: false,
           autofocus: true,
-          enabled: !loading,
+          readOnly: loading,
+          onEditingComplete: () {},
           onSubmitted: (_) => _identify(),
+          onChanged: (_) {
+            if (badgeError != null) setState(() => badgeError = null);
+          },
           textInputAction: TextInputAction.go,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
+            errorText: badgeError,
             labelText: 'Leitura do crachá',
             hintText: 'Aguardando leitura',
-            prefixIcon: Icon(Icons.badge_outlined),
+            prefixIcon: const Icon(Icons.badge_outlined),
           ),
         ),
         const SizedBox(height: 10),
@@ -333,38 +415,37 @@ class _AuthPageState extends State<AuthPage> {
       ],
       if (error != null) ...[
         const SizedBox(height: 12),
-        Semantics(
-          liveRegion: true,
-          child: StateMessage(
-            message: error!,
-            icon: Icons.error_outline,
-            color: AppTheme.danger,
-          ),
+        InlineNotice(
+          title: error!.title,
+          message: error!.message,
+          hint: error!.recoveryHint,
         ),
       ],
       const SizedBox(height: 20),
       SizedBox(
         width: double.infinity,
         child: FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: accessColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+          style: FilledButton.styleFrom(backgroundColor: accessColor),
           onPressed: loading
               ? null
               : credentialMode
               ? _loginCredentials
               : _identify,
           child: loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
+              ? const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Flexible(child: Text('Verificando acesso…')),
+                  ],
                 )
               : Text(
                   credentialMode
@@ -422,19 +503,29 @@ class _AuthPageState extends State<AuthPage> {
         ),
       ),
       const SizedBox(height: 20),
-      Center(
-        child: StatusPill(
-          checkingApi
-              ? 'Verificando conexão'
-              : health == null
-              ? 'Sistema indisponível'
-              : 'Sistema disponível',
-          color: checkingApi
-              ? AppTheme.warning
-              : health == null
-              ? AppTheme.danger
-              : AppTheme.success,
-        ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            child: StatusPill(
+              checkingApi
+                  ? 'Verificando conexão'
+                  : health == null
+                  ? 'Sistema indisponível'
+                  : 'Sistema disponível',
+              color: checkingApi
+                  ? AppTheme.warning
+                  : health == null
+                  ? AppTheme.danger
+                  : AppTheme.success,
+            ),
+          ),
+          IconButton(
+            tooltip: 'Verificar conexão',
+            onPressed: checkingApi ? null : _checkApi,
+            icon: const Icon(Icons.refresh, size: 20),
+          ),
+        ],
       ),
       const SizedBox(height: 12),
       if (adminMode)
@@ -593,6 +684,8 @@ class _InstitutionPanel extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 32),
+                        const _AccessFeatures(),
                       ],
                     ),
                   ),
@@ -662,4 +755,49 @@ class _AccessBackdrop extends CustomPainter {
 
   @override
   bool shouldRepaint(_AccessBackdrop oldDelegate) => false;
+}
+
+class _AccessFeatures extends StatelessWidget {
+  const _AccessFeatures();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .08),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white.withValues(alpha: .24)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final item in const [
+          (Icons.output_outlined, 'Retire para sua aula'),
+          (Icons.fact_check_outlined, 'Devolva com conferência'),
+          (Icons.history_outlined, 'Acompanhe suas movimentações'),
+        ])
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                ExcludeSemantics(
+                  child: Icon(item.$1, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    item.$2,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
 }

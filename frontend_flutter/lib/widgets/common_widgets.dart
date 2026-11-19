@@ -147,21 +147,83 @@ class ErrorPanel extends StatelessWidget {
   Widget build(BuildContext context) => SectionCard(
     child: Column(
       children: [
-        Semantics(
-          liveRegion: true,
-          child: StateMessage(
-            message: message,
-            icon: Icons.cloud_off_outlined,
-            color: AppTheme.danger,
-          ),
+        InlineNotice(
+          title: 'Não foi possível carregar',
+          message: message,
+          icon: Icons.cloud_off_outlined,
         ),
-        if (onRetry != null)
+        if (onRetry != null) ...[
+          const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
             label: const Text('Tentar novamente'),
           ),
+        ],
       ],
+    ),
+  );
+}
+
+/// Compact, persistent feedback near the control that caused it.
+class InlineNotice extends StatelessWidget {
+  const InlineNotice({
+    required this.title,
+    required this.message,
+    this.hint,
+    this.color = AppTheme.danger,
+    this.icon = Icons.error_outline,
+    super.key,
+  });
+
+  final String title;
+  final String message;
+  final String? hint;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: .06),
+        border: Border.all(color: color.withValues(alpha: .22)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ExcludeSemantics(child: Icon(icon, size: 22, color: color)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(message),
+                if (hint != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    hint!,
+                    style: const TextStyle(
+                      color: AppTheme.muted,
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

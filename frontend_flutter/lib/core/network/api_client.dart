@@ -23,13 +23,14 @@ class ApiClient {
 
   Future<Object?> get(String path, {Map<String, String>? query}) async {
     final uri = _uri(path, query);
-    return _send(() => _client.get(uri, headers: _headers));
+    return _send(() => _client.get(uri, headers: _headers), path: path);
   }
 
   Future<Object?> post(String path, Map<String, Object?> body) async {
     final uri = _uri(path);
     return _send(
       () => _client.post(uri, headers: _headers, body: jsonEncode(body)),
+      path: path,
     );
   }
 
@@ -44,39 +45,52 @@ class ApiClient {
     return query == null ? uri : uri.replace(queryParameters: query);
   }
 
-  Future<Object?> _send(Future<http.Response> Function() request) async {
+  Future<Object?> _send(
+    Future<http.Response> Function() request, {
+    required String path,
+  }) async {
     late final http.Response response;
     try {
       response = await request().timeout(timeout);
     } on TimeoutException {
-      throw const ApiException('A API demorou para responder.');
+      throw const ApiException(
+        'O sistema demorou além do esperado para responder.',
+        kind: ApiErrorKind.timeout,
+      );
     } on SocketException {
-      throw const ApiException('Não foi possível conectar à API.');
+      throw const ApiException(
+        'Não foi possível conectar ao sistema.',
+        kind: ApiErrorKind.network,
+      );
     } on http.ClientException {
       throw const ApiException(
-        'Falha de rede. Verifique a conexão e a configuração CORS da API.',
+        'Não foi possível conectar ao sistema.',
+        kind: ApiErrorKind.network,
       );
     }
 
+    final success = response.statusCode >= 200 && response.statusCode < 300;
     Object? decoded;
     if (response.body.isNotEmpty) {
       try {
         decoded = jsonDecode(response.body);
       } on FormatException {
-        throw ApiException(
-          'A API retornou uma resposta inválida.',
-          statusCode: response.statusCode,
-        );
+        // Proxy errors may be HTML. Preserve the HTTP classification.
+        if (success) {
+          throw ApiException(
+            'O sistema enviou uma resposta que não pôde ser reconhecida.',
+            statusCode: response.statusCode,
+            kind: ApiErrorKind.invalidResponse,
+          );
+        }
       }
     }
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final message = decoded is Map<String, dynamic>
-          ? decoded['detail']?.toString() ?? decoded['code']?.toString()
-          : null;
-      throw ApiException(
-        message ?? 'A API retornou HTTP ${response.statusCode}.',
-        statusCode: response.statusCode,
+    if (!success) {
+      throw ApiException.fromResponse(
+        response.statusCode,
+        decoded,
+        login: path == '/admin/login' || path == '/auth/professor/login',
+        rfid: path == '/auth/rfid',
       );
     }
     return decoded;
