@@ -3,10 +3,18 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
 class BrandMark extends StatelessWidget {
-  const BrandMark({this.inverted = false, this.compact = false, super.key});
+  const BrandMark({
+    this.inverted = false,
+    this.compact = false,
+    this.tagline = true,
+    super.key,
+  });
 
   final bool inverted;
   final bool compact;
+
+  /// Shows "Tablet de Segurança" below the logo.
+  final bool tagline;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -14,10 +22,18 @@ class BrandMark extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       Container(
-        color: inverted ? Colors.transparent : const Color(0xFF075DA8),
+        decoration: inverted
+            ? null
+            : const BoxDecoration(
+                color: AppTheme.blue,
+                borderRadius: AppRadius.control,
+              ),
         padding: inverted
             ? EdgeInsets.zero
-            : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            : const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
         child: Image.asset(
           'assets/branding/senai-white.webp',
           width: compact ? 108 : 144,
@@ -27,19 +43,19 @@ class BrandMark extends StatelessWidget {
           semanticLabel: 'SENAI',
         ),
       ),
-      const SizedBox(height: 8),
-      Text(
-        'Tablet de Segurança',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: inverted
-              ? Colors.white.withValues(alpha: .78)
-              : AppTheme.muted,
-          fontSize: compact ? 10 : 12,
-          fontWeight: FontWeight.w500,
+      if (tagline) ...[
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Tablet de Segurança',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: inverted ? AppTheme.onBrandMuted : AppTheme.muted,
+            fontSize: compact ? 10 : 12,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-      ),
+      ],
     ],
   );
 }

@@ -82,24 +82,26 @@ class _AgendaPageState extends State<AgendaPage> {
         'Eventos carregados do histórico persistido na API.',
       ),
       SectionCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Wrap(
-          spacing: 9,
-          runSpacing: 10,
+          spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             IconButton(
               onPressed: () => _step(-1),
               tooltip: 'Período anterior',
-              icon: const Icon(Icons.chevron_left),
+              icon: const Icon(Icons.chevron_left_outlined),
             ),
             Text(
               _rangeLabel(),
-              style: const TextStyle(fontWeight: FontWeight.w700),
+              style: Theme.of(context).textTheme.titleSmall
+                  ?.copyWith(fontFeatures: AppTheme.tabularFigures),
             ),
             IconButton(
               onPressed: () => _step(1),
               tooltip: 'Próximo período',
-              icon: const Icon(Icons.chevron_right),
+              icon: const Icon(Icons.chevron_right_outlined),
             ),
             OutlinedButton(
               onPressed: () {
@@ -148,7 +150,7 @@ class _AgendaPageState extends State<AgendaPage> {
           ],
         ),
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.md),
       FutureBuilder<HistoryResultPage>(
         future: events,
         builder: (context, snapshot) {
@@ -173,29 +175,35 @@ class _AgendaPageState extends State<AgendaPage> {
             );
           }
           return SectionCard(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SectionTitle('Movimentações do período'),
-                const Divider(height: 24),
-                ...rows.map(
-                  (row) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.event_note_outlined,
-                          color: AppTheme.blue,
-                        ),
-                        Text(
-                          formatTime(row.startedAt),
-                          style: const TextStyle(fontSize: 11),
-                        ),
-                      ],
+                const SizedBox(height: AppSpacing.xs),
+                for (final row in rows) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
                     ),
-                    title: Text(row.professorName),
+                    leading: SizedBox(
+                      width: 48,
+                      child: Text(
+                        formatTime(row.startedAt),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppTheme.muted,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      row.professorName,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
                     subtitle: Text(
                       '${row.purpose} · ${row.takenQuantity} tablet(s)',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                     trailing: StatusPill(
                       sessionStatusLabel(row.status),
@@ -222,15 +230,16 @@ class _AgendaPageState extends State<AgendaPage> {
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           );
         },
       ),
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.sm),
       const Wrap(
-        spacing: 8,
+        spacing: AppSpacing.xs,
+        runSpacing: AppSpacing.xs,
         children: [
           StatusPill('Retirada', color: AppTheme.blue),
           StatusPill('Devolução concluída', color: AppTheme.success),

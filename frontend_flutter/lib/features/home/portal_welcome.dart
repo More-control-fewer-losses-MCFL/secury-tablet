@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/glass_surface.dart';
 import '../../services/app_controller.dart';
 
 class PortalShortcut {
@@ -12,6 +13,9 @@ class PortalShortcut {
 }
 
 /// Presentation of the authenticated profile; permissions remain in the API.
+///
+/// Compact highlight band: identity and shortcuts on the profile gradient,
+/// cabinet summary on glass. Page metrics stay the main focus below it.
 class PortalWelcome extends StatelessWidget {
   const PortalWelcome({
     required this.controller,
@@ -31,114 +35,121 @@ class PortalWelcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final admin = controller.isAdmin;
+    final textTheme = Theme.of(context).textTheme;
+    final narrow = MediaQuery.sizeOf(context).width < 600;
     return Container(
       key: const Key('portal-welcome'),
-      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 24 : 36),
+      padding: EdgeInsets.all(narrow ? AppSpacing.lg : AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppTheme.headerFor(admin),
-        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppTheme.backdropFor(admin),
+        ),
+        borderRadius: AppRadius.panel,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // Narrow screens drop the overview card: its numbers are repeated
+          // right below (metrics / balance), so the band stays short.
+          final compact = constraints.maxWidth < 600;
+          final refreshTooltip = admin
+              ? 'Atualizar painel'
+              : 'Atualizar meus dados';
+          final eyebrow = Text(
+            admin
+                ? 'SECURY TABLET / ADMINISTRAÇÃO'
+                : 'SECURY TABLET / PROFESSOR',
+            style: textTheme.labelSmall?.copyWith(color: AppTheme.onBrandMuted),
+          );
+          final shortcutButtons = [
+            for (final shortcut in shortcuts)
+              TextButton.icon(
+                onPressed: () => context.go(shortcut.path),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.onBrand,
+                  backgroundColor: Colors.white.withValues(alpha: .12),
+                  overlayColor: Colors.white,
+                  textStyle: textTheme.labelMedium?.copyWith(
+                    fontFamily: 'Roboto',
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                  ),
+                ),
+                icon: Icon(shortcut.icon, size: 18),
+                label: Text(shortcut.label),
+              ),
+          ];
           final identity = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                admin
-                    ? 'SECURY TABLET / ADMINISTRAÇÃO'
-                    : 'SECURY TABLET / PROFESSOR',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  letterSpacing: 1.4,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 14),
+              if (compact)
+                Row(
+                  children: [
+                    Expanded(child: eyebrow),
+                    IconButton(
+                      tooltip: refreshTooltip,
+                      onPressed: onRefresh,
+                      color: AppTheme.onBrand,
+                      icon: const Icon(Icons.refresh_outlined, size: 20),
+                    ),
+                  ],
+                )
+              else
+                eyebrow,
+              const SizedBox(height: AppSpacing.sm),
               Semantics(
                 header: true,
                 child: Text(
                   admin ? 'Seu espaço de gestão.' : 'Seu espaço de professor.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: constraints.maxWidth < 600 ? 28 : 36,
-                    height: 1.15,
-                    letterSpacing: -.7,
-                    fontWeight: FontWeight.w700,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: AppTheme.onBrand,
                   ),
                 ),
               ),
-              const SizedBox(height: 22),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person_outline, color: AppTheme.text),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Olá, ${controller.displayName}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 19,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          admin
-                              ? 'Perfil administrativo'
-                              : 'Matrícula: ${controller.professor?.registration ?? '—'}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                          ),
-                        ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Olá, ${controller.displayName}',
+                style: textTheme.titleMedium?.copyWith(color: AppTheme.onBrand),
+              ),
+              Text(
+                admin
+                    ? 'Perfil administrativo'
+                    : 'Matrícula: ${controller.professor?.registration ?? '—'}',
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppTheme.onBrandMuted,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (compact)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final button in shortcutButtons) ...[
+                        button,
+                        const SizedBox(width: AppSpacing.xs),
                       ],
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final shortcut in shortcuts)
-                    OutlinedButton.icon(
-                      onPressed: () => context.go(shortcut.path),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
-                        textStyle: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 14,
-                        ),
-                      ),
-                      icon: Icon(shortcut.icon, size: 18),
-                      label: Text(shortcut.label),
-                    ),
-                ],
-              ),
+                )
+              else
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: shortcutButtons,
+                ),
             ],
           );
-          final overview = Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withValues(alpha: .3)),
+          final overview = GlassSurface(
+            borderRadius: AppRadius.card,
+            shadows: AppShadows.soft,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.lg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,41 +159,34 @@ class PortalWelcome extends StatelessWidget {
                     Expanded(
                       child: Text(
                         admin ? 'Visão do armário' : 'Seu atendimento',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: AppTheme.muted,
                         ),
                       ),
                     ),
                     IconButton(
-                      tooltip: admin
-                          ? 'Atualizar painel'
-                          : 'Atualizar meus dados',
+                      tooltip: refreshTooltip,
                       onPressed: onRefresh,
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      color: AppTheme.muted,
+                      icon: const Icon(Icons.refresh_outlined, size: 20),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  summary,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  detail,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    height: 1.6,
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        summary,
+                        style: textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(detail, style: textTheme.bodySmall),
+                    ],
                   ),
                 ),
               ],
@@ -194,14 +198,19 @@ class PortalWelcome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(flex: 3, child: identity),
-                const SizedBox(width: 40),
+                const SizedBox(width: AppSpacing.xl),
                 Expanded(flex: 2, child: overview),
               ],
             );
           }
+          if (compact) return identity;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [identity, const SizedBox(height: 24), overview],
+            children: [
+              identity,
+              const SizedBox(height: AppSpacing.lg),
+              overview,
+            ],
           );
         },
       ),

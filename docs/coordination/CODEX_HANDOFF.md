@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção T, 2026-11-19 — PRs #17/#18 integrados à main; CI pós-merge e Railway em acompanhamento.
+Atualização mais recente: seção U, 2026-11-26 — redesign visual do Flutter em revisão na branch feat/ui-redesign-glass; deploy de teste no Railway registrado.
 
 ## A. Identificação
 
@@ -490,3 +490,46 @@ Próximos três itens:
 2. Confirmar domínio/target 80 e referência `${{security-tablet.RAILWAY_PRIVATE_DOMAIN}}`.
 3. Autorizar e validar eventual deploy/configuração no Railway, usando o rollback
    e os testes do guia Docker.
+
+## U. Redesign visual do frontend — 2026-11-26
+
+Pedido explícito do usuário: redesign visual profissional do Flutter com
+glassmorphism, sem mudar comportamento, em etapas com checkpoints aprovados
+(tokens + vidro + login; shell; homes; páginas; documentação).
+
+- Branch `feat/ui-redesign-glass` a partir de `main` 9b665fd, em worktree separada;
+  pasta principal (`deploy/render-free`, alterações locais) preservada.
+- Commits: 9122fa4, 57fb0ec, 93e88eb, add2bb8, c3cf004, 074d168, 53bfd8c,
+  cf7a627, bea475a, e74cada, cc4ccc5 e o commit desta documentação.
+- Entregas: tokens (`AppSpacing`, `AppRadius`, `AppShadows`, `AppMotion`,
+  `AppGlass`), `GlassSurface` com fallback sem blur, login em vidro, barra do
+  shell em vidro, homes com métricas tabulares e prioridade para pendências,
+  páginas com variações de cartão, totem com `blur: false`, ícones outlined
+  (filled só no item ativo). Decisões em `docs/frontend-ux.md`.
+- Validação: Flutter 3.47.8 em Docker; format, analyze sem problemas, 51 testes
+  (44 de base + 7 novos), build Web release e `git diff --check` aprovados.
+  Python não alterado; pytest/Ruff não reexecutados. CI remoto não observado.
+- Capturas antes/depois com servidor simulado e dados fictícios do seed, fora do
+  Git; nenhuma API real, banco ou credencial real usados.
+- Segurança: sem mudança de autorização, rotas ou chamadas de API; nenhum segredo
+  no Flutter ou no Git.
+- Railway: deploy de teste com MySQL/api/web informado pelo usuário e registrado
+  em `docs/docker.md` sem valores secretos; não verificado nem alterado aqui.
+
+Pendências: diálogo de credenciais não redesenhado; `LockerIllustration` com
+cores próprias; páginas tablets/professores/agenda/configurações/alertas sem
+captura; verificação com leitor de tela real; desempenho do blur não medido.
+Estado: em revisão; PR será aberto pelo usuário; sem merge, sem deploy e Notion
+não atualizado.
+
+Próximos três itens:
+1. Abrir o PR para `main` e acompanhar os jobs unit, mysql, flutter e docker.
+2. Aceite assistivo (leitor de tela, teclado) e capturas das páginas pendentes.
+3. Restaurar referências de variáveis no Railway e validar o deploy de teste.
+
+Mensagem pronta para o ChatGPT: o frontend Flutter do Secury Tablet recebeu um
+redesign visual na branch `feat/ui-redesign-glass` (tokens, vidro com fallback,
+login, shell, homes e páginas), sem mudança de comportamento, API ou backend.
+Validação local: analyze sem problemas, 51 testes e build Web aprovados no
+Flutter 3.47.8. PR para `main` a abrir pelo usuário; CI e aceite assistivo
+pendentes. Deploy de teste no Railway informado e documentado sem segredos.

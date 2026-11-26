@@ -1,5 +1,45 @@
 # Estado da engenharia — Secury Tablet
 
+## Redesign visual do frontend Flutter — 2026-11-26
+
+Estado: **em revisão**. Branch `feat/ui-redesign-glass` a partir de `main` 9b665fd,
+desenvolvida em worktree separada para preservar a pasta principal (branch
+`deploy/render-free` com alterações locais não commitadas, intocadas).
+PR para `main` a ser aberto pelo usuário; sem merge e sem deploy.
+
+Somente camada visual do Flutter: tokens de design, `GlassSurface`, login,
+app shell, homes e páginas operacionais. Sem mudança de API, rotas, guardas,
+autenticação, regras de negócio, backend, banco, migrações ou Streamlit; sem
+dependência nova. Detalhes e regras de uso do vidro em
+[frontend-ux.md](frontend-ux.md#redesign-visual-e-glassmorphism--2026-11-26).
+
+Commits: 9122fa4 (tokens), 57fb0ec (GlassSurface), 93e88eb (contraste do vidro),
+add2bb8 (login), c3cf004 (shell), 074d168 (vidro 0,90), 53bfd8c (homes),
+cf7a627 (contraste dos atalhos), bea475a (páginas), e74cada (atalhos do
+professor), cc4ccc5 e o commit desta documentação.
+
+Validação local (Flutter 3.47.8 em Docker): format sem pendências, analyze sem
+problemas, 51 testes Flutter aprovados (44 de base + 7 novos), build Web release
+e `git diff --check` aprovados. Sem Python alterado: pytest/Ruff não reexecutados.
+Capturas antes/depois com dados fictícios e servidor simulado local, fora do Git.
+CI remoto ainda não observado (PR não aberto).
+
+Pendências: diálogo de credenciais não redesenhado; `LockerIllustration` com cores
+próprias; tablets/professores/agenda/configurações/alertas sem captura; leitor de
+tela real e navegação assistiva manual; desempenho do blur em hardware modesto.
+
+Deploy de teste no Railway (informado pelo usuário, não verificado nesta sessão):
+serviços MySQL (template), `api` e `web`; referências `${{MySQL.*}}` resolveram
+vazias e foram substituídas por valores fixos/cópia manual da senha. Detalhes,
+riscos e cuidados em [docker.md](docker.md#deploy-de-teste-no-railway--informado-em-2026-11-26).
+Nenhum valor secreto ou domínio público registrado.
+
+Próximos três itens:
+1. Abrir o PR para `main`, conferir CI (unit, mysql, flutter, docker) e revisar.
+2. Validar com leitor de tela real e teclado; capturar as páginas sem evidência.
+3. Restaurar as referências de variáveis no Railway e validar o deploy de teste
+   com os passos do guia Docker, sem expor credenciais.
+
 ## Integração autorizada em main — 2026-11-19
 
 Pedido explícito do usuário: “de um merge na main para poder dar tudo certo”.
