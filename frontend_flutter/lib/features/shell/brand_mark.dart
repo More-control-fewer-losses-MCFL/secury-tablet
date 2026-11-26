@@ -14,7 +14,7 @@ class BrandMark extends StatelessWidget {
     mainAxisSize: MainAxisSize.min,
     children: [
       Container(
-        color: inverted ? Colors.transparent : const Color(0xFF075DA8),
+        color: inverted ? Colors.transparent : AppTheme.blue,
         padding: inverted
             ? EdgeInsets.zero
             : const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
