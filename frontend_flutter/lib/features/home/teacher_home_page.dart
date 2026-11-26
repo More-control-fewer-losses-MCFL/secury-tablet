@@ -73,17 +73,9 @@ class _TeacherHomePageState extends State<TeacherHomePage> {
                     : 'Última movimentação: ${formatDateTime(rows.first.startedAt)}. '
                           'Consulte seu histórico para acompanhar os detalhes e as pendências.',
                 onRefresh: _refresh,
+                // Retirar/Devolver live in the focus card and bottom
+                // navigation; the band keeps only the history shortcut.
                 shortcuts: const [
-                  PortalShortcut(
-                    'Iniciar retirada',
-                    Icons.output_outlined,
-                    '/movements',
-                  ),
-                  PortalShortcut(
-                    'Registrar devolução',
-                    Icons.assignment_return_outlined,
-                    '/returns',
-                  ),
                   PortalShortcut(
                     'Consultar histórico',
                     Icons.history_outlined,
@@ -247,7 +239,7 @@ class _PersonalMovement extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(row.purpose, style: textTheme.titleSmall),
-              const SizedBox(height: 2),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 formatDateTime(row.startedAt),
                 style: textTheme.bodySmall?.copyWith(
