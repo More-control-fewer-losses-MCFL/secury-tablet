@@ -43,6 +43,9 @@ class Settings(BaseSettings):
     google_sheets_spreadsheet_id: str = ""
     google_sheets_professors_tab: str = "Professores"
     google_sheets_token_file: Path | None = None
+    # Lê a aba pelo link público (CSV gviz), sem OAuth. Expõe a planilha a quem
+    # tiver o link: decisão do usuário, ver docs/google-sheets-professors.md.
+    google_sheets_public_csv: bool = False
     google_sheets_max_professors: int = Field(default=1000, ge=1, le=10000)
     log_level: str = "INFO"
 
