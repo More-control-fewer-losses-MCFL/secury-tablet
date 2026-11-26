@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção U, 2026-11-26 — redesign visual do Flutter em revisão na branch feat/ui-redesign-glass; deploy de teste no Railway registrado.
+Atualização mais recente: seção V, 2026-11-26 — glassmorphism visível (v2) em revisão na branch feat/ui-glass-v2, ainda sem commit/PR.
 
 ## A. Identificação
 
@@ -533,3 +533,40 @@ login, shell, homes e páginas), sem mudança de comportamento, API ou backend.
 Validação local: analyze sem problemas, 51 testes e build Web aprovados no
 Flutter 3.47.8. PR para `main` a abrir pelo usuário; CI e aceite assistivo
 pendentes. Deploy de teste no Railway informado e documentado sem segredos.
+
+## V. Glassmorphism visível (v2) — 2026-11-26
+
+Pedido do usuário: o redesign com vidro não aparecia (cartão branco no login,
+barra branca lisa). Somente camada visual do Flutter.
+
+- Branch `feat/ui-glass-v2` a partir de `main` f86cd4d (PR #21 já integrado).
+  Sem commit, PR ou merge nesta sessão; pasta não rastreada e arquivos locais de
+  `deploy/render-free` preservados.
+- Entregas: `AppGlass` com variantes claro/escuro e `AppBackdrop` (manchas);
+  `GlassSurface` com realce de topo e `RepaintBoundary`; `GlassBackdrop` e
+  `GlassButton` novos; login com fundo colorido, painel e benefícios em vidro
+  escuro, campos translúcidos e entrada animada; barra em vidro claro com
+  pílula; faixa do início com manchas, atalhos em `GlassButton` e cartão em vidro
+  escuro; `InlineNotice` com cores explícitas.
+- Regras mantidas: >=4,5:1 calculado no pior caso; máximo 2 `BackdropFilter`
+  por tela (testado); totem `blur: false`; sem dependência nova; sem mudança de
+  rotas, API, autenticação, modelos, backend ou Streamlit.
+- Validação: Flutter 3.47.8 em Docker; format e analyze sem problemas; 85 testes
+  aprovados; build Web release e `git diff --check` aprovados. Python não alterado. CI não observado.
+- Prévias (dados fictícios, fora do Git) de login admin/professor, login 390px
+  e início admin/professor.
+
+Pendências: manchas contidas pelo contraste; blur não medido em navegador real e
+hardware modesto; aceite assistivo manual. Estado: em revisão; Notion não
+atualizado.
+
+Próximos três itens:
+1. Revisar as prévias, commitar e abrir o PR para `main`; acompanhar CI.
+2. Medir o blur no navegador real e em tablet modesto.
+3. Aceite assistivo (leitor de tela, teclado, alto contraste).
+
+Mensagem pronta para o ChatGPT: o frontend Flutter recebeu o glassmorphism v2 na
+branch `feat/ui-glass-v2` (vidro escuro com texto branco no login e na faixa do
+início, barra em vidro claro, `GlassButton`, fundo com manchas), sem mudança de
+comportamento, API ou backend. Validação local: analyze sem problemas e 85
+testes aprovados no Flutter 3.47.8. Commit, PR e CI pendentes.
