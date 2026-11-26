@@ -29,6 +29,38 @@ Próximos três itens:
    sincronizar os 3 cadastros fictícios.
 3. Voltar ao OAuth quando houver conta com permissão no Google Cloud.
 
+## Glassmorphism visível no Flutter (v2) — 2026-11-26
+
+Estado: **em revisão**, não commitado. Branch `feat/ui-glass-v2` a partir de
+`main` f86cd4d (PR #21 `feat/ui-redesign-glass` já integrado). PR, merge e deploy
+não feitos.
+
+Problema: o vidro branco a 0,90 parecia opaco, o fundo do login não tinha cor
+para o blur mostrar, e botões/barra eram chapados. Entrega somente visual:
+vidro escuro (véu navy + tint branco 0,12, borda 0,26) com texto branco no login
+e no cartão da faixa do início; vidro claro 0,68 na barra com pílula no item
+ativo; fundo do login com manchas ciano/violeta/azul-claro (professor em
+verde-água); novo `GlassButton` (primary/secondary/ghost); `GlassBackdrop`;
+`GlassSurface` com variantes, realce de topo e `RepaintBoundary`. No máximo 2
+`BackdropFilter` por tela; totem segue com `blur: false`. Sem dependência nova,
+sem mudança de rotas, API, autenticação, modelos, backend ou Streamlit.
+Parâmetros e justificativas em
+[frontend-ux.md](frontend-ux.md#glassmorphism-visível-v2--2026-11-26).
+
+Validação local (Flutter 3.47.8 em Docker): format sem pendências, analyze sem
+problemas, 85 testes aprovados, build Web release e `git diff --check` aprovados. Sem Python alterado:
+pytest/Ruff não se aplicam. Prévias renderizadas com dados fictícios, fora do Git.
+CI remoto não observado.
+
+Riscos: manchas contidas pelo pior caso de contraste; blur não medido em
+hardware modesto nem em navegador real; atalho "Passe o crachá" perdeu a linha
+auxiliar ao virar botão.
+
+Próximos três itens:
+1. Revisar as prévias, commitar em etapas e abrir o PR para `main`; acompanhar CI.
+2. Conferir no navegador real (Chrome/Edge) e num tablet modesto o custo do blur.
+3. Aceite assistivo (leitor de tela, teclado, alto contraste do sistema).
+
 ## Redesign visual do frontend Flutter — 2026-11-26
 
 Estado: **em revisão**. Branch `feat/ui-redesign-glass` a partir de `main` 9b665fd,

@@ -349,10 +349,20 @@ class InlineNotice extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                 ],
-                Text(message),
+                // Explicit colors: the opaque fill stays light even when the
+                // notice sits on dark glass with a white text theme.
+                Text(
+                  message,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: AppTheme.text),
+                ),
                 if (hint != null) ...[
                   const SizedBox(height: AppSpacing.xs),
-                  Text(hint!, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    hint!,
+                    style: Theme.of(context).textTheme.bodySmall
+                        ?.copyWith(color: AppTheme.muted),
+                  ),
                 ],
               ],
             ),

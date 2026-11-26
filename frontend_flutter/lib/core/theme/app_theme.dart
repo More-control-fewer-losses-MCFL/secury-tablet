@@ -43,22 +43,154 @@ abstract final class AppMotion {
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration medium = Duration(milliseconds: 200);
   static const Duration slow = Duration(milliseconds: 250);
+
+  /// One-time entrance of highlight panels (fade + short slide).
+  static const Duration entrance = Duration(milliseconds: 360);
+  static const double entranceOffset = 16;
   static const Curve curve = Curves.easeOutCubic;
 }
 
-/// Glass surface parameters. Opacity is high enough for >=4.5:1 text
-/// contrast over the darkest profile backdrop (see theme_contrast_test).
-abstract final class AppGlass {
-  static const double blurSigma = 16;
-  static const double opacity = .90;
-  static const double fallbackOpacity = .97;
-  static const double borderOpacity = .55;
+/// Glass variants: [dark] carries white text over colored backdrops (login,
+/// home band); [light] carries dark text over light pages (top bar).
+enum GlassTone { light, dark }
 
-  /// Effective fill of a white glass surface before compositing.
-  static Color fill({bool blurred = true, double? opacity}) =>
-      Colors.white.withValues(
-        alpha: blurred ? (opacity ?? AppGlass.opacity) : fallbackOpacity,
-      );
+/// Glass surface parameters. Every value is checked for >=4.5:1 text
+/// contrast against the worst-case backdrop in `theme_contrast_test.dart`.
+abstract final class AppGlass {
+  static const double blurSigma = 18;
+
+  /// Light glass: white tint for bars over light pages.
+  static const double lightOpacity = .68;
+  static const double lightBorderOpacity = .80;
+
+  /// Dark glass: a navy veil under a white tint. The tint alone (.10–.16)
+  /// cannot keep white text at 4.5:1 when a bright glow sits behind it, so
+  /// the veil darkens the backdrop first and the tint adds the frost.
+  static const Color darkVeil = Color(0xFF061A33);
+  static const double darkVeilOpacity = .42;
+  static const double darkTintOpacity = .12;
+  static const double darkBorderOpacity = .26;
+
+  /// Extra white at the top edge: brighter stroke and a faint inner sheen.
+  static const double highlightOpacity = .55;
+  static const double darkSheenOpacity = .06;
+  static const double lightSheenOpacity = .30;
+
+  /// Active navigation item on the light bar: a brighter glass pill.
+  static const double pillOpacity = .85;
+
+  /// Fills without blur (`blur: false`, reduced motion, high contrast).
+  static const double fallbackOpacity = .97;
+  static const double darkFallbackOpacity = .94;
+
+  /// Effective fill of a glass surface before compositing over the backdrop.
+  static Color fill(
+    GlassTone tone, {
+    bool blurred = true,
+    Color darkBase = darkVeil,
+  }) {
+    if (!blurred) {
+      return tone == GlassTone.light
+          ? Colors.white.withValues(alpha: fallbackOpacity)
+          : darkBase.withValues(alpha: darkFallbackOpacity);
+    }
+    return tone == GlassTone.light
+        ? Colors.white.withValues(alpha: lightOpacity)
+        : Color.alphaBlend(
+            Colors.white.withValues(alpha: darkTintOpacity),
+            darkVeil.withValues(alpha: darkVeilOpacity),
+          );
+  }
+
+  /// 1px stroke color at the bottom of the surface (the top is brighter).
+  static Color border(GlassTone tone) => Colors.white.withValues(
+    alpha: tone == GlassTone.light ? lightBorderOpacity : darkBorderOpacity,
+  );
+
+  /// Translucent fills for controls placed on dark glass. Fields sink
+  /// (darker than the panel); secondary buttons rise (lighter).
+  static Color darkControlFill({double tint = .10}) => Color.alphaBlend(
+    Colors.white.withValues(alpha: tint),
+    darkVeil.withValues(alpha: .20),
+  );
+  static const double fieldTint = .04;
+  static const double fieldFocusTint = .08;
+  static const double buttonTint = .10;
+  static const double buttonHoverTint = .16;
+}
+
+/// A soft colored glow painted behind glass so the blur has something to show.
+@immutable
+class GlowSpot {
+  const GlowSpot(this.color, this.opacity, this.center, this.radius);
+
+  final Color color;
+
+  /// Peak opacity at the center; it fades to zero at [radius].
+  final double opacity;
+  final Alignment center;
+
+  /// Radius as a fraction of the painted area's shortest side.
+  final double radius;
+}
+
+/// Backdrops placed behind glass. The contrast test composites all glows of
+/// a set at their peak over the lightest stop (worst case: full overlap).
+abstract final class AppBackdrop {
+  // SENAI-derived accents for the admin profile.
+  static const cyan = Color(0xFF22B5E8);
+  static const violet = Color(0xFF7C5CFF);
+  static const skyBlue = Color(0xFF5AA2FF);
+
+  // Professor profile: deep aqua tones.
+  static const aqua = Color(0xFF0FA89A);
+  static const seaGreen = Color(0xFF12A676);
+  static const lagoon = Color(0xFF2496C8);
+
+  /// Login gradient, darker than [AppTheme.backdropFor] so colored glows
+  /// stay vivid without lifting white text below 4.5:1.
+  static List<Color> loginStopsFor(bool admin) => admin
+      ? const [Color(0xFF031631), Color(0xFF052F5C)]
+      : const [Color(0xFF032019), Color(0xFF08352F)];
+
+  static List<GlowSpot> loginGlowsFor(bool admin) => admin
+      ? const [
+          // Two glows sit behind the form (right half) so its blur shows.
+          GlowSpot(cyan, .26, Alignment(.4, -.6), .55),
+          GlowSpot(violet, .32, Alignment(-.75, .6), .8),
+          GlowSpot(skyBlue, .25, Alignment(.8, .65), .5),
+        ]
+      : const [
+          GlowSpot(aqua, .28, Alignment(.4, -.6), .55),
+          GlowSpot(seaGreen, .26, Alignment(-.75, .6), .8),
+          GlowSpot(lagoon, .25, Alignment(.8, .65), .5),
+        ];
+
+  /// Subtle glows inside the home band (gradient = [AppTheme.backdropFor]).
+  static List<GlowSpot> bandGlowsFor(bool admin) => admin
+      ? const [
+          GlowSpot(cyan, .16, Alignment(1, -1), 1.1),
+          GlowSpot(violet, .20, Alignment(.35, 1.1), .9),
+        ]
+      : const [
+          GlowSpot(aqua, .14, Alignment(1, -1), 1.1),
+          GlowSpot(lagoon, .14, Alignment(.35, 1.1), .9),
+        ];
+
+  /// Page canvas behind the light top bar: very faint tints of the profile.
+  static List<Color> pageStopsFor(bool admin) => admin
+      ? const [Color(0xFFF1F5FB), AppTheme.background]
+      : const [Color(0xFFEEF6F3), Color(0xFFF2F6F5)];
+
+  static List<GlowSpot> pageGlowsFor(bool admin) => admin
+      ? const [
+          GlowSpot(skyBlue, .16, Alignment(-.9, -1), .9),
+          GlowSpot(violet, .08, Alignment(1, -.9), .7),
+        ]
+      : const [
+          GlowSpot(aqua, .14, Alignment(-.9, -1), .9),
+          GlowSpot(lagoon, .08, Alignment(1, -.9), .7),
+        ];
 }
 
 class AppTheme {
@@ -97,18 +229,137 @@ class AppTheme {
   static const onBrand = Colors.white;
   static const onBrandMuted = Color(0xFFE6EFF8);
 
+  /// Secondary text and icons on the light glass bar: [muted] drops below
+  /// 4.5:1 when the dark home band scrolls under the bar.
+  static const mutedStrong = Color(0xFF364256);
+
+  /// Error text and outline on dark glass ([danger] is too dark there).
+  static const onGlassError = Color(0xFFFFE9E6);
+  static const onGlassErrorBorder = Color(0xFFFF8A80);
+
   static const tabularFigures = <FontFeature>[FontFeature.tabularFigures()];
+
+  /// Profile of an ambient theme: [teacher] uses [teacherPrimary].
+  static bool isAdminTheme(ThemeData theme) =>
+      theme.colorScheme.primary != teacherPrimary;
 
   static Color headerFor(bool admin) => admin ? blue : teacherHeader;
   static Color accentFor(bool admin) => admin ? blue : teacherPrimary;
 
   /// Gradient stops (darkest first) for profile backdrops. Both stops keep
-  /// white and [onBrandMuted] text at >=4.5:1, including the glows below.
+  /// white and [onBrandMuted] text at >=4.5:1, including the band glows.
   static List<Color> backdropFor(bool admin) =>
       admin ? const [blueDeep, blue] : const [teacherDeep, teacherPrimary];
 
-  /// Maximum white overlay painted by decorative backdrop shapes.
-  static const double backdropGlowOpacity = .08;
+  /// Primary action gradient (top, bottom): the accent fades into a deeper
+  /// tone; white text stays >=4.5:1 on both stops plus the sheen.
+  static List<Color> primaryGradientFor(bool admin) => admin
+      ? const [blue, Color(0xFF05427F)]
+      : const [teacherPrimary, Color(0xFF0E4F46)];
+
+  /// Colored glow under the primary action.
+  static Color primaryGlowFor(bool admin) =>
+      admin ? const Color(0xFF3B9BFF) : const Color(0xFF2CC4A8);
+
+  /// Bright outline for focused fields on dark glass and decorative icons
+  /// (non-text: >=3:1). Text on dark glass uses [onBrand]/[onBrandMuted].
+  static Color focusGlowFor(bool admin) =>
+      admin ? const Color(0xFF9AD7FF) : const Color(0xFF8EEBD6);
+
+  /// Theme for content on dark glass: white text, sunken translucent fields
+  /// with a light outline, bright focus outline and light error color.
+  static ThemeData onDarkGlass(ThemeData base, {required bool admin}) {
+    final focus = focusGlowFor(admin);
+    final textTheme = base.textTheme
+        .apply(bodyColor: onBrand, displayColor: onBrand)
+        .copyWith(
+          bodySmall: base.textTheme.bodySmall?.copyWith(color: onBrandMuted),
+        );
+    OutlineInputBorder outline(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: AppRadius.control,
+          borderSide: BorderSide(color: color, width: width),
+        );
+    const labelStyle = TextStyle(
+      color: onBrandMuted,
+      fontWeight: FontWeight.w500,
+    );
+    return base.copyWith(
+      textTheme: textTheme,
+      iconTheme: const IconThemeData(color: onBrandMuted),
+      dividerColor: Colors.white.withValues(alpha: .22),
+      hoverColor: Colors.white.withValues(alpha: .06),
+      focusColor: Colors.white.withValues(alpha: .12),
+      colorScheme: base.colorScheme.copyWith(
+        onSurface: onBrand,
+        onSurfaceVariant: onBrandMuted,
+        outline: Colors.white.withValues(alpha: .45),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: onBrand,
+        selectionColor: focus.withValues(alpha: .35),
+        selectionHandleColor: focus,
+      ),
+      inputDecorationTheme: base.inputDecorationTheme.copyWith(
+        fillColor: WidgetStateColor.resolveWith(
+          (states) => AppGlass.darkControlFill(
+            tint: states.contains(WidgetState.focused)
+                ? AppGlass.fieldFocusTint
+                : AppGlass.fieldTint,
+          ),
+        ),
+        labelStyle: labelStyle,
+        floatingLabelStyle: labelStyle,
+        hintStyle: const TextStyle(
+          color: onBrandMuted,
+          fontWeight: FontWeight.w400,
+        ),
+        prefixIconColor: onBrandMuted,
+        suffixIconColor: onBrandMuted,
+        errorStyle: const TextStyle(
+          color: onGlassError,
+          fontSize: 12,
+          height: 1.4,
+        ),
+        border: outline(Colors.white.withValues(alpha: .30)),
+        enabledBorder: outline(Colors.white.withValues(alpha: .30)),
+        focusedBorder: outline(focus, 2),
+        errorBorder: outline(onGlassErrorBorder),
+        focusedErrorBorder: outline(onGlassErrorBorder, 2),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: onBrand,
+          overlayColor: Colors.white,
+          minimumSize: const Size(48, 48),
+          textStyle: base.textTheme.labelLarge?.copyWith(fontFamily: 'Roboto'),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadius.control),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          foregroundColor: onBrandMuted,
+          minimumSize: const Size(48, 48),
+        ),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        side: const BorderSide(color: onBrandMuted, width: 1.5),
+        checkColor: WidgetStatePropertyAll(base.colorScheme.primary),
+        fillColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? onBrand
+              : Colors.transparent,
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(textColor: onBrand),
+      expansionTileTheme: const ExpansionTileThemeData(
+        iconColor: onBrand,
+        collapsedIconColor: onBrandMuted,
+        textColor: onBrand,
+        collapsedTextColor: onBrand,
+      ),
+    );
+  }
 
   static final ThemeData _adminTheme = _build(
     primary: blue,
