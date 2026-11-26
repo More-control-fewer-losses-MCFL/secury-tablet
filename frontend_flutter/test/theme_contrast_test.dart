@@ -43,4 +43,53 @@ void main() {
         (AppTheme.buttonBlue.computeLuminance() + .05);
     expect(buttonRatio, greaterThanOrEqualTo(4.5));
   });
+
+  double contrast(Color a, Color b) {
+    final la = a.computeLuminance();
+    final lb = b.computeLuminance();
+    return ((la > lb ? la : lb) + .05) / ((la > lb ? lb : la) + .05);
+  }
+
+  test('text on glass stays readable over every profile backdrop', () {
+    for (final admin in [true, false]) {
+      for (final backdrop in AppTheme.backdropFor(admin)) {
+        for (final blurred in [true, false]) {
+          // Worst case: the darkest backdrop color seen through the glass.
+          final glass = Color.alphaBlend(
+            AppGlass.fill(blurred: blurred),
+            backdrop,
+          );
+          for (final color in [
+            AppTheme.text,
+            AppTheme.muted,
+            AppTheme.accentFor(admin),
+          ]) {
+            expect(
+              contrast(color, glass),
+              greaterThanOrEqualTo(4.5),
+              reason: 'text $color on glass over $backdrop',
+            );
+          }
+        }
+      }
+    }
+  });
+
+  test('light text stays readable on profile backdrops and glows', () {
+    for (final admin in [true, false]) {
+      for (final backdrop in AppTheme.backdropFor(admin)) {
+        final lightest = Color.alphaBlend(
+          Colors.white.withValues(alpha: AppTheme.backdropGlowOpacity),
+          backdrop,
+        );
+        for (final color in [AppTheme.onBrand, AppTheme.onBrandMuted]) {
+          expect(
+            contrast(color, lightest),
+            greaterThanOrEqualTo(4.5),
+            reason: '$color over $backdrop with glow',
+          );
+        }
+      }
+    }
+  });
 }

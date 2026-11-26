@@ -92,16 +92,20 @@ class AppTheme {
 
   /// Text over a profile-colored backdrop.
   static const onBrand = Colors.white;
-  static const onBrandMuted = Color(0xFFDCE8F5);
+  static const onBrandMuted = Color(0xFFE6EFF8);
 
   static const tabularFigures = <FontFeature>[FontFeature.tabularFigures()];
 
   static Color headerFor(bool admin) => admin ? blue : teacherHeader;
   static Color accentFor(bool admin) => admin ? blue : teacherPrimary;
 
-  /// Gradient stops (darkest first) for profile backdrops.
+  /// Gradient stops (darkest first) for profile backdrops. Both stops keep
+  /// white and [onBrandMuted] text at >=4.5:1, including the glows below.
   static List<Color> backdropFor(bool admin) =>
-      admin ? const [blueDeep, blue] : const [teacherDeep, teacherHeader];
+      admin ? const [blueDeep, blue] : const [teacherDeep, teacherPrimary];
+
+  /// Maximum white overlay painted by decorative backdrop shapes.
+  static const double backdropGlowOpacity = .08;
 
   static final ThemeData _adminTheme = _build(
     primary: blue,
