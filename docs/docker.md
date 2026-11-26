@@ -279,3 +279,40 @@ Referências primárias: [rede privada Railway](https://docs.railway.com/network
 [templates oficiais](https://github.com/nginx/docker-nginx/blob/master/entrypoint/20-envsubst-on-templates.sh),
 [proxy e herança de headers](https://nginx.org/en/docs/http/ngx_http_proxy_module.html),
 [proxy headers Uvicorn](https://www.uvicorn.org/settings/#http).
+
+### Deploy de teste no Railway — informado em 2026-11-26
+
+Registro do estado **informado pelo usuário**; não foi verificado por API, painel
+ou logs nesta sessão, e nenhum deploy ou alteração de configuração foi feito por
+ela. Ambiente de teste, não homologação nem produção. Nenhum valor de senha,
+chave ou domínio público é registrado aqui.
+
+Três serviços no mesmo projeto/ambiente:
+
+| Serviço | Origem | Configuração relevante |
+| --- | --- | --- |
+| MySQL | template MySQL do Railway | credenciais geradas pela plataforma |
+| api | `docker/api.Dockerfile` | pre-deploy `alembic upgrade head` |
+| web | `docker/web.Dockerfile` | `API_UPSTREAM_HOST=secury-tablet.railway.internal`, `API_UPSTREAM_PORT=8000`, `PORT=80` |
+
+Conexão da api com o banco: as referências `${{MySQL.*}}` resolveram vazias
+nesse projeto. Por isso `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER` e
+`MYSQL_DATABASE` estão com valores fixos, e `MYSQL_PASSWORD` foi copiada
+manualmente do serviço MySQL.
+
+O `web` usa hostname privado fixo em vez da referência
+`${{security-tablet.RAILWAY_PRIVATE_DOMAIN}}` descrita acima; o valor precisa
+corresponder ao domínio privado real do serviço `api`.
+
+Riscos e cuidados:
+
+- Valores copiados não acompanham mudanças: renomear o serviço `api`, recriar o
+  MySQL ou rotacionar a senha quebra a conexão até a cópia ser refeita.
+- Investigar por que as referências resolveram vazias (nome exato do serviço,
+  mesmo ambiente, sintaxe no editor de variáveis) e voltar a usá-las quando
+  possível, para que a rotação de credenciais se propague.
+- Não registrar a senha copiada em commits, documentação, logs ou capturas.
+- O pre-deploy aplica migrações a cada deploy da `api`; registrar backup/snapshot
+  do banco antes de deploys com migração nova.
+- Validações da seção anterior (domínio no target 80, `/healthz`, `/api/health`,
+  sessões, cookie seguro) continuam valendo para este deploy.

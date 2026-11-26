@@ -48,7 +48,9 @@ Sair volta ao login do perfil; nenhuma sessão ou credencial foi incorporada ao 
 Reutiliza LockerIllustration/BrandMark e ícones Material. A ilustração do armário
 fica em área própria com descrição semântica, acompanhando o fluxo operacional;
 no celular, orientações compactas substituem o painel alto. Não há imagens de
-rede, nova biblioteca de assets ou efeitos de desfoque pesados.
+rede nem nova biblioteca de assets. Desfoque: a regra anterior ("sem efeitos de
+desfoque pesados") foi substituída pelo uso limitado de vidro descrito em
+[Redesign visual e glassmorphism](#redesign-visual-e-glassmorphism--2026-11-26).
 
 Títulos semânticos, mensagens de erro anunciáveis, rótulos além das cores,
 controles do tema com área mínima de 48px e teste de contraste >=4.5:1 nos textos
@@ -208,6 +210,95 @@ Checks unit/mysql/flutter/docker aprovados nos heads dos dois PRs; árvore funci
 da main conferida igual ao head #18 validado. CI pós-merge em acompanhamento.
 O merge não confirma configuração ou funcionamento no Railway. Ver estado/handoff
 e `docs/docker.md` para evidências, configuração e limitações.
+
+## Redesign visual e glassmorphism — 2026-11-26
+
+Estado: em revisão. Branch `feat/ui-redesign-glass`, criada a partir de `main`
+(9b665fd). Somente camada visual do Flutter: sem mudança de API, AppController,
+rotas, guardas, autenticação, textos de erro funcionais, backend, banco ou Streamlit.
+Nenhuma dependência nova no `pubspec.yaml`; somente assets locais existentes.
+
+Diagnóstico de partida: sem sistema visual. Eram 27 cores literais em 4 arquivos,
+10 raios, 18 espaçamentos e 14 tamanhos de fonte fora do tema; cartões todos
+iguais; quadrados coloridos de ícone repetidos; ícones filled e outlined
+misturados (49/75); menu desktop em abas de largura igual; formulário de login
+solto no branco.
+
+### Tokens (`lib/core/theme/app_theme.dart`)
+
+- `AppSpacing` 4/8/12/16/24/32/48; `AppRadius` 8 (controles), 12 (cartões),
+  20 (painéis de destaque e diálogos); `AppShadows` com dois níveis suaves;
+  `AppMotion` 150/200/250 ms; `AppGlass` com os parâmetros do vidro.
+- Neutros frios, `borderStrong` para contornos e separadores sobre vidro,
+  gradientes de perfil (`backdropFor`) e cores semânticas inalteradas.
+- Tipografia do SDK pelo `textTheme`: títulos com tracking negativo, `labelSmall`
+  como sobrelinha única em caixa alta e `AppTheme.tabularFigures` em números.
+
+### GlassSurface e regras de uso
+
+`lib/core/widgets/glass_surface.dart`: `ClipRRect` + `BackdropFilter`, branco
+translúcido, borda de 1px e sombra suave, com blur, opacidade e raio parametrizáveis.
+
+- Usado no cartão do login, nos destaques do painel institucional, na barra
+  superior (desktop e celular) e no cartão "Visão do armário"/"Seu atendimento"
+  das homes. Não usado em tabelas, listas e formulários longos.
+- Desfoque permitido com limites: sigma 16 (faixa aceita 0–30, usada 10–20),
+  opacidade 0,90 e no máximo 2 `BackdropFilter` por tela (barra + um destaque).
+  No celular, as homes não exibem o cartão de visão (repetia os números abaixo).
+- Fallback sem blur e com preenchimento 0,97 quando `blur: false`, quando o
+  sistema pede menos animação (`disableAnimations`) ou alto contraste.
+- Totem: ações em `GlassSurface(blur: false)` desde o início, pois o hardware do
+  totem não está definido. A página do totem não usa `BackdropFilter`.
+- A barra do shell mantém o viewport abaixo dela (foco, `ensureVisible` e toques
+  corretos) e usa `Clip.none` para o conteúdo rolado continuar visível sob o vidro.
+- `StatusPill` e `InlineNotice` têm fundo opaco para não herdar o que está atrás.
+
+### Ícones, cartões e navegação
+
+- Ícones Material outlined em todo o app; filled apenas no item ativo da
+  navegação (menu superior, drawer e navegação inferior), padrão Material 3.
+- Variações de cartão: destaque (faixa de perfil e vidro), métrica (`MetricCard`:
+  número tabular grande, rótulo discreto e ponto semântico, sem quadrado de
+  ícone), lista (divisores) e ação (cartões com botão próprio, hover/foco).
+  `SectionCard` aceita faixa superior de atenção; o significado sempre aparece
+  também em texto. `HintNote` reúne notas estáticas no fim das páginas.
+- Shell: barra clara em vidro, itens com largura natural, avatar com iniciais,
+  drawer claro com grupos. Homes: faixa compacta e métricas como foco; admin
+  prioriza ocorrências e pendências; professor prioriza saldo e Retirar/Devolver.
+- Erros de formulário em retirada, devolução e professores passaram de texto
+  vermelho solto para `InlineNotice`, com o mesmo texto e anúncio acessível.
+
+### Contraste e acessibilidade
+
+`test/theme_contrast_test.dart` verifica >=4,5:1 para texto, texto secundário e
+cor de ação sobre o vidro composto com o tom mais escuro de cada perfil (com e
+sem blur), texto claro sobre os gradientes com brilhos decorativos e texto branco
+dos atalhos da faixa. `test/glass_surface_test.dart` cobre blur, fallback
+(`blur: false`, menos animação, alto contraste) e fundo opaco de status/avisos.
+Áreas de toque de 48px, foco visível, `Semantics` existentes e escala de texto
+livre foram mantidos; os cartões do totem preservam semântica de botão.
+
+### Validação e evidências
+
+Flutter 3.47.8 em Docker (imagem local `secury-tablet-flutter-test`):
+`dart format` sem pendências, `flutter analyze` sem problemas, 51 testes
+aprovados (44 na linha de base de `main` + 7 novos) e `flutter build web
+--release` concluído; `git diff --check` aprovado. Sem Python alterado: pytest e
+Ruff não se aplicam a este diff e não foram reexecutados.
+
+Capturas antes/depois em 1440px e 390px (login, shell, homes, retirada,
+devolução, histórico e totem) feitas no Chrome headless com perfil isolado e
+servidor simulado local com dados fictícios do `seed_demo.py`, sem API real,
+banco ou credencial real. Ficam fora do Git. CI remoto ainda não observado.
+
+### Pendências
+
+- Diálogo de credenciais do professor não redesenhado (só ajuste de espaçamento).
+- `LockerIllustration` mantém cores próprias, fora dos tokens.
+- Tablets, professores, agenda, configurações e alertas validados por análise e
+  testes, sem captura de tela.
+- Verificação com leitor de tela real e navegação assistiva manual.
+- Desempenho do blur em hardware modesto não medido (totem já sem blur).
 
 ## Atalhos da faixa de boas-vindas do professor — 2026-11-26
 
