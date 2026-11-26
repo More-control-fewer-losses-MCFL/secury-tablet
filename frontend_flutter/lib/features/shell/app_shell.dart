@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/glass_backdrop.dart';
 import '../../core/widgets/glass_surface.dart';
 import '../../services/app_controller.dart';
 import '../../services/system_api.dart';
@@ -171,131 +172,140 @@ class _AppShellState extends State<AppShell> {
             final barHeight = desktop
                 ? 72.0
                 : (AppSpacing.lg + 40 * textScale).clamp(64.0, 180.0);
-            return Scaffold(
-              key: scaffoldKey,
-              appBar: PreferredSize(
-                preferredSize: Size.fromHeight(barHeight),
-                child: desktop
-                    ? _PortalNavigation(
-                        admin: admin,
-                        items: items,
-                        selectedIndex: selectedIndex,
-                        api: widget.controller.api,
-                        name: widget.controller.displayName,
-                        onSelect: select,
-                        onLogout: _signOut,
-                        onSearch: () => showDialog<void>(
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Pesquisar histórico'),
-                            content: TextField(
-                              controller: searchController,
-                              autofocus: true,
-                              textInputAction: TextInputAction.search,
-                              decoration: const InputDecoration(
-                                labelText: 'Termo de pesquisa',
-                              ),
-                              onSubmitted: (query) {
-                                Navigator.of(dialogContext).pop();
-                                search(query);
-                              },
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(dialogContext).pop(),
-                                child: const Text('Cancelar'),
-                              ),
-                              FilledButton(
-                                onPressed: () {
+            // Soft tinted canvas behind everything, so the translucent bar
+            // always has color to blur, even before content scrolls under it.
+            return GlassBackdrop(
+              stops: AppBackdrop.pageStopsFor(admin),
+              glows: AppBackdrop.pageGlowsFor(admin),
+              child: Scaffold(
+                key: scaffoldKey,
+                backgroundColor: Colors.transparent,
+                appBar: PreferredSize(
+                  preferredSize: Size.fromHeight(barHeight),
+                  child: desktop
+                      ? _PortalNavigation(
+                          admin: admin,
+                          items: items,
+                          selectedIndex: selectedIndex,
+                          api: widget.controller.api,
+                          name: widget.controller.displayName,
+                          onSelect: select,
+                          onLogout: _signOut,
+                          onSearch: () => showDialog<void>(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const Text('Pesquisar histórico'),
+                              content: TextField(
+                                controller: searchController,
+                                autofocus: true,
+                                textInputAction: TextInputAction.search,
+                                decoration: const InputDecoration(
+                                  labelText: 'Termo de pesquisa',
+                                ),
+                                onSubmitted: (query) {
                                   Navigator.of(dialogContext).pop();
-                                  search(searchController.text);
+                                  search(query);
                                 },
-                                child: const Text('Pesquisar'),
                               ),
-                            ],
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(),
+                                  child: const Text('Cancelar'),
+                                ),
+                                FilledButton(
+                                  onPressed: () {
+                                    Navigator.of(dialogContext).pop();
+                                    search(searchController.text);
+                                  },
+                                  child: const Text('Pesquisar'),
+                                ),
+                              ],
+                            ),
                           ),
+                        )
+                      : _TopBar(
+                          admin: admin,
+                          title: items[selectedIndex].title,
+                          api: widget.controller.api,
+                          onMenu: () => scaffoldKey.currentState?.openDrawer(),
+                          onLogout: _signOut,
+                        ),
+                ),
+                drawer: desktop
+                    ? null
+                    : Drawer(
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.transparent,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.horizontal(
+                            right: Radius.circular(AppRadius.lg),
+                          ),
+                        ),
+                        child: SafeArea(child: sidebar),
+                      ),
+                bottomNavigationBar:
+                    !desktop && !admin && _mobilePaths.contains(path)
+                    ? DecoratedBox(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: AppTheme.border),
+                          ),
+                        ),
+                        child: NavigationBar(
+                          selectedIndex: _mobilePaths.indexOf(path).clamp(0, 3),
+                          onDestinationSelected: (index) =>
+                              context.go(_mobilePaths[index]),
+                          destinations: const [
+                            NavigationDestination(
+                              icon: Icon(Icons.home_outlined),
+                              selectedIcon: Icon(Icons.home),
+                              label: 'Início',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.output_outlined),
+                              selectedIcon: Icon(Icons.output),
+                              label: 'Retirar',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.assignment_return_outlined),
+                              selectedIcon: Icon(Icons.assignment_return),
+                              label: 'Devolver',
+                            ),
+                            NavigationDestination(
+                              icon: Icon(Icons.history_outlined),
+                              selectedIcon: Icon(Icons.history),
+                              label: 'Histórico',
+                            ),
+                          ],
                         ),
                       )
-                    : _TopBar(
-                        admin: admin,
-                        title: items[selectedIndex].title,
-                        api: widget.controller.api,
-                        onMenu: () => scaffoldKey.currentState?.openDrawer(),
-                        onLogout: _signOut,
-                      ),
-              ),
-              drawer: desktop
-                  ? null
-                  : Drawer(
-                      backgroundColor: Colors.white,
-                      surfaceTintColor: Colors.transparent,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.horizontal(
-                          right: Radius.circular(AppRadius.lg),
+                    : null,
+                // The viewport starts below the bar (focus, ensureVisible and taps
+                // stay correct); Clip.none keeps scrolled content painted under
+                // the translucent bar so the glass blurs it.
+                body: Builder(
+                  builder: (context) {
+                    final gutter = desktop ? AppSpacing.xl : AppSpacing.md;
+                    return Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1360),
+                        child: SingleChildScrollView(
+                          key: PageStorageKey('page-$path'),
+                          clipBehavior: Clip.none,
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: EdgeInsets.all(gutter),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: widget.child,
+                          ),
                         ),
                       ),
-                      child: SafeArea(child: sidebar),
-                    ),
-              bottomNavigationBar:
-                  !desktop && !admin && _mobilePaths.contains(path)
-                  ? DecoratedBox(
-                      decoration: const BoxDecoration(
-                        border: Border(top: BorderSide(color: AppTheme.border)),
-                      ),
-                      child: NavigationBar(
-                        selectedIndex: _mobilePaths.indexOf(path).clamp(0, 3),
-                        onDestinationSelected: (index) =>
-                            context.go(_mobilePaths[index]),
-                        destinations: const [
-                          NavigationDestination(
-                            icon: Icon(Icons.home_outlined),
-                            selectedIcon: Icon(Icons.home),
-                            label: 'Início',
-                          ),
-                          NavigationDestination(
-                            icon: Icon(Icons.output_outlined),
-                            selectedIcon: Icon(Icons.output),
-                            label: 'Retirar',
-                          ),
-                          NavigationDestination(
-                            icon: Icon(Icons.assignment_return_outlined),
-                            selectedIcon: Icon(Icons.assignment_return),
-                            label: 'Devolver',
-                          ),
-                          NavigationDestination(
-                            icon: Icon(Icons.history_outlined),
-                            selectedIcon: Icon(Icons.history),
-                            label: 'Histórico',
-                          ),
-                        ],
-                      ),
-                    )
-                  : null,
-              // The viewport starts below the bar (focus, ensureVisible and taps
-              // stay correct); Clip.none keeps scrolled content painted under
-              // the translucent bar so the glass blurs it.
-              body: Builder(
-                builder: (context) {
-                  final gutter = desktop ? AppSpacing.xl : AppSpacing.md;
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1360),
-                      child: SingleChildScrollView(
-                        key: PageStorageKey('page-$path'),
-                        clipBehavior: Clip.none,
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: EdgeInsets.all(gutter),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: widget.child,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             );
           },
@@ -305,19 +315,27 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-/// Light glass bar shared by desktop and mobile headers.
+/// Light glass bar shared by desktop and mobile headers: blur, white tint,
+/// translucent bottom edge and a soft shadow over the content below.
 class _GlassBar extends StatelessWidget {
   const _GlassBar({required this.child});
   final Widget child;
 
+  static const _edge = Color(0x1A0F223D);
+  static const _shadow = [
+    BoxShadow(color: Color(0x0F0F223D), blurRadius: 20, offset: Offset(0, 6)),
+  ];
+
   @override
   Widget build(BuildContext context) => GlassSurface(
+    key: const ValueKey('shell-glass-bar'),
     borderRadius: BorderRadius.zero,
     borderColor: Colors.transparent,
-    shadows: const [],
+    highlight: false,
+    shadows: _shadow,
     child: DecoratedBox(
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppTheme.border)),
+        border: Border(bottom: BorderSide(color: _edge)),
       ),
       child: SafeArea(bottom: false, child: child),
     ),
@@ -381,7 +399,7 @@ class _PortalNavigation extends StatelessWidget {
               IconButton(
                 onPressed: onSearch,
                 tooltip: 'Pesquisar histórico',
-                color: AppTheme.muted,
+                color: AppTheme.mutedStrong,
                 icon: const Icon(Icons.search_outlined),
               ),
               _ApiStatusIndicator(api: api),
@@ -389,7 +407,7 @@ class _PortalNavigation extends StatelessWidget {
                 IconButton(
                   onPressed: () => context.go('/alerts'),
                   tooltip: 'Central de alertas',
-                  color: AppTheme.muted,
+                  color: AppTheme.mutedStrong,
                   icon: const Icon(Icons.notifications_outlined),
                 ),
               _AccountMenu(
@@ -422,23 +440,37 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final foreground = selected ? scheme.primary : AppTheme.text;
+    const pill = BorderRadius.all(Radius.circular(999));
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Semantics(
         selected: selected,
+        // Active item: a glass pill (bright white fill, light edge, soft
+        // shadow) floating on the bar.
         child: AnimatedContainer(
-          duration: AppMotion.medium,
+          duration: MediaQuery.maybeDisableAnimationsOf(context) ?? false
+              ? Duration.zero
+              : AppMotion.medium,
           curve: AppMotion.curve,
           decoration: BoxDecoration(
-            color: selected ? scheme.primaryContainer : Colors.transparent,
-            borderRadius: AppRadius.control,
+            color: selected
+                ? Colors.white.withValues(alpha: AppGlass.pillOpacity)
+                : Colors.transparent,
+            borderRadius: pill,
+            border: Border.all(
+              color: selected
+                  ? scheme.primary.withValues(alpha: .22)
+                  : Colors.transparent,
+            ),
+            boxShadow: selected ? AppShadows.soft : const [],
           ),
           child: Material(
             type: MaterialType.transparency,
             child: InkWell(
               key: ValueKey('portal-nav-${item.path}'),
               onTap: onTap,
-              borderRadius: AppRadius.control,
+              borderRadius: pill,
+              hoverColor: Colors.white.withValues(alpha: .55),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48),
                 child: Padding(
@@ -452,7 +484,9 @@ class _NavButton extends StatelessWidget {
                         Icon(
                           selected ? item.selectedIcon : item.icon,
                           size: 18,
-                          color: selected ? scheme.primary : AppTheme.muted,
+                          color: selected
+                              ? scheme.primary
+                              : AppTheme.mutedStrong,
                         ),
                         const SizedBox(width: AppSpacing.xs),
                       ],
@@ -519,7 +553,8 @@ class _TopBar extends StatelessWidget {
                   admin ? 'Área administrativa' : 'Área do professor',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: AppTheme.mutedStrong),
                 ),
               ],
             ),
@@ -528,7 +563,7 @@ class _TopBar extends StatelessWidget {
           if (admin)
             IconButton(
               tooltip: 'Central de alertas',
-              color: AppTheme.muted,
+              color: AppTheme.mutedStrong,
               onPressed: () => context.go('/alerts'),
               icon: const Icon(Icons.notifications_outlined),
             ),
@@ -561,7 +596,7 @@ class _AccountMenu extends StatelessWidget {
   Widget build(BuildContext context) => PopupMenuButton<String>(
     tooltip: tooltip,
     icon: name == null
-        ? const Icon(Icons.account_circle_outlined, color: AppTheme.muted)
+        ? const Icon(Icons.account_circle_outlined, color: AppTheme.mutedStrong)
         : _Initials(name!),
     onSelected: (value) {
       if (value == 'logout') onLogout();

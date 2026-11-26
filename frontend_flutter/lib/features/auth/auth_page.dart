@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/network/api_exception.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/glass_backdrop.dart';
+import '../../core/widgets/glass_button.dart';
 import '../../core/widgets/glass_surface.dart';
 import '../../models/system_models.dart';
 import '../../services/app_controller.dart';
@@ -41,8 +43,6 @@ class _AuthPageState extends State<AuthPage> {
   bool get adminMode => widget.adminMode;
   bool get professorPasswordMode => widget.professorPasswordMode;
   bool get credentialMode => adminMode || professorPasswordMode;
-  Color get accessColor =>
-      professorPasswordMode ? AppTheme.teacherPrimary : AppTheme.blue;
   bool authorizeTerminal = false;
   ApiException? error;
   ApiHealth? health;
@@ -176,48 +176,41 @@ class _AuthPageState extends State<AuthPage> {
   );
 
   Widget _buildScaffold(BuildContext context) {
-    final stops = AppTheme.backdropFor(!professorPasswordMode);
+    final admin = !professorPasswordMode;
+    final stops = AppBackdrop.loginStopsFor(admin);
     return Scaffold(
       backgroundColor: stops.first,
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: stops,
-          ),
-        ),
-        child: CustomPaint(
-          painter: const _AccessBackdrop(),
-          child: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 980;
-                return Row(
-                  children: [
-                    if (wide) const Expanded(child: _InstitutionPanel()),
-                    Expanded(
-                      key: const ValueKey('access-form-pane'),
-                      child: LayoutBuilder(
-                        builder: (context, pane) => SingleChildScrollView(
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.manual,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: pane.maxHeight,
+      body: GlassBackdrop(
+        stops: stops,
+        glows: AppBackdrop.loginGlowsFor(admin),
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 980;
+              return Row(
+                children: [
+                  if (wide) const Expanded(child: _InstitutionPanel()),
+                  Expanded(
+                    key: const ValueKey('access-form-pane'),
+                    child: LayoutBuilder(
+                      builder: (context, pane) => SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.manual,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: pane.maxHeight,
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: wide ? AppSpacing.xxl : AppSpacing.md,
+                              vertical: wide ? AppSpacing.xxl : AppSpacing.lg,
                             ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: wide
-                                    ? AppSpacing.xxl
-                                    : AppSpacing.md,
-                                vertical: wide ? AppSpacing.xxl : AppSpacing.lg,
-                              ),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: 440,
-                                  ),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 440,
+                                ),
+                                child: _Entrance(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -236,10 +229,19 @@ class _AuthPageState extends State<AuthPage> {
                                         const SizedBox(height: AppSpacing.lg),
                                       ],
                                       GlassSurface(
+                                        key: const ValueKey('access-glass'),
+                                        tone: GlassTone.dark,
+                                        fallbackColor: stops.first,
                                         padding: EdgeInsets.all(
                                           wide ? AppSpacing.xl : AppSpacing.lg,
                                         ),
-                                        child: _buildForm(context),
+                                        child: Theme(
+                                          data: AppTheme.onDarkGlass(
+                                            Theme.of(context),
+                                            admin: admin,
+                                          ),
+                                          child: Builder(builder: _buildForm),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -250,19 +252,21 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
+  /// Built under [AppTheme.onDarkGlass]: white text, translucent fields.
   Widget _buildForm(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final helpStyle = textTheme.bodySmall?.copyWith(height: 1.6);
+    final glowColor = AppTheme.focusGlowFor(!professorPasswordMode);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -273,7 +277,7 @@ class _AuthPageState extends State<AuthPage> {
               : adminMode
               ? 'ACESSO COM CADASTRO'
               : 'ACESSO POR CRACHÁ',
-          style: textTheme.labelSmall?.copyWith(color: accessColor),
+          style: textTheme.labelSmall?.copyWith(color: AppTheme.onBrandMuted),
         ),
         const SizedBox(height: AppSpacing.sm),
         Semantics(
@@ -294,7 +298,7 @@ class _AuthPageState extends State<AuthPage> {
               : adminMode
               ? 'Entre com seu usuário e senha para acessar a gestão de tablets.'
               : 'Aproxime seu crachá do leitor para acessar seus tablets.',
-          style: textTheme.bodyMedium?.copyWith(color: AppTheme.muted),
+          style: textTheme.bodyMedium?.copyWith(color: AppTheme.onBrandMuted),
         ),
         const SizedBox(height: AppSpacing.lg),
         if (credentialMode)
@@ -369,7 +373,7 @@ class _AuthPageState extends State<AuthPage> {
             ),
           )
         else ...[
-          _ReaderVisual(color: accessColor),
+          _ReaderVisual(color: glowColor),
           const SizedBox(height: AppSpacing.lg),
           TextField(
             key: const Key('access-badge'),
@@ -409,40 +413,17 @@ class _AuthPageState extends State<AuthPage> {
         const SizedBox(height: AppSpacing.lg),
         SizedBox(
           width: double.infinity,
-          child: FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: accessColor),
-            onPressed: loading
-                ? null
-                : credentialMode
-                ? _loginCredentials
-                : _identify,
-            child: AnimatedSwitcher(
-              duration: AppMotion.medium,
-              child: loading
-                  ? const Row(
-                      key: ValueKey('access-loading'),
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: AppSpacing.sm),
-                        Flexible(child: Text('Verificando acesso…')),
-                      ],
-                    )
-                  : Text(
-                      credentialMode
-                          ? adminMode && authorizeTerminal
-                                ? 'Autorizar terminal'
-                                : 'Acessar'
-                          : 'Validar crachá',
-                    ),
-            ),
+          child: GlassButton(
+            key: const Key('access-submit'),
+            variant: GlassButtonVariant.primary,
+            loading: loading,
+            loadingLabel: 'Verificando acesso…',
+            onPressed: credentialMode ? _loginCredentials : _identify,
+            label: credentialMode
+                ? adminMode && authorizeTerminal
+                      ? 'Autorizar terminal'
+                      : 'Acessar'
+                : 'Validar crachá',
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -451,35 +432,42 @@ class _AuthPageState extends State<AuthPage> {
         if (adminMode) ...[
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            child: GlassButton(
               key: const Key('professor-password-access'),
-              style: OutlinedButton.styleFrom(backgroundColor: Colors.white),
               onPressed: loading ? null : () => context.go('/professor/login'),
-              icon: const Icon(Icons.school_outlined),
-              label: const Text('Entrar como professor'),
+              icon: Icons.school_outlined,
+              label: 'Entrar como professor',
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
         ],
         if (credentialMode)
-          _BadgePrompt(onTap: loading ? null : () => context.go('/login'))
+          SizedBox(
+            width: double.infinity,
+            child: GlassButton(
+              key: const Key('badge-access'),
+              onPressed: loading ? null : () => context.go('/login'),
+              icon: Icons.contactless_outlined,
+              label: 'Passe o crachá',
+            ),
+          )
         else
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            child: GlassButton(
               key: const Key('professor-password-access'),
-              style: OutlinedButton.styleFrom(backgroundColor: Colors.white),
               onPressed: loading ? null : () => context.go('/professor/login'),
-              icon: const Icon(Icons.person_outline),
-              label: const Text('Entrar com usuário e senha'),
+              icon: Icons.person_outline,
+              label: 'Entrar com usuário e senha',
             ),
           ),
         if (!adminMode) ...[
           const SizedBox(height: AppSpacing.xs),
           Center(
-            child: TextButton(
+            child: GlassButton(
+              variant: GlassButtonVariant.ghost,
               onPressed: loading ? null : () => context.go('/admin/login'),
-              child: const Text('Acesso administrativo'),
+              label: 'Acesso administrativo',
             ),
           ),
         ],
@@ -556,16 +544,46 @@ class _OrDivider extends StatelessWidget {
   const _OrDivider();
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      const Expanded(child: Divider(height: 1, color: AppTheme.borderStrong)),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        child: Text('ou', style: Theme.of(context).textTheme.bodySmall),
+  Widget build(BuildContext context) {
+    final line = Expanded(
+      child: Divider(height: 1, color: Colors.white.withValues(alpha: .22)),
+    );
+    return Row(
+      children: [
+        line,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          child: Text('ou', style: Theme.of(context).textTheme.bodySmall),
+        ),
+        line,
+      ],
+    );
+  }
+}
+
+/// Discreet one-time entrance: fade plus a short upward slide. Skipped when
+/// the platform asks for reduced motion.
+class _Entrance extends StatelessWidget {
+  const _Entrance({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: AppMotion.entrance,
+      curve: AppMotion.curve,
+      child: child,
+      builder: (context, value, child) => Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, (1 - value) * AppMotion.entranceOffset),
+          child: child,
+        ),
       ),
-      const Expanded(child: Divider(height: 1, color: AppTheme.borderStrong)),
-    ],
-  );
+    );
+  }
 }
 
 /// Contactless reader cue for the badge flow (decorative, text carries meaning).
@@ -580,9 +598,9 @@ class _ReaderVisual extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Color.alphaBlend(color.withValues(alpha: .04), Colors.white),
+        color: AppGlass.darkControlFill(tint: AppGlass.fieldTint),
         borderRadius: AppRadius.card,
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: Colors.white.withValues(alpha: .22)),
       ),
       child: Column(
         children: [
@@ -593,9 +611,9 @@ class _ReaderVisual extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   for (final (size, alpha) in const [
-                    (88.0, .08),
-                    (66.0, .14),
-                    (44.0, .22),
+                    (88.0, .18),
+                    (66.0, .30),
+                    (44.0, .45),
                   ])
                     Container(
                       width: size,
@@ -621,90 +639,6 @@ class _ReaderVisual extends StatelessWidget {
             style: textTheme.bodySmall,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _BadgePrompt extends StatefulWidget {
-  const _BadgePrompt({required this.onTap});
-  final VoidCallback? onTap;
-
-  @override
-  State<_BadgePrompt> createState() => _BadgePromptState();
-}
-
-class _BadgePromptState extends State<_BadgePrompt> {
-  bool hovered = false;
-  bool focused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = Theme.of(context).colorScheme.primary;
-    final textTheme = Theme.of(context).textTheme;
-    final active = hovered || focused;
-    return AnimatedContainer(
-      duration: AppMotion.fast,
-      curve: AppMotion.curve,
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          accent.withValues(alpha: active ? .08 : .04),
-          Colors.white,
-        ),
-        borderRadius: AppRadius.card,
-        border: Border.all(
-          color: active ? accent.withValues(alpha: .6) : AppTheme.border,
-        ),
-        boxShadow: focused
-            ? [BoxShadow(color: accent.withValues(alpha: .28), spreadRadius: 3)]
-            : const [],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          key: const Key('badge-access'),
-          onTap: widget.onTap,
-          onHover: (value) => setState(() => hovered = value),
-          onFocusChange: (value) => setState(() => focused = value),
-          borderRadius: AppRadius.card,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                ExcludeSemantics(
-                  child: Icon(Icons.contactless_outlined, color: accent),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Passe o crachá', style: textTheme.titleSmall),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Text(
-                        'Acesso para professores pelo leitor.',
-                        style: textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                ExcludeSemantics(
-                  child: AnimatedSlide(
-                    duration: AppMotion.fast,
-                    curve: AppMotion.curve,
-                    offset: active ? const Offset(.2, 0) : Offset.zero,
-                    child: Icon(
-                      Icons.arrow_forward_outlined,
-                      color: accent,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -801,49 +735,6 @@ class _InstitutionPanel extends StatelessWidget {
   }
 }
 
-/// Full-bleed decoration: soft glows and thin concentric arcs that evoke the
-/// contactless reader. Every shape stays within [AppTheme.backdropGlowOpacity].
-class _AccessBackdrop extends CustomPainter {
-  const _AccessBackdrop();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.save();
-    canvas.clipRect(Offset.zero & size);
-    const glow = AppTheme.backdropGlowOpacity;
-    void radial(Offset center, double radius) {
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()
-          ..shader = RadialGradient(
-            colors: [
-              Colors.white.withValues(alpha: glow),
-              Colors.white.withValues(alpha: 0),
-            ],
-          ).createShader(Rect.fromCircle(center: center, radius: radius)),
-      );
-    }
-
-    final shortest = size.shortestSide;
-    radial(Offset(size.width * .82, size.height * .08), shortest * .7);
-    radial(Offset(size.width * .1, size.height * .95), shortest * .55);
-
-    final arcs = Paint()
-      ..color = Colors.white.withValues(alpha: glow * .8)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
-    final origin = Offset(size.width * .04, size.height * 1.02);
-    for (var index = 1; index <= 7; index++) {
-      canvas.drawCircle(origin, shortest * .14 * index, arcs);
-    }
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_AccessBackdrop oldDelegate) => false;
-}
-
 class _AccessFeatures extends StatelessWidget {
   const _AccessFeatures();
 
@@ -857,11 +748,13 @@ class _AccessFeatures extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 420),
       child: GlassSurface(
-        opacity: AppTheme.backdropGlowOpacity,
-        fallbackOpacity: AppTheme.backdropGlowOpacity,
-        borderColor: Colors.white.withValues(alpha: .18),
+        key: const ValueKey('access-features-glass'),
+        tone: GlassTone.dark,
+        fallbackColor: AppBackdrop.loginStopsFor(
+          AppTheme.isAdminTheme(Theme.of(context)),
+        ).first,
         borderRadius: AppRadius.card,
-        shadows: const [],
+        shadows: AppShadows.soft,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.xs,
