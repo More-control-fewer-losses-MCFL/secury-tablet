@@ -208,3 +208,12 @@ Checks unit/mysql/flutter/docker aprovados nos heads dos dois PRs; árvore funci
 da main conferida igual ao head #18 validado. CI pós-merge em acompanhamento.
 O merge não confirma configuração ou funcionamento no Railway. Ver estado/handoff
 e `docs/docker.md` para evidências, configuração e limitações.
+
+## Atalhos da faixa de boas-vindas do professor — 2026-11-26
+
+Decisão aprovada na revisão visual (branch `feat/ui-redesign-glass`): no perfil
+professor, a faixa `PortalWelcome` mantém apenas o atalho "Consultar histórico".
+"Iniciar retirada" e "Registrar devolução" saíram da faixa porque já existem no
+cartão de foco da home (Retirar/Devolver tablets) e na navegação inferior do
+celular; repeti-los competia com a ação principal. O perfil administrativo
+mantém seus três atalhos. Rotas, permissões e textos dos fluxos não mudaram.
