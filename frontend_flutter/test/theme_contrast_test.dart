@@ -92,4 +92,21 @@ void main() {
       }
     }
   });
+
+  test('portal shortcuts keep white labels readable on the band', () {
+    for (final admin in [true, false]) {
+      for (final backdrop in AppTheme.backdropFor(admin)) {
+        // Shortcut buttons use a 12% white fill over the profile gradient.
+        final button = Color.alphaBlend(
+          Colors.white.withValues(alpha: .12),
+          backdrop,
+        );
+        expect(
+          contrast(AppTheme.onBrand, button),
+          greaterThanOrEqualTo(4.5),
+          reason: 'shortcut over $backdrop',
+        );
+      }
+    }
+  });
 }
