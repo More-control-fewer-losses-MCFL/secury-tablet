@@ -69,6 +69,9 @@ class AppTheme {
   static const text = Color(0xFF152238);
   static const muted = Color(0xFF4C5A70);
   static const border = Color(0xFFDDE3EB);
+
+  /// Separators and outlines that must stay visible on glass.
+  static const borderStrong = Color(0xFFBCC7D4);
   static const background = Color(0xFFF3F5F8);
   static const surfaceMuted = Color(0xFFF8FAFC);
 
@@ -291,7 +294,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
-          side: const BorderSide(color: border),
+          side: const BorderSide(color: borderStrong),
           minimumSize: const Size(48, 48),
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md + AppSpacing.xxs,
