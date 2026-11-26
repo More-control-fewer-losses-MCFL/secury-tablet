@@ -1,5 +1,34 @@
 # Estado da engenharia — Secury Tablet
 
+## Professores pelo link público da planilha — 2026-11-26
+
+Estado: **em revisão**. Branch `feat/sheets-public-csv` a partir de `main` f86cd4d,
+em worktree separada. Sem PR, merge ou deploy.
+
+Motivo: sem permissão para criar projeto no Google Cloud não há token OAuth.
+Novo modo opcional `GOOGLE_SHEETS_PUBLIC_CSV=true` lê a aba `Professores` pelo
+export CSV do link público (gviz), sem credenciais, e reaproveita
+`parse_professors` sem mudar regras. O modo OAuth segue padrão e intacto.
+Sem mudança de autorização (endpoint exclusivo do admin), Flutter, banco,
+migrações ou regras de negócio. `docker-compose.yml` passa a repassar a nova
+variável (padrão `false`). Guia em
+[google-sheets-professors.md](google-sheets-professors.md#modo-link-público-sem-oauth).
+
+Risco aceito pelo usuário: quem tiver o link vê nomes, matrículas e UIDs; RFID é
+clonável. Restringir o link e voltar ao OAuth quando houver conta com permissão.
+
+Validação local (Docker `python:3.12-slim`, `pip install -e '.[dev]'`; `.venv`
+ausente): 154 testes unitários aprovados (130 na linha de base + 24 novos),
+Ruff check e format aprovados nos Python alterados, `git diff --check` aprovado.
+Integração MySQL não executada (sem `TEST_DATABASE_URL` isolada; a mudança não
+toca banco). Nenhuma chamada real ao Google. CI remoto não observado.
+
+Próximos três itens:
+1. Abrir o PR para `main` e acompanhar os jobs da CI.
+2. Compartilhar a planilha por link, ativar o modo no ambiente de teste e
+   sincronizar os 3 cadastros fictícios.
+3. Voltar ao OAuth quando houver conta com permissão no Google Cloud.
+
 ## Redesign visual do frontend Flutter — 2026-11-26
 
 Estado: **em revisão**. Branch `feat/ui-redesign-glass` a partir de `main` 9b665fd,

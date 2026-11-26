@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção U, 2026-11-26 — redesign visual do Flutter em revisão na branch feat/ui-redesign-glass; deploy de teste no Railway registrado.
+Atualização mais recente: seção W, 2026-11-26 — sincronização de professores pelo link público da planilha (sem OAuth) em revisão na branch feat/sheets-public-csv.
 
 ## A. Identificação
 
@@ -533,3 +533,37 @@ login, shell, homes e páginas), sem mudança de comportamento, API ou backend.
 Validação local: analyze sem problemas, 51 testes e build Web aprovados no
 Flutter 3.47.8. PR para `main` a abrir pelo usuário; CI e aceite assistivo
 pendentes. Deploy de teste no Railway informado e documentado sem segredos.
+
+## W. Professores pelo link público da planilha — 2026-11-26
+
+Seção W porque a V está reservada à branch `feat/ui-glass-v2` (ainda não mesclada).
+Pedido do usuário: sincronizar professores sem OAuth, pois a conta não pode criar
+projeto no Google Cloud.
+
+- Branch `feat/sheets-public-csv` a partir de `main` f86cd4d, em worktree separada;
+  pasta principal e `deploy/render-free` preservadas.
+- Entregas: `GOOGLE_SHEETS_PUBLIC_CSV` (padrão `false`) em `Settings`,
+  `.env.example` e `docker-compose.yml`; `GoogleProfessorSheet` separa o fluxo
+  OAuth (inalterado) da leitura pública por CSV gviz em `docs.google.com`, com
+  timeout de 10 s, sem redirecionamentos, só 200 + `text/csv`, e reaproveita
+  `parse_professors`. Erros viram 503 sem URL, ID, UIDs ou conteúdo.
+- Sem mudança de autorização, Flutter, banco, migrações ou regras de negócio.
+- Validação: Docker `python:3.12-slim` (sem `.venv`); 154 testes unitários
+  (130 de base + 24 novos), Ruff check/format e `git diff --check` aprovados.
+  Integração MySQL não executada; nenhuma chamada real ao Google; CI não observado.
+- Risco aceito pelo usuário e registrado no guia: quem tiver o link vê nomes,
+  matrículas e UIDs; RFID é clonável.
+
+Estado: em revisão; branch enviada ao remoto; sem PR, merge ou deploy; Notion não
+atualizado.
+
+Próximos três itens:
+1. Abrir o PR para `main` e acompanhar a CI.
+2. Compartilhar a planilha por link e sincronizar os cadastros fictícios em teste.
+3. Retornar ao OAuth quando houver conta com permissão no Google Cloud.
+
+Mensagem pronta para o ChatGPT: a sincronização de professores ganhou um modo
+opcional por link público da planilha (`GOOGLE_SHEETS_PUBLIC_CSV=true`), sem
+OAuth, na branch `feat/sheets-public-csv`; o modo OAuth continua padrão. 154
+testes unitários e Ruff aprovados localmente em Docker. Risco aceito: o link
+expõe nomes, matrículas e UIDs. PR e CI pendentes.
