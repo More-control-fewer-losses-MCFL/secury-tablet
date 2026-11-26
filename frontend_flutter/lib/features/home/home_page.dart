@@ -9,6 +9,7 @@ import '../../services/app_controller.dart';
 import '../../widgets/common_widgets.dart';
 import '../shell/locker_illustration.dart';
 import 'admin_monitoring_panel.dart';
+import 'admin_rfid_panel.dart';
 import 'portal_welcome.dart';
 
 class HomePage extends StatefulWidget {
@@ -166,6 +167,8 @@ class _HomePageState extends State<HomePage> {
             key: ObjectKey(dashboard),
             api: widget.controller.api,
           ),
+          const SizedBox(height: 24),
+          AdminRfidPanel(api: widget.controller.api),
           const SizedBox(height: 24),
           LayoutBuilder(
             builder: (context, constraints) {

@@ -33,6 +33,7 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/hardware/events -Heade
 | POST | `/returns/reconcile` | Concilia a devolução tablet a tablet | 200 |
 | POST | `/hardware/events` | Recebe eventos do controlador (idempotente) | 200 |
 | GET | `/history` | Histórico paginado (`status`, `professor_id`, `since`, `until`, `limit`≤100, `offset`) | 200 |
+| GET | `/admin/rfid/leituras?limite=10` | [Leituras recentes do carrinho](leituras-rfid.md), com sessão administrativa | 200 |
 
 ## Erros
 

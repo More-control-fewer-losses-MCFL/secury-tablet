@@ -115,6 +115,17 @@ class SystemApi {
   Future<AdminOverview> adminOverview() async =>
       AdminOverview.fromJson(_asMap(await _client.get('/admin/overview')));
 
+  Future<List<RfidReading>> adminRfidReadings() async {
+    final data = _asMap(await _client.get('/admin/rfid/leituras'));
+    final readings = data['leituras'];
+    if (readings is! List) {
+      throw const FormatException('Formato de leituras RFID inválido.');
+    }
+    return readings
+        .map((item) => RfidReading.fromJson(_asMap(item)))
+        .toList(growable: false);
+  }
+
   Future<List<AlertRecord>> adminAlerts({int limit = 30}) async {
     final value = await _client.get(
       '/admin/alerts',

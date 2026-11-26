@@ -1,0 +1,12 @@
+services:
+  api:
+    environment:
+      RFID_SHEETS_ENABLED: ${RFID_SHEETS_ENABLED:-false}
+      RFID_SHEETS_SPREADSHEET_ID: ${RFID_SHEETS_SPREADSHEET_ID:-}
+      RFID_SHEETS_TAB: ${RFID_SHEETS_TAB:-Leituras_RFID}
+      RFID_SHEETS_TOKEN_FILE: /run/secrets/rfid_sheets_token.json
+    volumes:
+      - type: bind
+        source: ${RFID_SHEETS_TOKEN_HOST_FILE:?Configure o arquivo OAuth privado do RFID}
+        target: /run/secrets/rfid_sheets_token.json
+        read_only: true

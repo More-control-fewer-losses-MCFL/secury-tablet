@@ -20,5 +20,7 @@ secrets/
 **/credentials.json
 **/token.json
 **/google_sheets*token*.json
+**/rfid_sheets*token*.json
+/hardware/carrinho-rfid/esp32/carrinho_rfid/config.local.h
 
 docs/professor-demo.txt

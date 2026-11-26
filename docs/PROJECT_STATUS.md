@@ -1,5 +1,24 @@
 # Estado da engenharia — Secury Tablet
 
+## Leituras RFID do carrinho — 2026-11-26
+
+Branch `feat/integracao-leituras-rfid` sobre `main` (`9b665fd`). A API
+administrativa consulta a aba de leituras do carrinho com OAuth de somente leitura.
+O painel Flutter exibe os registros sob demanda. O firmware e o Apps Script
+do protótipo passaram a fazer parte do repositório, com configuração privada
+do firmware fora do Git. A consulta fica desativada até a configuração do servidor.
+
+Critérios de aceitação: administrador recebe os últimos registros na ordem
+da planilha, do mais recente para o mais antigo. Requisições sem sessão
+administrativa são recusadas antes do Google. Falha na planilha aparece no painel
+da consulta. A leitura é independente das movimentações e do cadastro.
+
+Validação local: 141 testes unitários Python, 44 testes Flutter, análise e build
+web, Ruff, configuração do Compose e compilação dos dois sketches ESP32.
+A rota respondeu HTTP 200 com uma leitura da planilha real, sem exibir o UID
+durante o teste. A validação física do carrinho e a execução da stack com
+MySQL estão pendentes. Veja a configuração em [Leituras RFID](leituras-rfid.md).
+
 ## Integração autorizada em main — 2026-11-19
 
 Pedido explícito do usuário: “de um merge na main para poder dar tudo certo”.

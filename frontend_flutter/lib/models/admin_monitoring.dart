@@ -68,3 +68,19 @@ class AdminOverview {
     );
   }
 }
+
+class RfidReading {
+  const RfidReading({this.dateTime, this.uid, this.terminal, this.status});
+
+  final String? dateTime;
+  final String? uid;
+  final String? terminal;
+  final String? status;
+
+  factory RfidReading.fromJson(Map<String, dynamic> value) => RfidReading(
+    dateTime: value['data/hora'] as String?,
+    uid: value['uid'] as String?,
+    terminal: value['terminal'] as String?,
+    status: value['status'] as String?,
+  );
+}

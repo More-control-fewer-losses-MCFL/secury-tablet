@@ -57,6 +57,21 @@ void main() {
         if (request.url.path == '/admin/alerts') {
           return http.Response('[]', 200);
         }
+        if (request.url.path == '/admin/rfid/leituras') {
+          return http.Response(
+            jsonEncode({
+              'leituras': [
+                {
+                  'data/hora': '19/11/2026 16:40:17',
+                  'uid': '0012AABB',
+                  'terminal': 'Carrinho_Tablets',
+                  'status': null,
+                },
+              ],
+            }),
+            200,
+          );
+        }
         return http.Response('{}', 404);
       });
       final api = SystemApi(baseUrl: 'http://test.local', httpClient: client);
@@ -66,6 +81,10 @@ void main() {
       expect(dashboard.divergentSessions, 1);
       expect(dashboard.recentAlerts.single.sessionId, 42);
       expect(await api.adminAlerts(), isEmpty);
+      final reading = (await api.adminRfidReadings()).single;
+      expect(reading.uid, '0012AABB');
+      expect(reading.dateTime, '19/11/2026 16:40:17');
+      expect(reading.status, isNull);
     },
   );
 
