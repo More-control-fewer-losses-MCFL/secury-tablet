@@ -49,6 +49,14 @@ class ProfessorSourceUnavailableError(AppError):
     """The configured read-only professor source is unavailable."""
 
 
+class RfidSourceUnconfiguredError(AppError):
+    """The RFID readings integration is disabled or missing configuration."""
+
+
+class RfidSourceUnavailableError(AppError):
+    """The configured read-only RFID source is unavailable."""
+
+
 class ProfessorImportInvalidError(AppError):
     """Invalid or ambiguous professor data; nothing is imported."""
 

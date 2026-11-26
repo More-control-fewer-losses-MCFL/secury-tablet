@@ -90,6 +90,10 @@ class ApiException implements Exception {
       'InvalidUidError': 'A leitura do crachá tem um formato inválido.',
       'LockError': 'A fechadura não confirmou o comando. A operação precisa ser conferida.',
       'ReaderError': 'Não foi possível confirmar a leitura do inventário.',
+      'RfidSourceUnconfiguredError':
+          'A consulta de leituras RFID ainda não foi configurada no servidor.',
+      'RfidSourceUnavailableError':
+          'Não foi possível consultar a planilha de leituras RFID.',
       'ProfessorSourceUnavailableError':
           'A fonte de cadastro dos professores está indisponível.',
       'ProfessorImportInvalidError':

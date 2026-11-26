@@ -16,6 +16,7 @@ from armario_tablets.api.routes import (
     professor_sync,
     professors,
     returns,
+    rfid,
     tablets,
     terminal,
 )
@@ -38,6 +39,8 @@ STATUS_BY_ERROR: dict[type[exc.AppError], int] = {
     exc.InvalidUidError: 422,
     exc.LockError: 502,
     exc.ReaderError: 502,
+    exc.RfidSourceUnconfiguredError: 503,
+    exc.RfidSourceUnavailableError: 502,
     exc.ProfessorSourceUnavailableError: 503,
     exc.ProfessorImportInvalidError: 422,
     exc.ProfessorImportConflictError: 409,
@@ -90,6 +93,7 @@ def create_app() -> FastAPI:
         returns,
         events,
         monitoring,
+        rfid,
         professor_sync,
         professor_auth,
     ):

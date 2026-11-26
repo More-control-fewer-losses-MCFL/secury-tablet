@@ -1,5 +1,33 @@
 # Estado da engenharia — Secury Tablet
 
+## Leituras RFID do carrinho — 2026-11-26
+
+Branch `feat/integracao-leituras-rfid` sobre `main` (`9b665fd`), em revisão
+pelo [PR #20](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/20). A API
+administrativa consulta a aba de leituras do carrinho com OAuth de somente leitura.
+O painel Flutter exibe os registros sob demanda. O firmware e o Apps Script
+do protótipo passaram a fazer parte do repositório, com configuração privada
+do firmware fora do Git. A consulta fica desativada até a configuração do servidor.
+
+Critérios de aceitação: administrador recebe os últimos registros na ordem
+da planilha, do mais recente para o mais antigo. Requisições sem sessão
+administrativa são recusadas antes do Google. Falha na planilha aparece no painel
+da consulta. A leitura é independente das movimentações e do cadastro.
+
+Validação local: 141 testes unitários Python, 44 testes Flutter, análise e build
+web, Ruff, configuração do Compose e compilação dos dois sketches ESP32.
+A stack local subiu com MySQL, API e Flutter. A API devolveu os mesmos 19 registros
+da planilha real em ordem decrescente, e o painel consultou e atualizou a lista.
+A primeira consulta após o reinício retornou 502, com HTTP 200 nas consultas
+seguintes. A leitura de uma nova tag no carrinho físico segue pendente.
+Veja a configuração em [Leituras RFID](leituras-rfid.md).
+
+O Apps Script agora prepara `Tablets`, `Professores` e `Logs`, com migração do
+histórico e validação dos cabeçalhos. O firmware usa o GPIO 13 para comandar o
+servo por Serial em bancada. Validação local: compilação ESP32, sete cenários
+simulados do Apps Script e 30 testes Python de leituras e importação. A migração
+na planilha real e a calibração física seguem pendentes.
+
 ## Integração autorizada em main — 2026-11-19
 
 Pedido explícito do usuário: “de um merge na main para poder dar tudo certo”.

@@ -2,6 +2,9 @@
 
 Sistema para controlar a **retirada e a devolução de tablets** de um armário por professores identificados com **crachá RFID**.
 
+O painel administrativo também consulta as últimas leituras do carrinho RFID
+pelo Google Sheets. Veja a [configuração da API, do ESP32 e do Apps Script](docs/leituras-rfid.md).
+
 - Interface web local: **Streamlit**
 - API local: **FastAPI** (recebe eventos do controlador/leitor)
 - Banco: **MySQL 8.4** (Docker) · ORM: **SQLAlchemy 2** · Migrações: **Alembic**

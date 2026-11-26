@@ -1,6 +1,6 @@
 # Handoff Codex → ChatGPT
 
-Atualização mais recente: seção T, 2026-11-19 — PRs #17/#18 integrados à main; CI pós-merge e Railway em acompanhamento.
+Atualização mais recente: seção U, 2026-11-26 — consulta administrativa das leituras RFID do carrinho.
 
 ## A. Identificação
 
@@ -490,3 +490,40 @@ Próximos três itens:
 2. Confirmar domínio/target 80 e referência `${{security-tablet.RAILWAY_PRIVATE_DOMAIN}}`.
 3. Autorizar e validar eventual deploy/configuração no Railway, usando o rollback
    e os testes do guia Docker.
+
+## U. Leituras RFID do carrinho — 2026-11-26
+
+- `feat/integracao-leituras-rfid` parte da `main` `9b665fd`. O código do
+  protótipo (snapshot `3033666`) foi integrado à API FastAPI existente. A
+  rota `GET /admin/rfid/leituras` usa a sessão administrativa e consulta a
+  planilha em modo somente leitura. Flutter mostra as últimas dez entradas
+  quando o administrador clica em **Consultar** no Início.
+- Firmware, diagnóstico do RC522 e Apps Script estão em
+  [hardware/carrinho-rfid](../../hardware/carrinho-rfid). As variáveis e a consulta
+  estão documentadas em [Leituras RFID](../leituras-rfid.md). A fonte RFID tem
+  configuração própria e a consulta vem desativada. A API usa a mesma rotina de
+  OAuth em modo leitura que a importação de professores.
+- O histórico original do protótipo e seu stash foram preservados na pasta
+  anterior. O stash tem a mesma árvore do commit `b1f4701`. O snapshot
+  transferido usa um arquivo de configuração local ignorado para Wi-Fi e URL.
+- Validação local: 141 unitários Python, 44 testes Flutter, análise e build web,
+  Ruff, Compose config, compilação dos dois sketches ESP32 e sintaxe do Apps
+  Script. A stack MySQL/Compose subiu em 8081. A API retornou os mesmos 19
+  registros lidos diretamente do Google Sheets. Consultar e Atualizar exibiram
+  a leitura mais recente no Edge. Após um 502 inicial, as consultas seguintes
+  retornaram 200.
+- Implementação em `10305f9`, publicada na branch de integração e em revisão
+  pelo [PR #20 em rascunho](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/20).
+  A leitura de uma tag nova em bancada segue pendente.
+- Evolução na mesma branch: Apps Script prepara `Tablets`, `Professores` e
+  `Logs`; valida cabeçalhos e renomeia `Leituras_RFID` preservando dados.
+  O ESP32 manda PWM ao servo no GPIO 13 pelos comandos Serial `a` e `f`.
+  Compilação ESP32, sete cenários simulados do Apps Script e 30 testes Python
+  aprovados. Deploy do script e calibração do servo seguem pendentes.
+
+Próximos itens:
+
+1. Revisar a branch e conferir os checks do GitHub.
+2. Preparar as abas e apontar a consulta para `Logs`; confirmar uma tag de
+   teste do ESP32 até o painel.
+3. Calibrar as posições do servo em bancada e validar a abertura e o fechamento.

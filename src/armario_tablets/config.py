@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     google_sheets_professors_tab: str = "Professores"
     google_sheets_token_file: Path | None = None
     google_sheets_max_professors: int = Field(default=1000, ge=1, le=10000)
+    rfid_sheets_enabled: bool = False
+    rfid_sheets_spreadsheet_id: str = ""
+    rfid_sheets_tab: str = "Leituras_RFID"
+    rfid_sheets_token_file: Path | None = None
     log_level: str = "INFO"
 
     @property

@@ -16,10 +16,10 @@ from armario_tablets.config import get_settings
 from armario_tablets.exceptions import ProfessorImportInvalidError, ProfessorSourceUnavailableError
 from armario_tablets.integrations.google_professor_sheet import (
     HEADERS,
-    READ_SCOPE,
     GoogleProfessorSheet,
     parse_professors,
 )
+from armario_tablets.integrations.google_sheets import READ_SCOPE
 from armario_tablets.models import Professor
 from armario_tablets.schemas.professor_sync_schema import ProfessorImport
 from tests.factories import ACTIVE_BADGE
