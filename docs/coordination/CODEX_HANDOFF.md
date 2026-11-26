@@ -508,11 +508,16 @@ Próximos três itens:
   transferido usa um arquivo de configuração local ignorado para Wi-Fi e URL.
 - Validação local: 141 unitários Python, 44 testes Flutter, análise e build web,
   Ruff, Compose config, compilação dos dois sketches ESP32 e sintaxe do Apps
-  Script. A consulta real retornou HTTP 200 e uma leitura sem registrar seu UID.
-- Pendências: CI, stack MySQL/Compose em execução e leitura de tag em bancada.
+  Script. A stack MySQL/Compose subiu em 8081. A API retornou os mesmos 19
+  registros lidos diretamente do Google Sheets. Consultar e Atualizar exibiram
+  a leitura mais recente no Edge. Após um 502 inicial, as consultas seguintes
+  retornaram 200.
+- Implementação em `10305f9`, publicada na branch de integração e em revisão
+  pelo [PR #20 em rascunho](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/20).
+  A leitura de uma tag nova em bancada segue pendente.
 
 Próximos itens:
 
 1. Revisar a branch e conferir os checks do GitHub.
-2. Configurar o OAuth do carrinho no ambiente de validação e consultar pelo painel.
-3. Confirmar em bancada o trajeto da tag de teste até o painel.
+2. Confirmar em bancada o trajeto da tag de teste até o painel.
+3. Definir os códigos adicionais que a planilha deve fornecer e o fluxo de cada um.

@@ -2,7 +2,8 @@
 
 ## Leituras RFID do carrinho — 2026-11-26
 
-Branch `feat/integracao-leituras-rfid` sobre `main` (`9b665fd`). A API
+Branch `feat/integracao-leituras-rfid` sobre `main` (`9b665fd`), em revisão
+pelo [PR #20](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/20). A API
 administrativa consulta a aba de leituras do carrinho com OAuth de somente leitura.
 O painel Flutter exibe os registros sob demanda. O firmware e o Apps Script
 do protótipo passaram a fazer parte do repositório, com configuração privada
@@ -15,9 +16,11 @@ da consulta. A leitura é independente das movimentações e do cadastro.
 
 Validação local: 141 testes unitários Python, 44 testes Flutter, análise e build
 web, Ruff, configuração do Compose e compilação dos dois sketches ESP32.
-A rota respondeu HTTP 200 com uma leitura da planilha real, sem exibir o UID
-durante o teste. A validação física do carrinho e a execução da stack com
-MySQL estão pendentes. Veja a configuração em [Leituras RFID](leituras-rfid.md).
+A stack local subiu com MySQL, API e Flutter. A API devolveu os mesmos 19 registros
+da planilha real em ordem decrescente, e o painel consultou e atualizou a lista.
+A primeira consulta após o reinício retornou 502, com HTTP 200 nas consultas
+seguintes. A leitura de uma nova tag no carrinho físico segue pendente.
+Veja a configuração em [Leituras RFID](leituras-rfid.md).
 
 ## Integração autorizada em main — 2026-11-19
 
