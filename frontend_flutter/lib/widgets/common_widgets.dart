@@ -89,7 +89,8 @@ class StatusPill extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: .08),
+      // Opaque tint: keeps the validated contrast on glass and dark surfaces.
+      color: Color.alphaBlend(color.withValues(alpha: .08), Colors.white),
       border: Border.all(color: color.withValues(alpha: .18)),
       borderRadius: BorderRadius.circular(10),
     ),
@@ -189,7 +190,7 @@ class InlineNotice extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: .06),
+        color: Color.alphaBlend(color.withValues(alpha: .06), Colors.white),
         border: Border.all(color: color.withValues(alpha: .22)),
         borderRadius: BorderRadius.circular(12),
       ),
