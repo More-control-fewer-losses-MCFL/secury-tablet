@@ -236,22 +236,80 @@ solto no branco.
 
 ### GlassSurface e regras de uso
 
-`lib/core/widgets/glass_surface.dart`: `ClipRRect` + `BackdropFilter`, branco
-translúcido, borda de 1px e sombra suave, com blur, opacidade e raio parametrizáveis.
+`lib/core/widgets/glass_surface.dart`: `RepaintBoundary` + `ClipRRect` +
+`BackdropFilter`, preenchimento translúcido, borda de 1px com gradiente vertical
+(mais clara no topo), brilho sutil no topo e sombra suave. Duas variantes
+(`GlassTone`), revisadas na v2 (seção abaixo):
 
-- Usado no cartão do login, nos destaques do painel institucional, na barra
-  superior (desktop e celular) e no cartão "Visão do armário"/"Seu atendimento"
-  das homes. Não usado em tabelas, listas e formulários longos.
-- Desfoque permitido com limites: sigma 16 (faixa aceita 0–30, usada 10–20),
-  opacidade 0,90 e no máximo 2 `BackdropFilter` por tela (barra + um destaque).
+- **Escuro** (`GlassTone.dark`, texto branco): painel do login, lista de
+  benefícios do painel institucional e cartão "Visão do armário"/"Seu
+  atendimento" da faixa do início.
+- **Claro** (`GlassTone.light`, texto escuro): barra superior (desktop e celular).
+- Não usado em tabelas, listas e formulários longos, cartões de métrica e
+  páginas operacionais, que seguem opacos.
+- No máximo 2 `BackdropFilter` por tela: login largo = painel + benefícios
+  (estreito = só o painel); início = barra + cartão de visão; demais páginas =
+  barra. `GlassButton` não usa `BackdropFilter`. Coberto por teste.
   No celular, as homes não exibem o cartão de visão (repetia os números abaixo).
-- Fallback sem blur e com preenchimento 0,97 quando `blur: false`, quando o
-  sistema pede menos animação (`disableAnimations`) ou alto contraste.
-- Totem: ações em `GlassSurface(blur: false)` desde o início, pois o hardware do
-  totem não está definido. A página do totem não usa `BackdropFilter`.
+- Fallback sem blur quando `blur: false`, quando o sistema pede menos animação
+  (`disableAnimations`) ou alto contraste: claro vira branco 0,97; escuro vira o
+  tom mais escuro do perfil a 0,94 (`fallbackColor`).
+- Totem: ações em `GlassSurface(blur: false)`; a página do totem não usa
+  `BackdropFilter`.
 - A barra do shell mantém o viewport abaixo dela (foco, `ensureVisible` e toques
   corretos) e usa `Clip.none` para o conteúdo rolado continuar visível sob o vidro.
-- `StatusPill` e `InlineNotice` têm fundo opaco para não herdar o que está atrás.
+- `StatusPill` e `InlineNotice` têm fundo opaco e cores de texto explícitas para
+  não herdar o fundo nem o tema branco do vidro escuro.
+
+### Glassmorphism visível (v2) — 2026-11-26
+
+Branch `feat/ui-glass-v2`, a partir de `main` f86cd4d (PR #21 já integrado).
+Somente camada visual; sem dependência nova, sem mudança de rotas, API,
+autenticação, modelos, backend ou Streamlit.
+
+Diagnóstico: com vidro branco a 0,90 o painel parecia um cartão branco comum; o
+fundo do login era um gradiente de um tom com brilhos brancos de 8% (nada para o
+blur mostrar); botões e barra eram chapados. A opacidade alta existia só para
+passar o contraste de texto escuro. Solução: vidro escuro com texto branco sobre
+fundo com manchas de cor, e vidro claro só na barra.
+
+Parâmetros (`AppGlass`, `AppBackdrop` em `lib/core/theme/app_theme.dart`):
+
+| Item | Valor |
+| --- | --- |
+| Sigma do blur | 18 |
+| Vidro escuro | véu navy `#061A33` a 0,42 + tint branco 0,12; borda branca 0,26 (topo 0,55); brilho de topo 0,06 |
+| Vidro claro (barra) | branco 0,68; borda inferior navy 0,10; sombra suave |
+| Fallback | claro 0,97 branco; escuro 0,94 do tom do perfil |
+| Campos sobre vidro escuro | véu 0,20 + branco 0,04 (foco 0,08); borda branca 0,30; foco 2px em azul-claro/verde-água; erro `#FFE9E6` |
+| Botão secundário | véu 0,20 + branco 0,10 (hover 0,16); borda branca 0,30 (hover 0,48) |
+| Pílula do menu ativo | branco 0,85, borda do perfil 0,22, sombra suave |
+| Manchas do login (pico) | admin: ciano 0,26, violeta 0,32, azul-claro 0,25; professor: verde-água 0,28, verde-mar 0,26, azul-laguna 0,25 |
+| Manchas da faixa do início | 0,14–0,20 sobre `backdropFor` |
+| Fundo da página (shell) | gradiente claro do perfil + manchas 0,08–0,16 |
+| Entrada do login | fade + 16px de deslocamento, 360 ms; desligada com `disableAnimations` |
+
+Por que um véu escuro sob o tint branco: o tint de 0,10–0,16 sozinho não mantém
+4,5:1 para texto branco quando uma mancha clara está no pico atrás do vidro (o
+cálculo dava ~3,2:1). O véu escurece o fundo e o tint dá o fosco.
+
+As manchas são gradientes radiais (`GlassBackdrop`,
+`lib/core/widgets/glass_backdrop.dart`), sem filtro, em camada própria. O pico
+das manchas é limitado pelo contraste do texto branco direto sobre o fundo; por
+isso o login usa gradientes mais escuros (`AppBackdrop.loginStopsFor`) que a
+faixa do início. Os arcos decorativos do login foram removidos: mesmo a 4%
+derrubavam o texto secundário do painel institucional abaixo de 4,5:1.
+
+`GlassButton` (`lib/core/widgets/glass_button.dart`): variantes primary
+(gradiente do perfil, brilho no topo, sombra colorida), secondary (vidro) e
+ghost; hover sobe 1px e reforça sombra/borda, pressionado escala 0,98, foco com
+contorno branco de 2px fora do botão, desabilitado a 50%, loading com indicador
+e texto. Área mínima 48px. Menos animação: transições instantâneas, sem
+elevação/escala. Alto contraste: preenchimento opaco, sem gradiente e borda
+branca de 2px. Usado no login (Acessar = primary; Entrar como professor, Passe o
+crachá e Entrar com usuário e senha = secondary; Acesso administrativo = ghost)
+e nos atalhos da faixa do início. O atalho "Passe o crachá" perdeu a linha
+auxiliar "Acesso para professores pelo leitor." ao virar botão.
 
 ### Ícones, cartões e navegação
 
@@ -270,11 +328,20 @@ translúcido, borda de 1px e sombra suave, com blur, opacidade e raio parametriz
 
 ### Contraste e acessibilidade
 
-`test/theme_contrast_test.dart` verifica >=4,5:1 para texto, texto secundário e
-cor de ação sobre o vidro composto com o tom mais escuro de cada perfil (com e
-sem blur), texto claro sobre os gradientes com brilhos decorativos e texto branco
-dos atalhos da faixa. `test/glass_surface_test.dart` cobre blur, fallback
-(`blur: false`, menos animação, alto contraste) e fundo opaco de status/avisos.
+`test/theme_contrast_test.dart` (v2) calcula >=4,5:1 no pior caso: todas as
+manchas de um fundo sobrepostas no pico sobre o tom mais claro do gradiente.
+Cobre texto institucional sobre o fundo do login; texto, erro e rótulos sobre o
+vidro escuro (com brilho de topo), campos em repouso/foco e botões em
+repouso/hover; fallback sem blur; texto e atalhos da faixa do início; cartão de
+visão; botão primário com brilho; barra clara sobre a página e sobre a faixa
+rolada por baixo (`mutedStrong` substitui `muted` na barra); pílula do menu; e
+texto da página sobre o fundo tingido. Contorno de foco: 3:1 (não textual).
+`test/glass_surface_test.dart` cobre as duas variantes, fallback (`blur: false`,
+menos animação, alto contraste), `RepaintBoundary`/`ClipRRect`, status opaco e
+o limite de `BackdropFilter` no login (admin, professor, crachá; 1440 e 390px)
+e no início (admin e professor). `test/glass_button_test.dart` cobre 48px,
+ausência de blur, gradiente por perfil, hover, pressionado, foco por teclado,
+desabilitado, loading, alto contraste e menos animação.
 Áreas de toque de 48px, foco visível, `Semantics` existentes e escala de texto
 livre foram mantidos; os cartões do totem preservam semântica de botão.
 
@@ -291,8 +358,19 @@ devolução, histórico e totem) feitas no Chrome headless com perfil isolado e
 servidor simulado local com dados fictícios do `seed_demo.py`, sem API real,
 banco ou credencial real. Ficam fora do Git. CI remoto ainda não observado.
 
+v2: Flutter 3.47.8 em Docker, `dart format` sem pendências, `flutter analyze`
+sem problemas, build Web release concluído e 85 testes aprovados (inclui os novos de vidro, botão, contraste
+e limite de blur). Prévias com o fixture `createResponsiveApi` e fontes do SDK
+(login admin, login professor, login admin 390px, início admin parado e rolado,
+início professor) geradas por um teste temporário fora do repositório; ficam
+fora do Git.
+
 ### Pendências
 
+- v2: manchas contidas pelo pior caso de contraste; para cores mais vivas é
+  preciso escurecer mais o gradiente ou posicionar texto longe das manchas.
+- v2: blur e manchas não medidos em hardware modesto nem em navegador real
+  (prévias renderizadas pelo `flutter_tester`).
 - Diálogo de credenciais do professor não redesenhado (só ajuste de espaçamento).
 - `LockerIllustration` mantém cores próprias, fora dos tokens.
 - Tablets, professores, agenda, configurações e alertas validados por análise e
