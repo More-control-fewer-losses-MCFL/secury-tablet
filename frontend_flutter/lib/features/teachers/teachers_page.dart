@@ -105,24 +105,22 @@ class _TeachersPageState extends State<TeachersPage> {
         'Consulte o cadastro por crachá e mantenha os acessos atualizados.',
       ),
       if (error != null) ...[
-        Semantics(
-          liveRegion: true,
-          child: SectionCard(
-            child: Text(error!, style: const TextStyle(color: AppTheme.danger)),
-          ),
-        ),
-        const SizedBox(height: 20),
+        InlineNotice(message: error!),
+        const SizedBox(height: AppSpacing.md),
       ],
       SectionCard(
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionTitle('Localizar cadastro'),
-            const SizedBox(height: 8),
-            const Text(
+            const SizedBox(height: AppSpacing.xs),
+            Text(
               'Leia o crachá ou informe o UID para consultar o professor.',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: AppTheme.muted),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             LayoutBuilder(
               builder: (context, constraints) {
                 final field = TextField(
@@ -134,12 +132,12 @@ class _TeachersPageState extends State<TeachersPage> {
                   textInputAction: TextInputAction.search,
                   decoration: const InputDecoration(
                     labelText: 'UID do crachá',
-                    prefixIcon: Icon(Icons.contactless),
+                    prefixIcon: Icon(Icons.contactless_outlined),
                   ),
                 );
                 final button = FilledButton.icon(
                   onPressed: loading || syncing ? null : _lookup,
-                  icon: const Icon(Icons.search),
+                  icon: const Icon(Icons.search_outlined),
                   label: Text(loading ? 'Consultando…' : 'Consultar'),
                 );
                 final stack =
@@ -148,27 +146,36 @@ class _TeachersPageState extends State<TeachersPage> {
                 return stack
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [field, const SizedBox(height: 12), button],
+                        children: [
+                          field,
+                          const SizedBox(height: AppSpacing.sm),
+                          button,
+                        ],
                       )
                     : Row(
                         children: [
                           Expanded(child: field),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
                           button,
                         ],
                       );
               },
             ),
             if (professor != null) ...[
-              const Divider(height: 36),
+              const Divider(height: AppSpacing.xl),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: AppTheme.paleBlue,
-                    child: Icon(Icons.person_outline, color: AppTheme.blue),
+                  CircleAvatar(
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primaryContainer,
+                    child: Icon(
+                      Icons.person_outline,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,19 +184,21 @@ class _TeachersPageState extends State<TeachersPage> {
                           professor!.name,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 4),
-                        Text('Matrícula ${professor!.registration}'),
+                        Text(
+                          'Matrícula ${professor!.registration}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               StatusPill(
                 professor!.active ? 'Cadastro ativo' : 'Cadastro inativo',
                 color: professor!.active ? AppTheme.success : AppTheme.warning,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               OutlinedButton.icon(
                 onPressed: loading || syncing
                     ? null
@@ -218,44 +227,44 @@ class _TeachersPageState extends State<TeachersPage> {
           ],
         ),
       ),
-      const SizedBox(height: 20),
+      const SizedBox(height: AppSpacing.md),
       SectionCard(
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SectionTitle('Cadastro pela planilha'),
-            const SizedBox(height: 8),
-            const Text(
+            const SizedBox(height: AppSpacing.xs),
+            Text(
               'Atualize os professores autorizados a partir da planilha de cadastros. O histórico de empréstimos será preservado.',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: AppTheme.muted),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: syncing || loading ? null : _syncProfessors,
-                icon: const Icon(Icons.sync),
+                icon: const Icon(Icons.sync_outlined),
                 label: Text(
                   syncing ? 'Sincronizando…' : 'Sincronizar professores',
                 ),
               ),
             ),
             if (syncMessage != null) ...[
-              const SizedBox(height: 16),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  syncMessage!,
-                  style: const TextStyle(color: AppTheme.success),
-                ),
+              const SizedBox(height: AppSpacing.md),
+              InlineNotice(
+                message: syncMessage!,
+                color: AppTheme.success,
+                icon: Icons.check_circle_outline,
               ),
             ],
           ],
         ),
       ),
-      const SizedBox(height: 16),
-      const StateMessage(
-        message: 'A consulta é individual. Listagem geral e edição direta ainda não estão disponíveis.',
-        icon: Icons.info_outline,
+      const SizedBox(height: AppSpacing.lg),
+      const HintNote(
+        'A consulta é individual. Listagem geral e edição direta ainda não estão disponíveis.',
       ),
     ],
   );

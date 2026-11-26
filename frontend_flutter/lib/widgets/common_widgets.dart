@@ -110,30 +110,34 @@ class SectionTitle extends StatelessWidget {
     builder: (context, constraints) {
       final titleWidget = Semantics(
         header: true,
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
       );
       if (action != null &&
           (constraints.maxWidth < 480 ||
               MediaQuery.textScalerOf(context).scale(1) > 1.3)) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [titleWidget, const SizedBox(height: 8), action!],
+          children: [
+            titleWidget,
+            const SizedBox(height: AppSpacing.xs),
+            action!,
+          ],
         );
       }
       return Row(
         children: [
           Expanded(child: titleWidget),
-          if (action != null) ...[const SizedBox(width: 12), action!],
+          if (action != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            action!,
+          ],
         ],
       );
     },
   );
 }
 
+/// Empty/success states inside a card.
 class StateMessage extends StatelessWidget {
   const StateMessage({
     required this.message,
@@ -148,13 +152,49 @@ class StateMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 12),
+    padding: const EdgeInsets.symmetric(
+      vertical: AppSpacing.lg,
+      horizontal: AppSpacing.sm,
+    ),
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 30, color: color),
-        const SizedBox(height: 10),
-        Text(message, textAlign: TextAlign.center),
+        Icon(icon, size: 28, color: color),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    ),
+  );
+}
+
+/// Quiet, static explanation shown at the end of a page (not a live alert).
+class HintNote extends StatelessWidget {
+  const HintNote(this.message, {this.icon = Icons.info_outline, super.key});
+
+  final String message;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(AppSpacing.md),
+    decoration: const BoxDecoration(
+      color: AppTheme.surfaceMuted,
+      borderRadius: AppRadius.card,
+      border: Border.fromBorderSide(BorderSide(color: AppTheme.border)),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ExcludeSemantics(child: Icon(icon, size: 20, color: AppTheme.muted)),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(message, style: Theme.of(context).textTheme.bodySmall),
+        ),
       ],
     ),
   );
@@ -168,18 +208,23 @@ class StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
     decoration: BoxDecoration(
       // Opaque tint: keeps the validated contrast on glass and dark surfaces.
       color: Color.alphaBlend(color.withValues(alpha: .08), Colors.white),
       border: Border.all(color: color.withValues(alpha: .18)),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: AppRadius.control,
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ExcludeSemantics(child: Icon(Icons.circle, size: 7, color: color)),
-        const SizedBox(width: 7),
+        ExcludeSemantics(
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            child: const SizedBox.square(dimension: 6),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
         Flexible(
           child: Text(
             label,
@@ -196,6 +241,7 @@ class StatusPill extends StatelessWidget {
   );
 }
 
+/// One strong title per screen, with a discreet subtitle.
 class PageHeading extends StatelessWidget {
   const PageHeading(this.title, this.subtitle, {super.key});
 
@@ -203,20 +249,26 @@ class PageHeading extends StatelessWidget {
   final String subtitle;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
-        ),
-        const SizedBox(height: 5),
-        Text(subtitle, style: const TextStyle(color: AppTheme.muted)),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(title, style: textTheme.headlineSmall),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            subtitle,
+            style: textTheme.bodyMedium?.copyWith(color: AppTheme.muted),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class ErrorPanel extends StatelessWidget {
@@ -227,6 +279,7 @@ class ErrorPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SectionCard(
+    padding: const EdgeInsets.all(AppSpacing.lg),
     child: Column(
       children: [
         InlineNotice(
@@ -235,10 +288,10 @@ class ErrorPanel extends StatelessWidget {
           icon: Icons.cloud_off_outlined,
         ),
         if (onRetry != null) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           OutlinedButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_outlined),
             label: const Text('Tentar novamente'),
           ),
         ],
@@ -250,15 +303,20 @@ class ErrorPanel extends StatelessWidget {
 /// Compact, persistent feedback near the control that caused it.
 class InlineNotice extends StatelessWidget {
   const InlineNotice({
-    required this.title,
     required this.message,
+    this.title,
     this.hint,
     this.color = AppTheme.danger,
     this.icon = Icons.error_outline,
+    this.live = true,
     super.key,
   });
 
-  final String title;
+  /// Announce changes to assistive technology (false for static notes).
+  final bool live;
+
+  /// Optional heading; without it the message itself is the notice.
+  final String? title;
   final String message;
   final String? hint;
   final Color color;
@@ -266,40 +324,35 @@ class InlineNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    liveRegion: true,
+    liveRegion: live,
     child: Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Color.alphaBlend(color.withValues(alpha: .06), Colors.white),
         border: Border.all(color: color.withValues(alpha: .22)),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.card,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ExcludeSemantics(child: Icon(icon, size: 22, color: color)),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
+                if (title != null) ...[
+                  Text(
+                    title!,
+                    style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: AppSpacing.xxs),
+                ],
                 Text(message),
                 if (hint != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    hint!,
-                    style: const TextStyle(
-                      color: AppTheme.muted,
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(hint!, style: Theme.of(context).textTheme.bodySmall),
                 ],
               ],
             ),

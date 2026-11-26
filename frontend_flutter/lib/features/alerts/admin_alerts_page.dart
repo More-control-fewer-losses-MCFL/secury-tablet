@@ -35,6 +35,7 @@ class _AdminAlertsPageState extends State<AdminAlertsPage> {
         'Eventos críticos persistidos pela API. Não representa alarmes ativos.',
       ),
       SectionCard(
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: FutureBuilder<List<AlertRecord>>(
           future: alerts,
           builder: (context, snapshot) {
@@ -48,17 +49,20 @@ class _AdminAlertsPageState extends State<AdminAlertsPage> {
               return const Center(child: CircularProgressIndicator());
             }
             final events = snapshot.requireData;
+            final textTheme = Theme.of(context).textTheme;
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SectionTitle(
                   '${events.length} eventos recentes',
                   action: IconButton(
                     tooltip: 'Atualizar alertas',
                     onPressed: _refresh,
-                    icon: const Icon(Icons.refresh),
+                    color: AppTheme.muted,
+                    icon: const Icon(Icons.refresh_outlined),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.xs),
                 if (events.isEmpty)
                   const StateMessage(
                     message: 'Nenhuma ocorrência crítica registrada.',
@@ -66,24 +70,37 @@ class _AdminAlertsPageState extends State<AdminAlertsPage> {
                     color: AppTheme.success,
                   )
                 else
-                  ...events.map(
-                    (event) => ListTile(
+                  for (final event in events) ...[
+                    const Divider(height: 1),
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xs,
+                      ),
                       leading: Icon(
                         Icons.report_gmailerrorred_outlined,
                         color: event.severity == 'high'
                             ? AppTheme.danger
                             : AppTheme.warning,
                       ),
-                      title: Text(event.title),
+                      title: Text(event.title, style: textTheme.titleSmall),
                       subtitle: Text(
                         'ID: ${event.eventId}\nData: ${event.occurredAt.toLocal()}',
+                        style: textTheme.bodySmall?.copyWith(
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
                       ),
                       isThreeLine: false,
                       trailing: event.sessionId == null
                           ? null
-                          : Text('#${event.sessionId}'),
+                          : Text(
+                              '#${event.sessionId}',
+                              style: textTheme.labelLarge?.copyWith(
+                                color: AppTheme.muted,
+                                fontFeatures: AppTheme.tabularFigures,
+                              ),
+                            ),
                     ),
-                  ),
+                  ],
               ],
             );
           },

@@ -339,7 +339,7 @@ class _RecentMovements extends StatelessWidget {
                           visible[index].professorName,
                           style: textTheme.titleSmall,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
                           '${visible[index].takenQuantity} tablet(s) · ${visible[index].purpose}',
                           style: textTheme.bodyMedium,

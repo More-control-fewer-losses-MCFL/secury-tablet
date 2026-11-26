@@ -96,7 +96,7 @@ class _ProfessorCredentialsDialogState
                 labelText: 'Usuário do professor',
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             TextField(
               key: const Key('professor-credential-password'),
               controller: password,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/network/api_exception.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/display.dart';
 import '../../core/utils/csv_download.dart';
 import '../../models/system_models.dart';
@@ -122,9 +123,10 @@ class _HistoryPageState extends State<HistoryPage> {
             ? 'Consulte as movimentações persistidas pela API.'
             : 'Resultados locais da página atual para “${widget.controller.searchQuery}”.',
       ),
+      // Filter bar.
       Wrap(
-        spacing: 10,
-        runSpacing: 10,
+        spacing: AppSpacing.xs,
+        runSpacing: AppSpacing.xs,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           SizedBox(
@@ -149,7 +151,8 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           OutlinedButton.icon(
             onPressed: _selectDates,
-            icon: const Icon(Icons.date_range),
+            style: OutlinedButton.styleFrom(backgroundColor: Colors.white),
+            icon: const Icon(Icons.date_range_outlined),
             label: Text(
               since == null
                   ? 'Filtrar período'
@@ -157,24 +160,25 @@ class _HistoryPageState extends State<HistoryPage> {
                         '${formatDateTime(until!).substring(0, 10)}',
             ),
           ),
-          OutlinedButton.icon(
+          TextButton.icon(
             onPressed: () => setState(() {
               since = null;
               until = null;
               offset = 0;
               page = _load();
             }),
-            icon: const Icon(Icons.clear),
+            icon: const Icon(Icons.close_outlined),
             label: const Text('Limpar'),
           ),
           IconButton(
             onPressed: _refresh,
             tooltip: 'Atualizar',
-            icon: const Icon(Icons.refresh),
+            color: AppTheme.muted,
+            icon: const Icon(Icons.refresh_outlined),
           ),
         ],
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: AppSpacing.md),
       FutureBuilder<HistoryResultPage>(
         future: page,
         builder: (context, snapshot) {
@@ -190,12 +194,14 @@ class _HistoryPageState extends State<HistoryPage> {
           final data = snapshot.requireData;
           final rows = _filteredRows(data.rows);
           return SectionCard(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SectionTitle(
                   '${data.total} registro(s)',
                   action: Wrap(
-                    spacing: 8,
+                    spacing: AppSpacing.xs,
                     children: [
                       OutlinedButton.icon(
                         onPressed: rows.isEmpty
@@ -228,19 +234,20 @@ class _HistoryPageState extends State<HistoryPage> {
                     ],
                   ),
                 ),
-                const Divider(height: 24),
+                const SizedBox(height: AppSpacing.sm),
                 if (rows.isEmpty)
                   const StateMessage(
                     message: 'Nenhum registro encontrado para os filtros.',
-                    icon: Icons.search_off,
+                    icon: Icons.search_off_outlined,
                   )
                 else
-                  ...rows.map(
-                    (row) => _HistoryTile(
-                      row: row,
-                      showDetails: () => _showDetails(context, row),
+                  for (var index = 0; index < rows.length; index++) ...[
+                    const Divider(height: 1),
+                    _HistoryTile(
+                      row: rows[index],
+                      showDetails: () => _showDetails(context, rows[index]),
                     ),
-                  ),
+                  ],
               ],
             ),
           );
@@ -279,6 +286,7 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 }
 
+/// List row: request number, who, when and status.
 class _HistoryTile extends StatelessWidget {
   const _HistoryTile({required this.row, required this.showDetails});
 
@@ -286,32 +294,69 @@ class _HistoryTile extends StatelessWidget {
   final VoidCallback showDetails;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    onTap: showDetails,
-    contentPadding: EdgeInsets.zero,
-    leading: SizedBox(
-      width: 44,
-      child: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Text(
-          '${row.sessionId}',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w700,
-            fontSize: 11,
-          ),
-        ),
-      ),
-    ),
-    title: Text(row.professorName),
-    subtitle: Text(
-      '${formatDateTime(row.startedAt)} · ${row.takenQuantity} tablet(s) · ${row.purpose}',
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    ),
-    trailing: StatusPill(
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final pill = StatusPill(
       sessionStatusLabel(row.status),
       color: sessionStatusColor(row.status),
-    ),
-  );
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Narrow rows put the status below the text instead of squeezing it.
+        final stacked =
+            constraints.maxWidth < 520 ||
+            MediaQuery.textScalerOf(context).scale(1) > 1.3;
+        return InkWell(
+          onTap: showDetails,
+          borderRadius: AppRadius.control,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.sm,
+              ),
+              child: Row(
+                crossAxisAlignment: stacked
+                    ? CrossAxisAlignment.start
+                    : CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      '#${row.sessionId}',
+                      style: textTheme.labelLarge?.copyWith(
+                        color: AppTheme.muted,
+                        fontFeatures: AppTheme.tabularFigures,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(row.professorName, style: textTheme.titleSmall),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          '${formatDateTime(row.startedAt)} · ${row.takenQuantity} tablet(s) · ${row.purpose}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall,
+                        ),
+                        if (stacked) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          pill,
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!stacked) ...[const SizedBox(width: AppSpacing.md), pill],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

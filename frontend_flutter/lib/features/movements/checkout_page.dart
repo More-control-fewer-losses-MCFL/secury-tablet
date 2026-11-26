@@ -120,7 +120,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           }
           if (!snapshot.hasData) {
             return const Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(AppSpacing.xl),
               child: Center(child: CircularProgressIndicator()),
             );
           }
@@ -135,208 +135,209 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(flex: 4, child: summary),
-                        const SizedBox(width: 24),
+                        const SizedBox(width: AppSpacing.lg),
                         Expanded(flex: 7, child: form),
                       ],
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [summary, const SizedBox(height: 20), form],
+                      children: [
+                        summary,
+                        const SizedBox(height: AppSpacing.md),
+                        form,
+                      ],
                     );
             },
           );
         },
       ),
       if (result != null) ...[
-        const SizedBox(height: 20),
-        Semantics(
-          liveRegion: true,
-          child: SectionCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const StateMessage(
-                  message: 'Solicitação enviada. A retirada dos tablets será confirmada pela conferência do inventário.',
-                  icon: Icons.check_circle_outline,
-                  color: AppTheme.success,
-                ),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: [
-                    Text('Solicitação #${result!.sessionId}'),
-                    StatusPill(
-                      sessionStatusLabel(result!.status),
-                      color: sessionStatusColor(result!.status),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text('Professor: ${result!.professorName}'),
-              ],
-            ),
+        const SizedBox(height: AppSpacing.md),
+        SectionCard(
+          accent: AppTheme.success,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const InlineNotice(
+                message: 'Solicitação enviada. A retirada dos tablets será confirmada pela conferência do inventário.',
+                icon: Icons.check_circle_outline,
+                color: AppTheme.success,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    'Solicitação #${result!.sessionId}',
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontFeatures: AppTheme.tabularFigures),
+                  ),
+                  StatusPill(
+                    sessionStatusLabel(result!.status),
+                    color: sessionStatusColor(result!.status),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text('Professor: ${result!.professorName}'),
+            ],
           ),
         ),
       ],
     ],
   );
 
-  Widget _availabilitySummary(BuildContext context, Availability data) =>
-      SectionCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SectionTitle('Disponibilidade atual'),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.tablet_android_outlined,
-                  size: 40,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${data.available}',
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                      Text(
-                        data.available == 1
-                            ? 'tablet disponível'
-                            : 'tablets disponíveis',
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'De ${data.total} tablets cadastrados',
-                        style: const TextStyle(color: AppTheme.muted),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+  /// Metric card: the available balance is the number to read first.
+  Widget _availabilitySummary(BuildContext context, Availability data) {
+    final textTheme = Theme.of(context).textTheme;
+    return SectionCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionTitle('Disponibilidade atual'),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '${data.available}',
+            style: textTheme.displaySmall?.copyWith(
+              fontSize: 56,
+              height: 1,
+              color: AppTheme.navy,
+              fontFeatures: AppTheme.tabularFigures,
             ),
-            const SizedBox(height: 20),
-            if (data.available == 0)
-              const Text('Nenhum tablet disponível no momento.')
-            else
-              const Text(
-                'Informe a quantidade desejada. Os itens retirados serão conferidos individualmente.',
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            data.available == 1 ? 'tablet disponível' : 'tablets disponíveis',
+            style: textTheme.titleSmall,
+          ),
+          Text(
+            'De ${data.total} tablets cadastrados',
+            style: textTheme.bodySmall,
+          ),
+          const Divider(height: AppSpacing.xl),
+          if (data.available == 0)
+            const Text('Nenhum tablet disponível no momento.')
+          else
+            Text(
+              'Informe a quantidade desejada. Os itens retirados serão conferidos individualmente.',
+              style: textTheme.bodyMedium?.copyWith(color: AppTheme.muted),
+            ),
+          if (data.tablets.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: data.tablets
+                  .map((tablet) => Chip(label: Text(tablet.assetCode)))
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Form card: identity, request fields and the primary action.
+  Widget _requestForm(BuildContext context, Availability data) {
+    final textTheme = Theme.of(context).textTheme;
+    return SectionCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SectionTitle('Dados da solicitação'),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const ExcludeSemantics(
+                child: Icon(Icons.badge_outlined, color: AppTheme.muted),
               ),
-            if (data.tablets.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: data.tablets
-                    .map((tablet) => Chip(label: Text(tablet.assetCode)))
-                    .toList(),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.controller.professor?.name ?? 'Professor',
+                      style: textTheme.titleSmall,
+                    ),
+                    Text(
+                      'Matrícula ${widget.controller.professor?.registration ?? '—'}',
+                      style: textTheme.bodySmall,
+                    ),
+                  ],
+                ),
               ),
             ],
-          ],
-        ),
-      );
-
-  Widget _requestForm(BuildContext context, Availability data) => SectionCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SectionTitle('Dados da solicitação'),
-        const SizedBox(height: 16),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.badge_outlined,
-              color: Theme.of(context).colorScheme.primary,
+          ),
+          const Divider(height: AppSpacing.xl),
+          TextField(
+            controller: quantityController,
+            enabled: !submitting,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            decoration: const InputDecoration(
+              labelText: 'Quantidade de tablets',
+              prefixIcon: Icon(Icons.tablet_mac_outlined),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.controller.professor?.name ?? 'Professor',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Matrícula ${widget.controller.professor?.registration ?? '—'}',
-                    style: const TextStyle(color: AppTheme.muted),
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          TextField(
+            controller: purposeController,
+            enabled: !submitting,
+            textInputAction: TextInputAction.next,
+            maxLength: 200,
+            decoration: const InputDecoration(
+              labelText: 'Finalidade',
+              hintText: 'Ex.: atividade em laboratório',
+              prefixIcon: Icon(Icons.edit_note_outlined),
             ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: classController,
+            enabled: !submitting,
+            maxLength: 100,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(
+              labelText: 'Turma (opcional)',
+              prefixIcon: Icon(Icons.groups_outlined),
+            ),
+          ),
+          if (error != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            InlineNotice(message: error!),
           ],
-        ),
-        const Divider(height: 32),
-        TextField(
-          controller: quantityController,
-          enabled: !submitting,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
-            labelText: 'Quantidade de tablets',
-            prefixIcon: Icon(Icons.tablet_mac_outlined),
+          const SizedBox(height: AppSpacing.lg),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size(48, 52)),
+            onPressed: submitting || data.available == 0 ? null : _submit,
+            icon: submitting
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.output_outlined),
+            label: Text(
+              submitting ? 'Enviando solicitação…' : 'Confirmar retirada',
+            ),
           ),
-        ),
-        const SizedBox(height: 20),
-        TextField(
-          controller: purposeController,
-          enabled: !submitting,
-          textInputAction: TextInputAction.next,
-          maxLength: 200,
-          decoration: const InputDecoration(
-            labelText: 'Finalidade',
-            hintText: 'Ex.: atividade em laboratório',
-            prefixIcon: Icon(Icons.edit_note_outlined),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: classController,
-          enabled: !submitting,
-          maxLength: 100,
-          textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(
-            labelText: 'Turma (opcional)',
-            prefixIcon: Icon(Icons.groups_outlined),
-          ),
-        ),
-        if (error != null) ...[
-          const SizedBox(height: 12),
-          Semantics(
-            liveRegion: true,
-            child: Text(error!, style: const TextStyle(color: AppTheme.danger)),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'A quantidade solicitada pode ser diferente da quantidade efetivamente retirada.',
+            style: textTheme.bodySmall,
           ),
         ],
-        const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: submitting || data.available == 0 ? null : _submit,
-          icon: submitting
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.output_outlined),
-          label: Text(
-            submitting ? 'Enviando solicitação…' : 'Confirmar retirada',
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Text(
-          'A quantidade solicitada pode ser diferente da quantidade efetivamente retirada.',
-          style: TextStyle(color: AppTheme.muted),
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }

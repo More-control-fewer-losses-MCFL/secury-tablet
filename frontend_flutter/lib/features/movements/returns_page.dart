@@ -109,27 +109,22 @@ class _ReturnsPageState extends State<ReturnsPage> {
             : 'Confira suas solicitações pendentes e registre os tablets devolvidos.',
       ),
       if (error != null) ...[
-        Semantics(
-          liveRegion: true,
-          child: Text(error!, style: const TextStyle(color: AppTheme.danger)),
-        ),
-        const SizedBox(height: 12),
+        InlineNotice(message: error!),
+        const SizedBox(height: AppSpacing.md),
       ],
       if (result != null) ...[
-        SectionCard(
-          child: StateMessage(
-            message:
-                result!.divergence ??
-                'Devolução registrada: ${sessionStatusLabel(result!.status)}.',
-            icon: result!.divergence == null
-                ? Icons.check_circle_outline
-                : Icons.warning_amber_outlined,
-            color: result!.divergence == null
-                ? AppTheme.success
-                : AppTheme.warning,
-          ),
+        InlineNotice(
+          message:
+              result!.divergence ??
+              'Devolução registrada: ${sessionStatusLabel(result!.status)}.',
+          icon: result!.divergence == null
+              ? Icons.check_circle_outline
+              : Icons.warning_amber_outlined,
+          color: result!.divergence == null
+              ? AppTheme.success
+              : AppTheme.warning,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.md),
       ],
       FutureBuilder<List<HistoryRow>>(
         future: sessions,
@@ -148,116 +143,122 @@ class _ReturnsPageState extends State<ReturnsPage> {
             return const SectionCard(
               child: StateMessage(
                 message: 'Não há tablets pendentes de devolução.',
-                icon: Icons.task_alt,
+                icon: Icons.task_alt_outlined,
                 color: AppTheme.success,
               ),
             );
           }
-          return SectionCard(
-            child: Column(
-              children: [
-                SectionTitle(
-                  'Pendentes (${rows.length})',
-                  action: IconButton(
-                    onPressed: _reload,
-                    tooltip: 'Atualizar devoluções',
-                    icon: const Icon(Icons.refresh),
-                  ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionTitle(
+                'Pendentes (${rows.length})',
+                action: IconButton(
+                  onPressed: _reload,
+                  tooltip: 'Atualizar devoluções',
+                  icon: const Icon(Icons.refresh_outlined),
                 ),
-                const Divider(height: 24),
-                for (final row in rows) _pendingSession(context, row),
-              ],
-            ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns =
+                      constraints.maxWidth >= 900 &&
+                          MediaQuery.textScalerOf(context).scale(1) <= 1.3
+                      ? 2
+                      : 1;
+                  final width =
+                      (constraints.maxWidth - AppSpacing.md * (columns - 1)) /
+                      columns;
+                  return Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.md,
+                    children: [
+                      for (final row in rows)
+                        SizedBox(
+                          width: width,
+                          child: _pendingSession(context, row),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ],
           );
         },
       ),
-      const SizedBox(height: 14),
-      const SectionCard(
-        child: StateMessage(
-          message:
-              'Somente os tablets identificados na conferência são registrados como devolvidos. '
-              'Se houver itens faltando ou falha na leitura, as pendências serão preservadas.',
-          icon: Icons.info_outline,
-        ),
+      const SizedBox(height: AppSpacing.lg),
+      const HintNote(
+        'Somente os tablets identificados na conferência são registrados como devolvidos. '
+        'Se houver itens faltando ou falha na leitura, as pendências serão preservadas.',
       ),
     ],
   );
 
-  Widget _pendingSession(BuildContext context, HistoryRow row) => Padding(
-    padding: const EdgeInsets.only(bottom: 16),
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.border),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.assignment_return_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        row.professorName,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Solicitação #${row.sessionId} · ${formatDateTime(row.startedAt)}',
-                        style: const TextStyle(color: AppTheme.muted),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+  /// Action card: one pending request, its counters and its own action.
+  Widget _pendingSession(BuildContext context, HistoryRow row) {
+    final textTheme = Theme.of(context).textTheme;
+    return SectionCard(
+      // Strip reserved on every card so a grid row stays aligned; the
+      // status pill below repeats the meaning in text.
+      accent: row.status == 'DIVERGENT' ? AppTheme.warning : Colors.transparent,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(row.professorName, style: textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            'Solicitação #${row.sessionId} · ${formatDateTime(row.startedAt)}',
+            style: textTheme.bodySmall?.copyWith(
+              fontFeatures: AppTheme.tabularFigures,
             ),
-            const SizedBox(height: 12),
-            Text(row.purpose),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                StatusPill(
-                  '${row.pendingQuantity} pendentes',
-                  color: AppTheme.warning,
-                ),
-                Text('${row.takenQuantity} retirados'),
-              ],
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: submitting ? null : () => _reconcile(row),
-              icon: reconciling.contains(row.sessionId)
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.assignment_return_outlined),
-              label: Text(
-                reconciling.contains(row.sessionId)
-                    ? 'Conferindo devolução…'
-                    : 'Ler devolução',
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(row.purpose),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              StatusPill(
+                sessionStatusLabel(row.status),
+                color: sessionStatusColor(row.status),
               ),
+              StatusPill(
+                '${row.pendingQuantity} pendentes',
+                color: AppTheme.warning,
+              ),
+              Text(
+                '${row.takenQuantity} retirados',
+                style: textTheme.bodySmall?.copyWith(
+                  fontFeatures: AppTheme.tabularFigures,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          FilledButton.icon(
+            onPressed: submitting ? null : () => _reconcile(row),
+            icon: reconciling.contains(row.sessionId)
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.assignment_return_outlined),
+            label: Text(
+              reconciling.contains(row.sessionId)
+                  ? 'Conferindo devolução…'
+                  : 'Ler devolução',
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  );
+    );
+  }
 }

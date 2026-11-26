@@ -55,48 +55,58 @@ class _TabletsPageState extends State<TabletsPage> {
               ),
             );
           }
+          final textTheme = Theme.of(context).textTheme;
           return SectionCard(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SectionTitle(
                   '${data.length} tablet(s)',
                   action: IconButton(
                     onPressed: _reload,
                     tooltip: 'Atualizar',
-                    icon: const Icon(Icons.refresh),
+                    color: AppTheme.muted,
+                    icon: const Icon(Icons.refresh_outlined),
                   ),
                 ),
-                const Divider(height: 24),
-                for (final tablet in data)
+                const SizedBox(height: AppSpacing.xs),
+                for (final tablet in data) ...[
+                  const Divider(height: 1),
                   ListTile(
-                    contentPadding: EdgeInsets.zero,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                    ),
                     leading: const Icon(
                       Icons.tablet_mac_outlined,
-                      color: AppTheme.blue,
+                      color: AppTheme.muted,
                     ),
-                    title: Text(tablet.assetCode),
+                    title: Text(
+                      tablet.assetCode,
+                      style: textTheme.titleSmall?.copyWith(
+                        fontFeatures: AppTheme.tabularFigures,
+                      ),
+                    ),
                     subtitle: Text(
                       'Atualizado ${formatDateTime(tablet.updatedAt)}'
                       '${tablet.hasRfidTag ? ' · Etiqueta RFID cadastrada' : ''}',
+                      style: textTheme.bodySmall,
                     ),
                     trailing: StatusPill(
                       tabletStatusLabel(tablet.status),
                       color: tabletStatusColor(tablet.status),
                     ),
                   ),
+                ],
               ],
             ),
           );
         },
       ),
-      const SizedBox(height: 16),
-      const SectionCard(
-        child: StateMessage(
-          message:
-              'A API atual informa patrimônio, estado e presença de etiqueta RFID. '
-              'Não há integração disponível para sensores ou compartimentos físicos.',
-          icon: Icons.info_outline,
-        ),
+      const SizedBox(height: AppSpacing.lg),
+      const HintNote(
+        'A API atual informa patrimônio, estado e presença de etiqueta RFID. '
+        'Não há integração disponível para sensores ou compartimentos físicos.',
       ),
     ],
   );
