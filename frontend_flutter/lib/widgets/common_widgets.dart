@@ -6,16 +6,97 @@ class SectionCard extends StatelessWidget {
   const SectionCard({
     required this.child,
     this.padding = const EdgeInsets.all(20),
+    this.accent,
     super.key,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
 
+  /// Optional top strip that marks a card needing attention. Meaning is
+  /// always repeated in text; the color is never the only signal.
+  final Color? accent;
+
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(padding: padding, child: child),
+    clipBehavior: accent == null ? Clip.none : Clip.antiAlias,
+    child: accent == null
+        ? Padding(padding: padding, child: child)
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ColoredBox(color: accent!, child: const SizedBox(height: 3)),
+              Padding(padding: padding, child: child),
+            ],
+          ),
   );
+}
+
+/// Metric card: discreet label, large tabular number, short caption.
+class MetricCard extends StatelessWidget {
+  const MetricCard({
+    required this.label,
+    required this.value,
+    this.caption,
+    this.color,
+    super.key,
+  });
+
+  final String label;
+  final String value;
+  final String? caption;
+
+  /// Semantic dot next to the label (the label itself carries the meaning).
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return SectionCard(
+      padding: const EdgeInsets.all(AppSpacing.md + AppSpacing.xxs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (color != null) ...[
+                ExcludeSemantics(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const SizedBox.square(dimension: 8),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+              ],
+              Flexible(
+                child: Text(
+                  label,
+                  style: textTheme.bodyMedium?.copyWith(color: AppTheme.muted),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            value,
+            style: textTheme.displaySmall?.copyWith(
+              fontSize: 40,
+              height: 1,
+              fontFeatures: AppTheme.tabularFigures,
+            ),
+          ),
+          if (caption != null) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(caption!, style: textTheme.bodySmall),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 class SectionTitle extends StatelessWidget {
