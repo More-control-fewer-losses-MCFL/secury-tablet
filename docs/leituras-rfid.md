@@ -1,10 +1,28 @@
 # Leituras RFID do carrinho
 
 O ESP32 lê a etiqueta pelo RC522. O Apps Script grava o evento na aba
-`Leituras_RFID`. O backend do Secury Tablet consulta a aba pelo Google Sheets
+`Logs`. O backend do Secury Tablet consulta a aba pelo Google Sheets
 e exibe as últimas dez leituras em **Início → Leituras RFID do carrinho**,
 no portal administrativo. A consulta é manual e a planilha mantém o histórico
 bruto. Retiradas, devoluções, cadastro e permissões seguem os fluxos do sistema.
+
+## Abas da planilha
+
+| Aba | Colunas | Uso |
+| --- | --- | --- |
+| `Tablets` | `asset_code`, `rfid_tag_uid` | Cadastro de patrimônio e etiqueta na planilha |
+| `Professores` | `registration`, `name`, `badge_uid`, `active` | Fonte para a sincronização administrativa existente |
+| `Logs` | `Data/Hora`, `UID`, `Terminal`, `Status` | Registros recebidos do ESP32 |
+
+Preencha os cadastros nas respectivas abas. Passar uma tag acrescenta uma linha
+em `Logs`. O inventário de tablets continua gerenciado no MySQL pelo sistema.
+
+Para migrar, publique uma nova versão do Apps Script na implantação existente
+e execute `configurarPlanilha` no editor. A função renomeia `Leituras_RFID` para
+`Logs` preservando as linhas e cria as abas que estiverem faltando. Se já
+existirem as duas abas de histórico ou um cabeçalho incompatível, a função
+interrompe a configuração para permitir a revisão dos dados.
+Depois da migração, ajuste `RFID_SHEETS_TAB=Logs` no `.env` e reaplique o Compose.
 
 ## Ativar a consulta
 
@@ -16,8 +34,11 @@ bruto. Retiradas, devoluções, cadastro e permissões seguem os fluxos do siste
    ```dotenv
    RFID_SHEETS_ENABLED=true
    RFID_SHEETS_SPREADSHEET_ID=ID_DA_PLANILHA
-   RFID_SHEETS_TAB=Leituras_RFID
+   RFID_SHEETS_TAB=Logs
    ```
+
+   Em uma planilha que ainda usa a aba antiga, mantenha
+   `RFID_SHEETS_TAB=Leituras_RFID` até fazer a migração.
 
 3. No servidor nativo, configure `RFID_SHEETS_TOKEN_FILE` com o caminho privado
    do `token.json` gerado pelo protótipo. O token deve conter `client_id`,
@@ -86,7 +107,8 @@ Para montar uma bancada nova, use uma planilha de teste.
 3. Na pasta do sketch, copie `config.example.h` para `config.local.h`.
    Preencha o Wi-Fi de 2,4 GHz e a URL `/exec`. Gere o horário Unix de bancada
    antes de gravar com `[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()`.
-   O relógio manual é provisório.
+   Se já existir um `config.local.h`, acrescente os dois parâmetros do servo
+   do exemplo ao arquivo existente. O relógio manual é provisório.
 4. Ligue o RC522 ao ESP32. Abra o Monitor Serial a 115200 baud, aproxime uma
    tag de teste e confira a mensagem de confirmação e a linha no painel.
    O sketch [diagnostico_rc522.ino](../hardware/carrinho-rfid/esp32/diagnostico_rc522/diagnostico_rc522.ino)
@@ -102,6 +124,20 @@ Para montar uma bancada nova, use uma planilha de teste.
 | MOSI | GPIO 23 |
 | RST | GPIO 27 |
 | IRQ | Livre |
+
+## Servo da porta
+
+- Ligue o sinal do servo ao **GPIO 13**. Use uma fonte adequada ao modelo do
+  servo e compartilhe o GND da fonte com o ESP32.
+- Com o braço fora do mecanismo da porta, ajuste `SERVO_ABERTO_US` e
+  `SERVO_FECHADO_US` no `config.local.h` para as duas posições. Os pulsos
+  do exemplo são pontos de partida para bancada.
+- No Monitor Serial a 115200 baud, envie `a` para abrir e `f` para fechar.
+  O PWM começa no primeiro comando. Confira visualmente cada posição antes de
+  conectar o braço à porta.
+
+O comando Serial é de bancada. A mensagem indica o envio do PWM. A posição
+física precisa ser conferida no equipamento. O painel segue com hardware simulado.
 
 O Apps Script mantém o protocolo de bancada do firmware. Uma requisição
 aceita pelo script registra uma leitura na planilha. Use o painel para conferência

@@ -13,9 +13,44 @@ constexpr uint8_t PINO_MISO = 19;
 constexpr uint8_t PINO_MOSI = 23;
 constexpr uint8_t PINO_CS = 5;
 constexpr uint8_t PINO_RST = 27;
+constexpr uint8_t PINO_SERVO = 13;
+constexpr uint32_t FREQUENCIA_SERVO = 50;
+constexpr uint8_t RESOLUCAO_SERVO = 14;
+constexpr uint32_t PERIODO_SERVO_US = 1000000UL / FREQUENCIA_SERVO;
+
+static_assert(SERVO_ABERTO_US >= 1000 && SERVO_ABERTO_US <= 2000,
+              "Pulso de abertura fora da faixa de teste");
+static_assert(SERVO_FECHADO_US >= 1000 && SERVO_FECHADO_US <= 2000,
+              "Pulso de fechamento fora da faixa de teste");
+static_assert(SERVO_ABERTO_US != SERVO_FECHADO_US, "Calibre duas posicoes diferentes");
 
 MFRC522 leitor(PINO_CS, PINO_RST);
 bool relogioAjustado = false;
+bool servoConectado = false;
+
+void processarComandoServo() {
+  const int comando = Serial.read();
+  if (comando != 'a' && comando != 'f') {
+    return;
+  }
+
+  if (!servoConectado) {
+    servoConectado = ledcAttach(PINO_SERVO, FREQUENCIA_SERVO, RESOLUCAO_SERVO);
+    if (!servoConectado) {
+      Serial.println("[Servo] Falha ao configurar PWM.");
+      return;
+    }
+  }
+
+  const uint16_t pulso = comando == 'a' ? SERVO_ABERTO_US : SERVO_FECHADO_US;
+  const uint32_t duty = (1UL << RESOLUCAO_SERVO) * pulso / PERIODO_SERVO_US;
+  if (!ledcWrite(PINO_SERVO, duty)) {
+    Serial.println("[Servo] Falha ao enviar comando.");
+    return;
+  }
+  Serial.println(comando == 'a' ? "[Servo] Comando de abertura enviado."
+                                : "[Servo] Comando de fechamento enviado.");
+}
 
 void enviarUID(const String& uid) {
   if (WiFi.status() != WL_CONNECTED) {
@@ -110,9 +145,11 @@ void setup() {
   }
 
   Serial.println("[RFID] Aproxime uma tag.");
+  Serial.println("[Servo] Bancada: envie a para abrir ou f para fechar.");
 }
 
 void loop() {
+  processarComandoServo();
   if (!leitor.PICC_IsNewCardPresent() || !leitor.PICC_ReadCardSerial()) {
     return;
   }

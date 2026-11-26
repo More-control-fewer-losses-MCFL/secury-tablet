@@ -22,6 +22,12 @@ A primeira consulta após o reinício retornou 502, com HTTP 200 nas consultas
 seguintes. A leitura de uma nova tag no carrinho físico segue pendente.
 Veja a configuração em [Leituras RFID](leituras-rfid.md).
 
+O Apps Script agora prepara `Tablets`, `Professores` e `Logs`, com migração do
+histórico e validação dos cabeçalhos. O firmware usa o GPIO 13 para comandar o
+servo por Serial em bancada. Validação local: compilação ESP32, sete cenários
+simulados do Apps Script e 30 testes Python de leituras e importação. A migração
+na planilha real e a calibração física seguem pendentes.
+
 ## Integração autorizada em main — 2026-11-19
 
 Pedido explícito do usuário: “de um merge na main para poder dar tudo certo”.

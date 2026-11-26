@@ -515,9 +515,15 @@ Próximos três itens:
 - Implementação em `10305f9`, publicada na branch de integração e em revisão
   pelo [PR #20 em rascunho](https://github.com/More-control-fewer-losses-MCFL/secury-tablet/pull/20).
   A leitura de uma tag nova em bancada segue pendente.
+- Evolução na mesma branch: Apps Script prepara `Tablets`, `Professores` e
+  `Logs`; valida cabeçalhos e renomeia `Leituras_RFID` preservando dados.
+  O ESP32 manda PWM ao servo no GPIO 13 pelos comandos Serial `a` e `f`.
+  Compilação ESP32, sete cenários simulados do Apps Script e 30 testes Python
+  aprovados. Deploy do script e calibração do servo seguem pendentes.
 
 Próximos itens:
 
 1. Revisar a branch e conferir os checks do GitHub.
-2. Confirmar em bancada o trajeto da tag de teste até o painel.
-3. Definir os códigos adicionais que a planilha deve fornecer e o fluxo de cada um.
+2. Preparar as abas e apontar a consulta para `Logs`; confirmar uma tag de
+   teste do ESP32 até o painel.
+3. Calibrar as posições do servo em bancada e validar a abertura e o fechamento.
