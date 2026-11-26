@@ -50,7 +50,7 @@ abstract final class AppMotion {
 /// contrast over the darkest profile backdrop (see theme_contrast_test).
 abstract final class AppGlass {
   static const double blurSigma = 16;
-  static const double opacity = .86;
+  static const double opacity = .90;
   static const double fallbackOpacity = .97;
   static const double borderOpacity = .55;
 
