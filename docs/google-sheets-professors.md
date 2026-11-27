@@ -79,6 +79,59 @@ Credenciais reais foram guardadas fora do repositório em pasta privada do usuá
 .gitignore e .dockerignore protegem secrets/, token.json e credentials.json;
 não copiar o ZIP para contexto de build nem publicar arquivos de credenciais.
 
+## Modo link público (sem OAuth)
+
+Alternativa ao token OAuth, adotada em 2026-11-26 porque a conta disponível não
+tem permissão para criar projeto no Google Cloud
+(`resourcemanager.projects.create`). O modo OAuth acima continua existindo e é o
+padrão; nada muda com `GOOGLE_SHEETS_PUBLIC_CSV=false`.
+
+Como ativar (no `.env` do backend ou no ambiente do Compose):
+
+```dotenv
+GOOGLE_SHEETS_ENABLED=true
+GOOGLE_SHEETS_PUBLIC_CSV=true
+GOOGLE_SHEETS_SPREADSHEET_ID=ID_DA_PLANILHA
+GOOGLE_SHEETS_PROFESSORS_TAB=Professores
+```
+
+`GOOGLE_SHEETS_TOKEN_FILE` e o override `docker/google-sheets.override.yml` não
+são necessários neste modo. O `docker-compose.yml` repassa
+`GOOGLE_SHEETS_PUBLIC_CSV` ao backend (padrão `false`).
+
+Requisito: a planilha precisa estar compartilhada como **"qualquer pessoa com o
+link pode ver"**. Sem isso o Google responde com redirecionamento para login ou
+erro, e a sincronização retorna 503 orientando a conferir o compartilhamento.
+
+Funcionamento: o backend faz um único `GET` em
+`https://docs.google.com/spreadsheets/d/{ID}/gviz/tq?tqx=out:csv&headers=1&sheet={ABA}&range=A1:D{limite+2}`
+(aba codificada na URL), com host fixo, timeout de 10 s, sem seguir
+redirecionamentos e sem cabeçalho de autorização. `headers=1` impede o gviz de
+juntar linhas no cabeçalho; o intervalo repete o limite e a linha sentinela do
+modo OAuth. Só é aceita resposta 200 com `Content-Type: text/csv`; HTML (página
+de login) é tratado como indisponível. O CSV passa pelas mesmas regras de
+`parse_professors`: cabeçalho exato, matrícula e UID únicos, TRUE/FALSE em texto,
+limite de linhas, linha vazia ignorada. O gviz devolve tudo como texto, então
+zeros à esquerda na matrícula são preservados; mantenha a coluna A formatada como
+texto na planilha. Se o nome da aba não existir, o Google pode devolver outra
+aba; o cabeçalho exato barra a importação nesse caso (422). Erros não expõem
+URL, ID da planilha, UIDs nem conteúdo.
+
+**Risco aceito como decisão do usuário (dono do projeto):** qualquer pessoa que
+tenha o link vê nomes, matrículas e UIDs de crachá. RFID é clonável, então um UID
+vazado facilita clonar o crachá de um professor (o uso continua limitado a
+terminal autorizado e às permissões de professor). Recomendações:
+
+- Compartilhar o link apenas com quem administra o sistema; não publicar em
+  grupos, documentos ou repositórios. O ID fica só no ambiente do backend.
+- Manter editores restritos; o link concede somente leitura.
+- Voltar ao modo OAuth (`GOOGLE_SHEETS_PUBLIC_CSV=false` + token somente leitura)
+  assim que houver conta com permissão no Google Cloud e, então, remover o
+  compartilhamento por link.
+
+Validação (2026-11-26): 24 testes unitários novos com transporte HTTP simulado
+(sem rede real); nenhum acesso real à planilha nesta revisão.
+
 ## Evidência desta revisão — 2026-11-12
 
 - 109 testes unitários Python aprovados, incluindo 19 cenários novos.

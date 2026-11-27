@@ -12,7 +12,7 @@ from sqlalchemy import func, select
 from armario_tablets.api.deps import get_db, get_services
 from armario_tablets.api.main import create_app
 from armario_tablets.api.routes.professor_sync import get_professor_sheet
-from armario_tablets.config import get_settings
+from armario_tablets.config import Settings, get_settings
 from armario_tablets.exceptions import ProfessorImportInvalidError, ProfessorSourceUnavailableError
 from armario_tablets.integrations.google_professor_sheet import (
     HEADERS,
@@ -217,3 +217,197 @@ def test_broader_google_scope_is_not_accepted(settings, tmp_path):
     adapter = GoogleProfessorSheet(settings, transport=httpx.MockTransport(forbidden))
     with pytest.raises(ProfessorSourceUnavailableError):
         adapter.read_professors()
+
+
+# --- Public link mode (gviz CSV export, no OAuth); fictional data only ---
+
+SHEET_ID = "fake-sheet-id-00000000000000"
+# gviz quotes every value, including booleans and numbers stored as text.
+GVIZ_CSV = (
+    '"registration","name","badge_uid","active"\n'
+    '"0042","Ana Test","cd:00:00:01","TRUE"\n'
+    '"S-002","Bruno Test","CD000002","false"\n'
+    '"","","",""\n'
+    "\n"
+)
+
+
+def public_settings(settings, tab="Professores"):
+    settings.google_sheets_enabled = True
+    settings.google_sheets_public_csv = True
+    settings.google_sheets_spreadsheet_id = SHEET_ID
+    settings.google_sheets_professors_tab = tab
+    settings.google_sheets_token_file = None
+    return settings
+
+
+def csv_reply(text=GVIZ_CSV, content_type="text/csv; charset=utf-8", status=200):
+    return httpx.Response(status, text=text, headers={"content-type": content_type})
+
+
+def public_adapter(settings, handler):
+    return GoogleProfessorSheet(public_settings(settings), transport=httpx.MockTransport(handler))
+
+
+def test_public_csv_reads_bounded_tab_without_token_or_auth(settings):
+    calls = []
+
+    def handle(request):
+        calls.append(request)
+        return csv_reply()
+
+    adapter = GoogleProfessorSheet(
+        public_settings(settings, tab="Professores 2026"), transport=httpx.MockTransport(handle)
+    )
+    records = adapter.read_professors()
+
+    assert len(calls) == 1
+    request = calls[0]
+    assert request.method == "GET"
+    assert request.url.scheme == "https" and request.url.host == "docs.google.com"
+    assert request.url.path == f"/spreadsheets/d/{SHEET_ID}/gviz/tq"
+    assert request.url.params["tqx"] == "out:csv"
+    assert request.url.params["sheet"] == "Professores 2026"
+    assert "Professores%202026" in str(request.url)
+    assert request.url.params["range"] == "A1:D1002"
+    assert "authorization" not in request.headers
+    assert [(r.registration, r.badge_uid, r.active) for r in records] == [
+        ("0042", "CD000001", True),
+        ("S-002", "CD000002", False),
+    ]
+
+
+def test_public_csv_handles_bom_and_crlf(settings):
+    text = "﻿" + GVIZ_CSV.replace("\n", "\r\n")
+    adapter = public_adapter(settings, lambda _: csv_reply(text))
+    assert len(adapter.read_professors()) == 2
+
+
+def test_public_csv_imports_like_oauth_mode(sync_client, db, settings):
+    headers = admin(sync_client)
+    reply = {"text": GVIZ_CSV}
+    adapter = public_adapter(settings, lambda _: csv_reply(reply["text"]))
+    sync_client.app.dependency_overrides[get_professor_sheet] = lambda: adapter
+
+    assert sync_client.post(PATH, headers=headers).json() == {
+        "created": 2,
+        "updated": 0,
+        "unchanged": 0,
+    }
+    ana = db.scalar(select(Professor).where(Professor.registration == "0042"))
+    assert ana.badge_uid == "CD000001" and ana.active
+    assert sync_client.post(PATH, headers=headers).json() == {
+        "created": 0,
+        "updated": 0,
+        "unchanged": 2,
+    }
+    reply["text"] = GVIZ_CSV.replace('"Ana Test"', '"Ana Renamed Test"')
+    assert sync_client.post(PATH, headers=headers).json() == {
+        "created": 0,
+        "updated": 1,
+        "unchanged": 1,
+    }
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        httpx.Response(302, headers={"location": "https://accounts.google.com/ServiceLogin"}),
+        httpx.Response(307, headers={"location": "https://docs.google.com/other"}),
+        csv_reply(status=401),
+        csv_reply(status=403),
+        csv_reply(status=404),
+        csv_reply(status=500),
+        csv_reply("<!DOCTYPE html><html>Fazer login</html>", "text/html; charset=utf-8"),
+        csv_reply("<!DOCTYPE html><html>Fazer login</html>"),
+        csv_reply("registration,name\n", "application/json"),
+    ],
+)
+def test_public_csv_unavailable_when_not_shared_and_redacted(settings, reply):
+    calls = []
+
+    def handle(request):
+        calls.append(request)
+        return reply
+
+    adapter = public_adapter(settings, handle)
+    with pytest.raises(ProfessorSourceUnavailableError) as error:
+        adapter.read_professors()
+    assert len(calls) == 1, "redirects must not be followed"
+    message = str(error.value)
+    for leaked in (SHEET_ID, "docs.google.com", "gviz", "CD000001", "Fazer login"):
+        assert leaked not in message
+    assert "link" in message
+
+
+def test_public_csv_unavailable_maps_to_503(sync_client, settings):
+    adapter = public_adapter(settings, lambda _: csv_reply(status=403))
+    sync_client.app.dependency_overrides[get_professor_sheet] = lambda: adapter
+    response = sync_client.post(PATH, headers=admin(sync_client))
+    assert response.status_code == 503
+    assert SHEET_ID not in response.text
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        '"Data/Hora","UID","Terminal","Status"\n"x","CD000001","T1","OK"\n',
+        '"registration","name","badge_uid","active","extra"\n',
+        '"registration","name","badge_uid","active"\n"S-1","Test","CD000001","yes"\n',
+        '"registration","name","badge_uid","active"\n"S-1","Test","CD000001"\n',
+        "",
+    ],
+)
+def test_public_csv_invalid_register_is_rejected(settings, text):
+    adapter = public_adapter(settings, lambda _: csv_reply(text))
+    with pytest.raises(ProfessorImportInvalidError) as error:
+        adapter.read_professors()
+    assert "CD000001" not in str(error.value)
+
+
+def test_public_csv_invalid_register_maps_to_422_without_writes(sync_client, db, settings):
+    count = db.scalar(select(func.count(Professor.id)))
+    text = GVIZ_CSV.replace('"registration"', '"matricula"')
+    adapter = public_adapter(settings, lambda _: csv_reply(text))
+    sync_client.app.dependency_overrides[get_professor_sheet] = lambda: adapter
+    assert sync_client.post(PATH, headers=admin(sync_client)).status_code == 422
+    assert db.scalar(select(func.count(Professor.id))) == count
+
+
+def test_public_csv_respects_row_limit(settings):
+    settings.google_sheets_max_professors = 1
+    adapter = public_adapter(settings, lambda _: csv_reply())
+    with pytest.raises(ProfessorImportInvalidError):
+        adapter.read_professors()
+
+
+@pytest.mark.parametrize("change", ["disabled", "bad_id"])
+def test_public_csv_requires_enabled_flag_and_valid_id(settings, change):
+    public_settings(settings)
+    if change == "disabled":
+        settings.google_sheets_enabled = False
+    else:
+        settings.google_sheets_spreadsheet_id = "../not-an-id"
+
+    def forbidden(_):
+        pytest.fail("Misconfigured source must not reach the network")
+
+    adapter = GoogleProfessorSheet(settings, transport=httpx.MockTransport(forbidden))
+    with pytest.raises(ProfessorSourceUnavailableError):
+        adapter.read_professors()
+
+
+def test_oauth_mode_still_requires_token_file_and_ignores_public_url(settings):
+    public_settings(settings)
+    settings.google_sheets_public_csv = False
+
+    def forbidden(_):
+        pytest.fail("OAuth mode without token must not call Google")
+
+    adapter = GoogleProfessorSheet(settings, transport=httpx.MockTransport(forbidden))
+    with pytest.raises(ProfessorSourceUnavailableError):
+        adapter.read_professors()
+
+
+def test_public_csv_defaults_to_disabled():
+    assert Settings(_env_file=None).google_sheets_public_csv is False
